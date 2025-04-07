@@ -1,3 +1,13 @@
+# roles\prometheus\tasks\main.yml
+- name: Añadir repositorio prometheus-community si no existe
+  ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  register: add_repo_result
+  failed_when: add_repo_result.rc != 0 and "exists" not in add_repo_result.stderr
+  changed_when: "'...Successfully' in add_repo_result.stdout or 'has been added' in add_repo_result.stdout"
+
+- name: Actualizar repositorios de Helm
+  ansible.builtin.command: helm repo update
+
 - name: Crear namespace monitoring si no existe
   kubernetes.core.k8s:
     kubeconfig: "/home/victory/.kube/config"
