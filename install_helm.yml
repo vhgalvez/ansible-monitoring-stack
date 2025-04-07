@@ -1,0 +1,43 @@
+---
+- name: Instalar Helm en el nodo controlador (ej. physical1)
+  hosts: localhost
+  become: true
+  vars:
+    helm_version: "v3.14.0"
+  tasks:
+
+    - name: Crear directorio temporal
+      file:
+        path: /tmp/helm_install
+        state: directory
+
+    - name: Descargar Helm {{ helm_version }}
+      get_url:
+        url: "https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz"
+        dest: "/tmp/helm_install/helm.tar.gz"
+
+    - name: Extraer Helm
+      unarchive:
+        src: "/tmp/helm_install/helm.tar.gz"
+        dest: "/tmp/helm_install/"
+        remote_src: yes
+
+    - name: Mover binario de Helm a /usr/local/bin
+      copy:
+        src: "/tmp/helm_install/linux-amd64/helm"
+        dest: "/usr/local/bin/helm"
+        mode: '0755'
+        remote_src: yes
+
+    - name: Verificar versión de Helm instalada
+      command: helm version
+      register: helm_output
+
+    - name: Mostrar salida de Helm
+      debug:
+        msg: "{{ helm_output.stdout }}"
+
+    - name: Limpiar archivos temporales
+      file:
+        path: /tmp/helm_install
+        state: absent

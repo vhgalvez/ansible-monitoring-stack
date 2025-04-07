@@ -78,3 +78,5 @@ Revisa el service de Grafana o Prometheus para exponerlo mediante Traefik o Node
 ✨ Créditos
 Proyecto creado como parte del stack FlatcarMicroCloud
 Autor: @vhgalvez
+
+sudo ansible-playbook install_helm.yml
