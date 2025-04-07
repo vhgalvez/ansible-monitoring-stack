@@ -1,3 +1,13 @@
+# roles\grafana\tasks\main.yml
+- name: Añadir repositorio grafana si no existe
+  ansible.builtin.command: helm repo add grafana https://grafana.github.io/helm-charts
+  register: add_repo_result
+  failed_when: add_repo_result.rc != 0 and "exists" not in add_repo_result.stderr
+  changed_when: "'has been added' in add_repo_result.stdout"
+
+- name: Actualizar repositorios de Helm
+  ansible.builtin.command: helm repo update
+
 - name: Crear namespace monitoring si no existe
   kubernetes.core.k8s:
     kubeconfig: "/home/victory/.kube/config"
