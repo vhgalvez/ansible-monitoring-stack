@@ -1,10 +1,25 @@
+- name: Crear namespace monitoring si no existe
+  kubernetes.core.k8s:
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: monitoring
+
 - name: Crear PVC de Prometheus
   kubernetes.core.k8s:
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
     state: present
     definition: "{{ lookup('template', 'prometheus-pvc.yaml.j2') }}"
 
 - name: Instalar Prometheus vía Helm
-  community.kubernetes.helm:
+  kubernetes.core.helm:
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
     name: prometheus
     chart_ref: prometheus-community/prometheus
     release_namespace: monitoring
@@ -12,4 +27,5 @@
     values:
       server:
         persistentVolume:
+          enabled: true
           existingClaim: prometheus-pvc

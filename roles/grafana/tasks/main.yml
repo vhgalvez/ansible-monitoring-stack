@@ -1,17 +1,25 @@
 - name: Crear namespace monitoring si no existe
   kubernetes.core.k8s:
-    name: monitoring
-    api_version: v1
-    kind: Namespace
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
     state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: monitoring
 
 - name: Crear PVC de Grafana
   kubernetes.core.k8s:
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
     state: present
     definition: "{{ lookup('template', 'grafana-pvc.yaml.j2') }}"
 
 - name: Instalar Grafana vía Helm
-  community.kubernetes.helm:
+  kubernetes.core.helm:
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
     name: grafana
     chart_ref: grafana/grafana
     release_namespace: monitoring
