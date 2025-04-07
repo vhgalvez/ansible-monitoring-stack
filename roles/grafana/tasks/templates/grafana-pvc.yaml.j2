@@ -2,11 +2,11 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: grafana-pvc
-  namespace: {{ monitoring_namespace }}
+  namespace: monitoring
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ grafana_pvc_size }}
-  storageClassName: {{ grafana_storage_class }}
+      storage: 5Gi
+  storageClassName: longhorn

@@ -1,8 +1,11 @@
-- name: Desplegar stack de monitoreo (Prometheus + Grafana)
+- name: Desplegar stack de monitoreo con Grafana y Prometheus
   hosts: masters
   become: true
-  gather_facts: false
+  tasks:
+    - name: Incluir rol de Prometheus
+      include_role:
+        name: prometheus
 
-  roles:
-    - prometheus
-    - grafana
+    - name: Incluir rol de Grafana
+      include_role:
+        name: grafana

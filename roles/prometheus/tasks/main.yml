@@ -1,0 +1,15 @@
+- name: Crear PVC de Prometheus
+  kubernetes.core.k8s:
+    state: present
+    definition: "{{ lookup('template', 'prometheus-pvc.yaml.j2') }}"
+
+- name: Instalar Prometheus vía Helm
+  community.kubernetes.helm:
+    name: prometheus
+    chart_ref: prometheus-community/prometheus
+    release_namespace: monitoring
+    create_namespace: false
+    values:
+      server:
+        persistentVolume:
+          existingClaim: prometheus-pvc
