@@ -1,0 +1,8 @@
+- name: Desplegar stack de monitoreo (Prometheus + Grafana)
+  hosts: masters
+  become: true
+  gather_facts: false
+
+  roles:
+    - prometheus
+    - grafana
