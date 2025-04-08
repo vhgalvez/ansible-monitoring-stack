@@ -1,3 +1,4 @@
+# site.yml
 ---
 - name: 0️⃣ Configurar kubeconfig local para acceder al clúster K3s
   import_playbook: setup_kubeconfig.yml
