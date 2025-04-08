@@ -64,7 +64,7 @@ sudo ansible-playbook -i hosts.ini playbooks/nfs_config.yml
 Este playbook formatea y monta los discos adicionales (`/dev/vdb`) en los nodos worker y configura `/mnt/longhorn-disk`.
 
 ```bash
-ansible-playbook -i hosts.ini playbooks/longhorn_worker_disk_setup.yml
+sudo ansible-playbook -i hosts.ini playbooks/longhorn_worker_disk_setup.yml
 ```
 
 📌 Asegúrate de que cada nodo worker tiene un disco adicional conectado como `/dev/vdb`.
@@ -76,7 +76,7 @@ ansible-playbook -i hosts.ini playbooks/longhorn_worker_disk_setup.yml
 Este playbook usa `kubectl` en el nodo `master1` para etiquetar los nodos con `longhorn=enabled`, permitiendo que Longhorn los use como almacenamiento.
 
 ```bash
-ansible-playbook -i hosts.ini playbooks/label_longhorn_nodes_from_master.yml
+sudo ansible-playbook -i hosts.ini playbooks/label_longhorn_nodes_from_master.yml
 ```
 
 📌 Este paso es crítico para que Longhorn detecte y use los nodos.
@@ -88,7 +88,7 @@ ansible-playbook -i hosts.ini playbooks/label_longhorn_nodes_from_master.yml
 Este playbook instala Longhorn como sistema de almacenamiento distribuido en el clúster.
 
 ```bash
-ansible-playbook -i hosts.ini playbooks/install_longhorn.yml
+sudo ansible-playbook -i hosts.ini playbooks/install_longhorn.yml
 ```
 
 📌 Asegúrate de que `kubectl` esté correctamente configurado y tenga permisos administrativos.
@@ -100,7 +100,7 @@ ansible-playbook -i hosts.ini playbooks/install_longhorn.yml
 Este playbook desmonta discos, borra volúmenes lógicos y limpia las rutas de NFS, sin afectar el sistema base.
 
 ```bash
-ansible-playbook -i hosts.ini playbooks/playbook_cleanup.yml
+sudo ansible-playbook -i hosts.ini playbooks/playbook_cleanup.yml
 ```
 
 ---
@@ -122,4 +122,5 @@ ansible-playbook -i hosts.ini playbooks/playbook_cleanup.yml
 Este flujo permite una configuración persistente y replicada para almacenamiento en Kubernetes.
 
 Se recomienda ejecutar estos pasos justo después de desplegar el clúster y antes de instalar aplicaciones que usen PVCs.
+
 ```
