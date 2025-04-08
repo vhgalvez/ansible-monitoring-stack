@@ -1,0 +1,39 @@
+---
+- name: 0️⃣ Configurar acceso local al clúster Kubernetes (K3s)
+  hosts: localhost
+  gather_facts: false
+  become: true
+  vars:
+    kubeconfig_path: "/home/victory/.kube/config"
+    master_node: "10.17.4.21"
+    ssh_key: "/home/victory/.ssh/id_rsa_key_cluster_openshift"
+    vip_kubernetes: "10.17.5.10"
+
+  tasks:
+    - name: Crear carpeta ~/.kube si no existe
+      file:
+        path: "{{ kubeconfig_path | dirname }}"
+        state: directory
+        owner: victory
+        group: victory
+        mode: '0755'
+
+    - name: Copiar kubeconfig desde master1
+      ansible.builtin.command: >
+        scp -i {{ ssh_key }} core@{{ master_node }}:/etc/rancher/k3s/k3s.yaml {{ kubeconfig_path }}
+      environment:
+        SSH_AUTH_SOCK: "{{ lookup('env', 'SSH_AUTH_SOCK') }}"
+      changed_when: true
+
+    - name: Reemplazar IP localhost por IP VIP
+      ansible.builtin.replace:
+        path: "{{ kubeconfig_path }}"
+        regexp: '127.0.0.1'
+        replace: "{{ vip_kubernetes }}"
+
+    - name: Cambiar propietario del kubeconfig
+      file:
+        path: "{{ kubeconfig_path }}"
+        owner: victory
+        group: victory
+        mode: '0600'
