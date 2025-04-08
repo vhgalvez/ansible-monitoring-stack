@@ -1,3 +1,4 @@
+# install_helm.yml
 ---
 - name: Instalar Helm en el nodo controlador (ej. physical1)
   hosts: localhost

@@ -1,3 +1,4 @@
+# playbook_monitoring.yml
 - name: Desplegar stack de monitoreo con Grafana y Prometheus
   hosts: localhost
   connection: local
