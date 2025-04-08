@@ -11,7 +11,7 @@
       ignore_errors: true
 
     - name: Instalar Helm si no está instalado
-      import_playbook: install_helm.yml
+      include_tasks: install_helm.yml
       when: helm_installed.rc != 0
 
 - name: 2️⃣ Desplegar stack de monitoreo con Grafana y Prometheus
