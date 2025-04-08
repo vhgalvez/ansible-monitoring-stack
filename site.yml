@@ -1,0 +1,9 @@
+---
+- name: 0️⃣ Configurar kubeconfig local para acceder al clúster K3s
+  import_playbook: setup_kubeconfig.yml
+
+- name: 1️⃣ Instalar Helm en el nodo controlador
+  import_playbook: install_helm.yml
+
+- name: 2️⃣ Desplegar stack de monitoreo con Grafana y Prometheus
+  import_playbook: playbook_monitoring.yml
