@@ -3,7 +3,8 @@
   import_playbook: setup_kubeconfig.yml
 
 - name: 1️⃣ Instalar Helm en el nodo controlador
-  block:
+  hosts: localhost
+  tasks:
     - name: Verificar si Helm está instalado
       command: helm version --short
       register: helm_installed
