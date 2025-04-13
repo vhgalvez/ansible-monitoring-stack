@@ -1,19 +1,21 @@
-# site.yml
 ---
-- name: 0️⃣ Configurar kubeconfig local para acceder al clúster K3s
-  import_playbook: setup_kubeconfig.yml
+# site.yml
+# 🧩 Playbook maestro para configurar almacenamiento persistente en Flatcar + K3s
+# Incluye: LVM, NFS, Longhorn (con etiquetado de nodos integrado)
 
-- name: 1️⃣ Instalar Helm en el nodo controlador
-  hosts: localhost
-  tasks:
-    - name: Verificar si Helm está instalado
-      command: helm version --short
-      register: helm_installed
-      ignore_errors: true
+- name: 📦 Preparar disco de almacenamiento con LVM y exportar NFS
+  hosts: storage
+  become: true
+  gather_facts: true
+  roles:
+    - role: storage_setup
 
-    - name: Instalar Helm si no está instalado
-      include_tasks: install_helm.yml
-      when: helm_installed.rc != 0
+- name: 💾 Preparar nodos Longhorn (formatear y montar /dev/vdb)
+  hosts: workers
+  become: true
+  gather_facts: true
+  roles:
+    - role: longhorn_worker
 
-- name: 2️⃣ Desplegar stack de monitoreo con Grafana y Prometheus
-  import_playbook: playbook_monitoring.yml
+- name: 🚀 Instalar Longhorn y etiquetar nodos
+  import_playbook: playbooks/install_longhorn.yml
