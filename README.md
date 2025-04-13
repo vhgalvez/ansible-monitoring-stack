@@ -80,3 +80,35 @@ Proyecto creado como parte del stack FlatcarMicroCloud
 Autor: @vhgalvez
 
 sudo ansible-playbook install_helm.yml
+
+
+## Monitorización con `virt-top`
+
+`virt-top` es una herramienta de monitorización para máquinas virtuales que permite visualizar el uso de recursos en tiempo real. Es similar a `top`, pero está diseñada específicamente para entornos de virtualización.
+Es útil para supervisar el rendimiento de las máquinas virtuales y los recursos que consumen.
+
+![[Monitorización con `virt-top`](doc/mvs_monitoreo.png)
+
+
+### Instalación
+
+```bash
+sudo dnf install virt-top
+```
+### Uso básico
+
+```bash
+sudo virt-top
+```
+
+### Atajos útiles
+
+- h: Ayuda
+
+- c: Ordenar por CPU
+
+- m: Ordenar por Memoria
+
+- 1: Ver vCPUs
+
+- q: Salir
