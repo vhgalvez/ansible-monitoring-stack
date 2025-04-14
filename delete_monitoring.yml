@@ -3,30 +3,86 @@
 - name: Eliminar monitoreo completo (Grafana y Prometheus)
   hosts: localhost
   become: yes
+  gather_facts: false
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
+
   tasks:
-    # Eliminar el namespace 'monitoring' si existe
-    - name: Eliminar el namespace monitoring si existe
+
+    # 1️⃣ Verificar si el namespace monitoring existe
+    - name: 🔍 Verificar si el namespace monitoring existe
+      command: /usr/local/bin/kubectl get namespace monitoring
+      register: ns_check
+      failed_when: false
+      changed_when: false
+
+    # 2️⃣ Eliminar namespace si existe
+    - name: ❌ Eliminar namespace monitoring
       command: /usr/local/bin/kubectl delete namespace monitoring
-      ignore_errors: true
+      when: ns_check.rc == 0
+      register: ns_delete
+      failed_when: ns_delete.rc != 0
+      changed_when: "'deleted' in ns_delete.stdout"
 
-    # Eliminar los PVCs de Grafana y Prometheus
-    - name: Eliminar los PVCs de Grafana y Prometheus
+    - name: ℹ️ Namespace ya eliminado o no existe
+      debug:
+        msg: "✅ Namespace 'monitoring' ya estaba eliminado."
+      when: ns_check.rc != 0
+
+    - name: ⚠️ Error al eliminar namespace
+      debug:
+        msg: "❌ Error al eliminar el namespace: {{ ns_delete.stderr }}"
+      when: ns_check.rc == 0 and ns_delete.rc != 0
+
+    # 3️⃣ Eliminar PVCs si el namespace existía
+    - name: ❌ Eliminar PVCs de Grafana y Prometheus
       command: /usr/local/bin/kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
-      ignore_errors: true
+      when: ns_check.rc == 0
+      register: pvc_delete
+      failed_when: false
+      changed_when: "'deleted' in pvc_delete.stdout"
 
-    # Eliminar los servicios de Prometheus
-    - name: Eliminar los servicios de Prometheus
-      command: /usr/local/bin/kubectl delete service prometheus-server prometheus-alertmanager prometheus-kube-state-metrics prometheus-prometheus-node-exporter prometheus-prometheus-pushgateway -n monitoring
-      ignore_errors: true
+    - name: ℹ️ PVCs eliminados o ya no existen
+      debug:
+        msg: "ℹ️ PVCs eliminados o no existen: {{ pvc_delete.stdout | default('No se encontraron PVCs') }}"
 
-    # Eliminar los Pods de Grafana y Prometheus
-    - name: Eliminar los Pods de Grafana y Prometheus
-      command: /usr/local/bin/kubectl delete pod grafana-* prometheus-* -n monitoring
-      ignore_errors: true
+    # 4️⃣ Eliminar servicios de Prometheus
+    - name: ❌ Eliminar servicios de Prometheus
+      command: >
+        /usr/local/bin/kubectl delete service prometheus-server
+        prometheus-alertmanager
+        prometheus-kube-state-metrics
+        prometheus-prometheus-node-exporter
+        prometheus-prometheus-pushgateway -n monitoring
+      when: ns_check.rc == 0
+      register: svc_delete
+      failed_when: false
+      changed_when: "'deleted' in svc_delete.stdout"
 
-    # (Opcional) Eliminar Longhorn si se desea eliminar
-    - name: Eliminar los recursos Longhorn de monitoreo
+    - name: ℹ️ Servicios eliminados o no existen
+      debug:
+        msg: "ℹ️ Servicios eliminados o no existen: {{ svc_delete.stdout | default('No se encontraron servicios') }}"
+
+    # 5️⃣ Eliminar pods de Grafana y Prometheus
+    - name: ❌ Eliminar Pods de Grafana y Prometheus
+      command: /usr/local/bin/kubectl delete pod -l app in (grafana,prometheus) -n monitoring
+      when: ns_check.rc == 0
+      register: pods_delete
+      failed_when: false
+      changed_when: "'deleted' in pods_delete.stdout"
+
+    - name: ℹ️ Pods eliminados o no existen
+      debug:
+        msg: "ℹ️ Pods eliminados o no existen: {{ pods_delete.stdout | default('No se encontraron pods') }}"
+
+    # 6️⃣ Eliminar PVCs de Longhorn
+    - name: ❌ Eliminar PVCs de Longhorn con label app=longhorn
       command: /usr/local/bin/kubectl delete pvc -l app=longhorn -n monitoring
-      ignore_errors: true
+      when: ns_check.rc == 0
+      register: longhorn_pvc_delete
+      failed_when: false
+      changed_when: "'deleted' in longhorn_pvc_delete.stdout"
+
+    - name: ℹ️ PVCs de Longhorn eliminados o no existen
+      debug:
+        msg: "ℹ️ PVCs de Longhorn eliminados o no existen: {{ longhorn_pvc_delete.stdout | default('No se encontraron PVCs con label app=longhorn') }}"
