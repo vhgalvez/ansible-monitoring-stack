@@ -15,25 +15,7 @@
       failed_when: false
       changed_when: false
 
-    # 2️⃣ Eliminar namespace si existe
-    - name: ❌ Eliminar namespace monitoring
-      command: /usr/local/bin/kubectl delete namespace monitoring
-      when: ns_check.rc == 0
-      register: ns_delete
-      failed_when: ns_delete.rc != 0
-      changed_when: "'deleted' in ns_delete.stdout"
-
-    - name: ℹ️ Namespace ya eliminado o no existe
-      debug:
-        msg: "✅ Namespace 'monitoring' ya estaba eliminado."
-      when: ns_check.rc != 0
-
-    - name: ⚠️ Error al eliminar namespace
-      debug:
-        msg: "❌ Error al eliminar el namespace: {{ ns_delete.stderr }}"
-      when: ns_check.rc == 0 and ns_delete.rc != 0
-
-    # 3️⃣ Eliminar PVCs si el namespace existía
+    # 2️⃣ Eliminar PVCs de Grafana y Prometheus si el namespace existe
     - name: ❌ Eliminar PVCs de Grafana y Prometheus
       command: /usr/local/bin/kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
       when: ns_check.rc == 0
@@ -41,11 +23,11 @@
       failed_when: false
       changed_when: "'deleted' in pvc_delete.stdout"
 
-    - name: ℹ️ PVCs eliminados o ya no existen
+    - name: ℹ️ PVCs eliminados o no existen
       debug:
         msg: "ℹ️ PVCs eliminados o no existen: {{ pvc_delete.stdout | default('No se encontraron PVCs') }}"
 
-    # 4️⃣ Eliminar servicios de Prometheus
+    # 3️⃣ Eliminar servicios de Prometheus
     - name: ❌ Eliminar servicios de Prometheus
       command: >
         /usr/local/bin/kubectl delete service prometheus-server
@@ -62,7 +44,7 @@
       debug:
         msg: "ℹ️ Servicios eliminados o no existen: {{ svc_delete.stdout | default('No se encontraron servicios') }}"
 
-    # 5️⃣ Eliminar pods de Grafana y Prometheus
+    # 4️⃣ Eliminar pods de Grafana y Prometheus
     - name: ❌ Eliminar Pods de Grafana y Prometheus
       command: /usr/local/bin/kubectl delete pod -l app in (grafana,prometheus) -n monitoring
       when: ns_check.rc == 0
@@ -74,7 +56,7 @@
       debug:
         msg: "ℹ️ Pods eliminados o no existen: {{ pods_delete.stdout | default('No se encontraron pods') }}"
 
-    # 6️⃣ Eliminar PVCs de Longhorn
+    # 5️⃣ Eliminar Longhorn PVCs si existen
     - name: ❌ Eliminar PVCs de Longhorn con label app=longhorn
       command: /usr/local/bin/kubectl delete pvc -l app=longhorn -n monitoring
       when: ns_check.rc == 0
@@ -85,3 +67,21 @@
     - name: ℹ️ PVCs de Longhorn eliminados o no existen
       debug:
         msg: "ℹ️ PVCs de Longhorn eliminados o no existen: {{ longhorn_pvc_delete.stdout | default('No se encontraron PVCs con label app=longhorn') }}"
+
+    # 6️⃣ Eliminar el namespace monitoring si existe
+    - name: ❌ Eliminar namespace monitoring
+      command: /usr/local/bin/kubectl delete namespace monitoring
+      when: ns_check.rc == 0
+      register: ns_delete
+      failed_when: ns_delete.rc != 0
+      changed_when: "'deleted' in ns_delete.stdout"
+
+    - name: ℹ️ Namespace ya eliminado o no existe
+      debug:
+        msg: "✅ Namespace 'monitoring' ya estaba eliminado."
+      when: ns_check.rc != 0
+
+    - name: ⚠️ Error al eliminar namespace
+      debug:
+        msg: "❌ Error al eliminar el namespace: {{ ns_delete.stderr }}"
+      when: ns_check.rc == 0 and ns_delete.rc != 0
