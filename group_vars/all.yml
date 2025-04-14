@@ -5,5 +5,5 @@
 grafana_admin_password: "SuperSecreta123"
 
 # 🛠️ Variables de entorno para asegurar que helm se encuentre correctamente
-environment:
+grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"
