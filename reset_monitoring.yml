@@ -8,19 +8,20 @@
 
     # Eliminar el namespace 'monitoring' si existe
     - name: Eliminar el namespace monitoring
-      raw: kubectl delete namespace monitoring
+      command: kubectl delete namespace monitoring
 
     # Eliminar los PVCs de Grafana y Prometheus
     - name: Eliminar los PVCs de Grafana y Prometheus
-      raw: kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
+      command: kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
 
-    # Eliminar los servicios de Prometheus
+    # Eliminar el servicio de Prometheus
     - name: Eliminar los servicios de Prometheus
-      raw: kubectl delete service prometheus-server prometheus-alertmanager prometheus-kube-state-metrics prometheus-prometheus-node-exporter prometheus-prometheus-pushgateway -n monitoring
+      command: kubectl delete service prometheus-server prometheus-alertmanager prometheus-kube-state-metrics prometheus-prometheus-node-exporter prometheus-prometheus-pushgateway -n monitoring
 
-    # Eliminar los Pods de Grafana y Prometheus usando selector
-    - name: Eliminar los Pods de Grafana
-      raw: kubectl delete pod -l app=grafana -n monitoring
+    # Eliminar los Pods de Grafana y Prometheus
+    - name: Eliminar los Pods de Grafana y Prometheus
+      command: kubectl delete pod grafana-* prometheus-* -n monitoring
 
-    - name: Eliminar los Pods de Prometheus
-      raw: kubectl delete pod -l app=prometheus -n monitoring
+    # (Opcional) Eliminar Longhorn si se desea eliminar
+    - name: Eliminar el namespace longhorn
+      command: kubectl delete namespace longhorn-system
