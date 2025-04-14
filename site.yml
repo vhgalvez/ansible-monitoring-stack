@@ -1,26 +1,11 @@
 # site.yml
-# 🧩 Playbook maestro para desplegar Prometheus y Grafana en Kubernetes con PVCs en Longhorn
+# 🧩 Playbook maestro para desplegar Prometheus y Grafana en Kubernetes con almacenamiento persistente (Longhorn)
 
-- name: 0️⃣ Configurar acceso local al clúster Kubernetes (kubeconfig)
-  hosts: localhost
-  gather_facts: false
-  become: true
-  tasks:
-    - name: Incluir configuración de kubeconfig
-      import_playbook: setup_kubeconfig.yml
+# 0️⃣ Configurar kubeconfig local para acceso al clúster
+- import_playbook: setup_kubeconfig.yml
 
-- name: 1️⃣ Instalar Helm
-  hosts: localhost
-  become: true
-  gather_facts: false
-  tasks:
-    - name: Incluir instalación de Helm
-      import_playbook: install_helm.yml
+# 1️⃣ Instalar Helm (v3) en el nodo de control
+- import_playbook: install_helm.yml
 
-- name: 2️⃣ Desplegar stack de monitoreo
-  hosts: localhost
-  connection: local
-  gather_facts: false
-  tasks:
-    - name: Incluir despliegue de Prometheus y Grafana
-      import_playbook: playbook_monitoring.yml
+# 2️⃣ Desplegar stack de monitoreo con PVCs Longhorn
+- import_playbook: playbook_monitoring.yml
