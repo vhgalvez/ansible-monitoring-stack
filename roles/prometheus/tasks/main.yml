@@ -1,4 +1,5 @@
-# roles\prometheus\tasks\main.yml
+# roles/prometheus/tasks/main.yml
+
 # 1️⃣ Verificar si el deployment de Prometheus ya existe
 - name: Verificar si el deployment de Prometheus ya existe
   command: /usr/local/bin/kubectl get deployment prometheus-server -n monitoring
@@ -47,9 +48,9 @@
     src: prometheus-pvc.yaml.j2
     dest: /tmp/prometheus_manifests/prometheus-pvc.yaml
 
-# 7️⃣ Crear namespace 'monitoring' si no existe usando raw para evitar errores de librerías
+# 7️⃣ Crear namespace 'monitoring' si no existe usando command para evitar errores de librerías
 - name: 📥 Crear namespace monitoring (si no existe)
-  raw: /usr/local/bin/kubectl create namespace monitoring
+  command: /usr/local/bin/kubectl create namespace monitoring
   register: ns_result
   failed_when: ns_result.rc != 0 and 'AlreadyExists' not in ns_result.stderr
   changed_when: "'created' in ns_result.stdout"
@@ -58,13 +59,13 @@
 
 # 8️⃣ Aplicar PVC de Prometheus vía kubectl
 - name: 📦 Aplicar PVC de Prometheus vía kubectl
-  raw: /usr/local/bin/kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
+  command: /usr/local/bin/kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
 # 9️⃣ Añadir repositorio prometheus-community si no existe
 - name: 🔗 Añadir repositorio prometheus-community si no existe
-  raw: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
   register: add_repo_result
@@ -73,13 +74,17 @@
 
 # 🔟 Actualizar repositorios de Helm
 - name: 🔄 Actualizar repositorios de Helm
-  raw: /usr/local/bin/helm repo update
+  command: /usr/local/bin/helm repo update
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
 
-# 1️⃣1️⃣ Instalar Prometheus vía Helm
+# 1️⃣1️⃣ Instalar Prometheus vía Helm (si el deployment no existe)
 - name: 🚀 Instalar Prometheus vía Helm (si el deployment no existe)
-  raw: /usr/local/bin/helm install prometheus prometheus-community/prometheus
+  command: >
+    /usr/local/bin/helm install prometheus prometheus-community/prometheus
+    --namespace monitoring
+    --set server.persistentVolume.enabled=true
+    --set server.persistentVolume.existingClaim=prometheus-pvc
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
     KUBECONFIG: "/home/victory/.kube/config"
