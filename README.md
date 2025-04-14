@@ -153,11 +153,11 @@ sudo ansible-playbook -i inventory/hosts.ini delete_monitoring.yml
 # Grafana: Accede a la UI de Grafana en el puerto 3001 (externo)
 
 ```bash
-kubectl port-forward -n monitoring svc/grafana 3001:3000
+kubectl port-forward -n monitoring svc/grafana 3000:3000
 ```
 
 # Prometheus: Accede a la UI de Prometheus en el puerto 9093 (externo)
 
 ```bash
-kubectl port-forward -n monitoring svc/prometheus-server 9093:9090
+kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
 ```
