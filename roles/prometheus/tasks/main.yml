@@ -76,7 +76,7 @@
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
 
-# 1️⃣1️⃣ Instalar Prometheus vía Helm
+# 1️⃣1️⃣ Instalar Prometheus vía Helm solo si no está instalado
 - name: 🚀 Instalar Prometheus vía Helm
   command: >
     /usr/local/bin/helm install prometheus prometheus-community/prometheus
