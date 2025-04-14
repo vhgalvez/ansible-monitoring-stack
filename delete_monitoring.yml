@@ -10,7 +10,7 @@
     - name: Eliminar el namespace monitoring si existe
       command: /usr/local/bin/kubectl delete namespace monitoring
       ignore_errors: true
-      
+
     # Eliminar los PVCs de Grafana y Prometheus
     - name: Eliminar los PVCs de Grafana y Prometheus
       command: /usr/local/bin/kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
