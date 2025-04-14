@@ -2,8 +2,11 @@
 - name: Eliminar monitoreo completo (Grafana y Prometheus)
   hosts: localhost
   become: yes
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"  # Asegúrate de que esta ruta sea correcta
   tasks:
-    # Eliminar namespace 'monitoring' si existe
+
+    # Eliminar el namespace 'monitoring' si existe
     - name: Eliminar el namespace monitoring
       k8s:
         name: monitoring
@@ -14,7 +17,7 @@
       k8s:
         state: absent
         kind: PersistentVolumeClaim
-        name: 
+        name:
           - grafana-pvc
           - prometheus-pvc
         namespace: monitoring
