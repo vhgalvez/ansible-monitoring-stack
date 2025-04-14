@@ -138,6 +138,7 @@ sudo ansible-playbook -i inventory/hosts.ini uninstall_site.yml
 # Despliegue de Prometheus y Grafana y heml cpmfigracio kubectl en local
 
 
+```bash
 sudo ansible-playbook -i inventory/hosts.ini site.yml
 ```
 
