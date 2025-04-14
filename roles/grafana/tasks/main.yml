@@ -29,6 +29,14 @@
     state: present
     definition: "{{ lookup('template', 'grafana-pvc.yaml.j2') }}"
 
+- name: Depurar usuario de ejecución
+  ansible.builtin.command: whoami
+  register: current_user
+
+- name: Mostrar usuario de ejecución
+  ansible.builtin.debug:
+    var: current_user.stdout
+
 - name: Instalar Grafana vía Helm
   kubernetes.core.helm:
     kubeconfig: "/home/victory/.kube/config"
@@ -44,3 +52,5 @@
       adminPassword: "{{ grafana_admin_password }}"
       service:
         type: ClusterIP
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin"
