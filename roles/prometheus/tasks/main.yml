@@ -7,7 +7,7 @@
   failed_when: false
   changed_when: false
 
-# 2️⃣ Instalar Prometheus vía Helm si no está instalado
+# 2️⃣ Si Prometheus no está instalado, instalarlo
 - name: Instalar Prometheus vía Helm si no está instalado
   when: prometheus_installed.stdout == ""
   command: >
