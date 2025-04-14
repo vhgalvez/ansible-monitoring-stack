@@ -10,12 +10,7 @@
     - name: Eliminar el namespace monitoring si existe
       command: /usr/local/bin/kubectl delete namespace monitoring
       ignore_errors: true
-
-    # Crear el namespace 'monitoring' si no existe
-    - name: Crear el namespace monitoring si no existe
-      command: /usr/local/bin/kubectl create namespace monitoring
-      ignore_errors: true
-
+      
     # Eliminar los PVCs de Grafana y Prometheus
     - name: Eliminar los PVCs de Grafana y Prometheus
       command: /usr/local/bin/kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
@@ -24,10 +19,12 @@
     # Eliminar los servicios de Prometheus
     - name: Eliminar los servicios de Prometheus
       command: /usr/local/bin/kubectl delete service prometheus-server prometheus-alertmanager prometheus-kube-state-metrics prometheus-prometheus-node-exporter prometheus-prometheus-pushgateway -n monitoring
+      ignore_errors: true
 
     # Eliminar los Pods de Grafana y Prometheus
     - name: Eliminar los Pods de Grafana y Prometheus
       command: /usr/local/bin/kubectl delete pod grafana-* prometheus-* -n monitoring
+      ignore_errors: true
 
     # (Opcional) Eliminar Longhorn si se desea eliminar
     - name: Eliminar los recursos Longhorn de monitoreo
