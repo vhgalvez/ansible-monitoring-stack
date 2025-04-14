@@ -1,20 +1,30 @@
+# install_kubectl.yml
 ---
 - name: Instalar kubectl en el nodo local
   hosts: localhost
   become: true
-  gather_facts: false
+  vars:
+    kubectl_version: "v1.29.0"
+    kubectl_path: "/usr/local/bin/kubectl"
   tasks:
-    - name: Descargar kubectl (v1.29.0)
+    - name: 📥 Descargar kubectl ({{ kubectl_version }})
       get_url:
-        url: "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
-        dest: /usr/local/bin/kubectl
+        url: "https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl"
+        dest: /tmp/kubectl
         mode: '0755'
 
-    - name: Verificar versión de kubectl
-      command: kubectl version --client
-      register: kubectl_out
+    - name: ✅ Mover kubectl a /usr/local/bin
+      copy:
+        src: /tmp/kubectl
+        dest: "{{ kubectl_path }}"
+        remote_src: yes
+        mode: '0755'
+
+    - name: 🧪 Verificar versión de kubectl con ruta absoluta
+      command: "{{ kubectl_path }} version --client"
+      register: kubectl_output
       ignore_errors: yes
 
-    - name: Mostrar salida de kubectl
+    - name: 📊 Mostrar salida de kubectl
       debug:
-        msg: "{{ kubectl_out.stdout }}"
+        msg: "{{ kubectl_output.stdout }}"

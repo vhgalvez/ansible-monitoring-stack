@@ -13,15 +13,15 @@
     dest: /tmp/prometheus_manifests/prometheus-pvc.yaml
 
 - name: 📥 Crear namespace monitoring (si no existe)
-  command: kubectl create namespace monitoring
+  command: /usr/local/bin/kubectl create namespace monitoring
   register: ns_result
-  failed_when: false
+  failed_when: ns_result.rc != 0 and 'AlreadyExists' not in ns_result.stderr
   changed_when: "'created' in ns_result.stdout"
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
 - name: 📦 Aplicar PVC de Prometheus vía kubectl
-  command: kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
+  command: /usr/local/bin/kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
@@ -30,7 +30,7 @@
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
   register: add_repo_result
-  failed_when: add_repo_result.rc != 0 and "exists" not in add_repo_result.stderr
+  failed_when: add_repo_result.rc != 0 and 'exists' not in add_repo_result.stderr
   changed_when: "'Successfully' in add_repo_result.stdout or 'has been added' in add_repo_result.stdout"
 
 - name: 🔄 Actualizar repositorios de Helm
