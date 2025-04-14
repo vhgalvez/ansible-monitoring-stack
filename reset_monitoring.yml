@@ -1,0 +1,90 @@
+# reset_monitoring.yml
+---
+- name: Resetear monitoreo (Grafana y Prometheus)
+  hosts: localhost
+  become: true
+  tasks:
+
+    - name: Eliminar los PVCs de Grafana y Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "/home/victory/.kube/config"
+        state: absent
+        kind: PersistentVolumeClaim
+        name: "{{ item }}"
+        namespace: monitoring
+      loop:
+        - grafana-pvc
+        - prometheus-pvc
+
+    - name: Eliminar los Pods de Grafana y Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "/home/victory/.kube/config"
+        state: absent
+        kind: Pod
+        name: "{{ item }}"
+        namespace: monitoring
+      loop:
+        - grafana-84fb65758f-dggvh
+        - prometheus-server-86786fd6d8-kfvg9
+
+    - name: Eliminar Deployments de Grafana y Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "/home/victory/.kube/config"
+        state: absent
+        kind: Deployment
+        name: "{{ item }}"
+        namespace: monitoring
+      loop:
+        - grafana
+        - prometheus-server
+
+    - name: Eliminar Servicios de Grafana y Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "/home/victory/.kube/config"
+        state: absent
+        kind: Service
+        name: "{{ item }}"
+        namespace: monitoring
+      loop:
+        - prometheus-server
+        - grafana
+
+    - name: Aplicar PVC de Prometheus (nuevo)
+      kubernetes.core.k8s:
+        kubeconfig: "/home/victory/.kube/config"
+        state: present
+        definition: "{{ lookup('template', 'prometheus-pvc.yaml.j2') }}"
+        namespace: monitoring
+
+    - name: Aplicar PVC de Grafana (nuevo)
+      kubernetes.core.k8s:
+        kubeconfig: "/home/victory/.kube/config"
+        state: present
+        definition: "{{ lookup('template', 'grafana-pvc.yaml.j2') }}"
+        namespace: monitoring
+
+    - name: Desplegar Grafana y Prometheus desde Helm
+      kubernetes.core.helm:
+        kubeconfig: "/home/victory/.kube/config"
+        name: "{{ item }}"
+        chart_ref: "{{ item | lower }}/{{ item | lower }}"
+        release_namespace: monitoring
+        create_namespace: false
+        values:
+          persistence:
+            enabled: true
+            existingClaim: "{{ item | lower }}-pvc"
+      loop:
+        - prometheus
+        - grafana
+
+    - name: Verificar que los Pods de Grafana y Prometheus están corriendo
+      kubernetes.core.k8s_info:
+        kubeconfig: "/home/victory/.kube/config"
+        kind: Pod
+        namespace: monitoring
+      register: pod_info
+
+    - name: Mostrar el estado de los Pods
+      debug:
+        var: pod_info.resources
