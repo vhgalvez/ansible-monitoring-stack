@@ -18,6 +18,8 @@
   register: install_prometheus
   failed_when: install_prometheus.rc != 0
   changed_when: "'STATUS: deployed' in install_prometheus.stdout"
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
 
 # 3️⃣ Mostrar salida de la instalación de Prometheus
 - name: Mostrar salida de la instalación de Prometheus
@@ -32,7 +34,7 @@
   when: prometheus_installed.stdout != ""
 
 # 5️⃣ Crear carpeta temporal para manifiestos de Prometheus si no existe
-- name: 📁 Crear carpeta temporal para manifiestos si no existe
+- name: 📁 Crear carpeta temporal para manifiestos de Prometheus si no existe
   file:
     path: /tmp/prometheus_manifests
     state: directory
