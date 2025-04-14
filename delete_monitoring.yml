@@ -8,7 +8,6 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   tasks:
-
     # 1️⃣ Verificar si el namespace monitoring existe
     - name: 🔍 Verificar si el namespace monitoring existe
       command: /usr/local/bin/kubectl get namespace monitoring
