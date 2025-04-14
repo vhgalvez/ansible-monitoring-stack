@@ -1,21 +1,22 @@
 ---
-# site.yml
-# 🧩 Playbook maestro para configurar almacenamiento persistente en Flatcar + K3s
-# Incluye: LVM, NFS, Longhorn (con etiquetado de nodos integrado)
+# site.yml - Playbook maestro para el stack de monitoreo
+# Mejora: Eliminamos referencias a roles no incluidos (como storage_setup)
+# y enfocamos este playbook a instalar Prometheus + Grafana sobre Kubernetes.
 
-- name: 📦 Preparar disco de almacenamiento con LVM y exportar NFS
-  hosts: storage
-  become: true
-  gather_facts: true
-  roles:
-    - role: storage_setup
+- name: 🚀 Desplegar stack de monitoreo con Grafana y Prometheus
+  hosts: localhost
+  connection: local
+  gather_facts: false
 
-- name: 💾 Preparar nodos Longhorn (formatear y montar /dev/vdb)
-  hosts: workers
-  become: true
-  gather_facts: true
-  roles:
-    - role: longhorn_worker
+  vars_files:
+    - group_vars/all.yml
 
-- name: 🚀 Instalar Longhorn y etiquetar nodos
-  import_playbook: playbooks/install_longhorn.yml
+  tasks:
+    - name: 🌎 Configurar kubeconfig local
+      import_playbook: setup_kubeconfig.yml
+
+    - name: 🔺 Instalar Helm si no está presente
+      import_playbook: install_helm.yml
+
+    - name: 🌌 Desplegar stack de monitoreo (Prometheus + Grafana)
+      import_playbook: playbook_monitoring.yml
