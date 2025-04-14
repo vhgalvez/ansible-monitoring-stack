@@ -1,0 +1,29 @@
+# delete_monitoring.yml
+---
+- name: Eliminar monitoreo completo (Grafana y Prometheus)
+  hosts: localhost
+  become: yes
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+  tasks:
+
+    # Eliminar el namespace 'monitoring' si existe
+    - name: Eliminar el namespace monitoring
+      command: /usr/local/bin/kubectl delete namespace monitoring
+
+    # Eliminar los PVCs de Grafana y Prometheus
+    - name: Eliminar los PVCs de Grafana y Prometheus
+      command: /usr/local/bin/kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
+
+    # Eliminar los servicios de Prometheus
+    - name: Eliminar los servicios de Prometheus
+      command: /usr/local/bin/kubectl delete service prometheus-server prometheus-alertmanager prometheus-kube-state-metrics prometheus-prometheus-node-exporter prometheus-prometheus-pushgateway -n monitoring
+
+    # Eliminar los Pods de Grafana y Prometheus
+    - name: Eliminar los Pods de Grafana y Prometheus
+      command: /usr/local/bin/kubectl delete pod grafana-* prometheus-* -n monitoring
+
+    # (Opcional) Eliminar solo el namespace de Longhorn relacionado con el monitoreo, sin eliminar el sistema completo
+    - name: Eliminar los recursos Longhorn de monitoreo
+      command: /usr/local/bin/kubectl delete pvc -l app=longhorn -n monitoring
+      ignore_errors: true
