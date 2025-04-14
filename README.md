@@ -121,6 +121,8 @@ sudo virt-top
 sudo pip3 install kubernetes
 ```
 
+sudo ansible-galaxy collection install community.kubernetes
+
 
 kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
 

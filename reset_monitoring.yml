@@ -5,96 +5,49 @@
   tasks:
     # Eliminar namespace 'monitoring' si existe
     - name: Eliminar el namespace monitoring
-      kubectl:
-        command: delete
-        args:
-          namespace: monitoring
-      ignore_errors: yes
+      k8s:
+        name: monitoring
+        state: absent
 
     # Eliminar los PVCs de Grafana y Prometheus
     - name: Eliminar los PVCs de Grafana y Prometheus
-      kubectl:
-        command: delete
-        args:
-          pvc:
-            - grafana-pvc
-            - prometheus-pvc
-          namespace: monitoring
-      ignore_errors: yes
+      k8s:
+        state: absent
+        kind: PersistentVolumeClaim
+        name: 
+          - grafana-pvc
+          - prometheus-pvc
+        namespace: monitoring
 
     # Eliminar el servicio de Prometheus
     - name: Eliminar el servicio de Prometheus
-      kubectl:
-        command: delete
-        args:
-          service:
-            - prometheus-server
-            - prometheus-alertmanager
-            - prometheus-kube-state-metrics
-            - prometheus-prometheus-node-exporter
-            - prometheus-prometheus-pushgateway
-          namespace: monitoring
-      ignore_errors: yes
+      k8s:
+        state: absent
+        kind: Service
+        name:
+          - prometheus-server
+          - prometheus-alertmanager
+          - prometheus-kube-state-metrics
+          - prometheus-prometheus-node-exporter
+          - prometheus-prometheus-pushgateway
+        namespace: monitoring
 
     # Eliminar los Pods de Grafana y Prometheus
     - name: Eliminar los Pods de Grafana y Prometheus
-      kubectl:
-        command: delete
-        args:
-          pod:
-            - grafana-84fb65758f-dggvh
-            - prometheus-alertmanager-0
-            - prometheus-kube-state-metrics-6cf54df84c-26skr
-            - prometheus-prometheus-node-exporter-27b5l
-            - prometheus-prometheus-node-exporter-52s2j
-            - prometheus-prometheus-node-exporter-8g8sd
-            - prometheus-prometheus-node-exporter-cf2tk
-            - prometheus-prometheus-node-exporter-dl8h5
-            - prometheus-prometheus-node-exporter-pmxj6
-            - prometheus-prometheus-node-exporter-zq2gc
-            - prometheus-prometheus-pushgateway-544579d549-jwppz
-            - prometheus-server-86786fd6d8-kfvg9
-          namespace: monitoring
-      ignore_errors: yes
-
-    # Eliminar el namespace longhorn (si se desea eliminar Longhorn)
-    - name: Eliminar el namespace longhorn (si se desea eliminar Longhorn)
-      kubectl:
-        command: delete
-        args:
-          namespace: longhorn-system
-      ignore_errors: yes
-
-    # Aplicar los PVCs nuevamente después de eliminarlos
-    - name: Aplicar PVC de Prometheus (nuevo)
-      kubectl:
-        command: apply
-        args:
-          - -f
-          - roles/prometheus/templates/prometheus-pvc.yaml.j2
-          - namespace: monitoring
-
-    - name: Aplicar PVC de Grafana (nuevo)
-      kubectl:
-        command: apply
-        args:
-          - -f
-          - roles/grafana/templates/grafana-pvc.yaml.j2
-          - namespace: monitoring
-
-    # Finalmente, recrear los servicios de Prometheus y Grafana
-    - name: Aplicar el servicio de Prometheus (nuevo)
-      kubectl:
-        command: apply
-        args:
-          - -f
-          - roles/prometheus/templates/prometheus-service.yaml.j2
-          - namespace: monitoring
-
-    - name: Aplicar el servicio de Grafana (nuevo)
-      kubectl:
-        command: apply
-        args:
-          - -f
-          - roles/grafana/templates/grafana-service.yaml.j2
-          - namespace: monitoring
+      k8s:
+        state: absent
+        kind: Pod
+        name:
+          - grafana-84fb65758f-dggvh
+          - prometheus-alertmanager-0
+          - prometheus-kube-state-metrics-6cf54df84c-26skr
+          - prometheus-prometheus-node-exporter-27b5l
+          - prometheus-prometheus-node-exporter-52s2j
+          - prometheus-prometheus-node-exporter-8g8sd
+          - prometheus-prometheus-node-exporter-cf2tk
+          - prometheus-prometheus-node-exporter-dl8h5
+          - prometheus-prometheus-node-exporter-pmxj6
+          - prometheus-prometheus-node-exporter-zq2gc
+          - prometheus-prometheus-pushgateway-544579d549-jwppz
+          - prometheus-server-86786fd6d8-kfvg9
+        namespace: monitoring
