@@ -123,8 +123,8 @@ sudo pip3 install kubernetes
 
 sudo ansible-galaxy collection install community.kubernetes
 
+kubectl port-forward -n monitoring grafana-bf4967644-8vssb 3000:3000
 
-kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
 
 kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
 
