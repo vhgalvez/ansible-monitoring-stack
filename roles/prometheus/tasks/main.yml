@@ -1,7 +1,40 @@
+
 # roles/prometheus/tasks/main.yml
 
-# 1️⃣ Verificar si el deployment de Prometheus ya existe
-- name: Verificar si el deployment de Prometheus ya existe
+# 1️⃣ Crear namespace 'monitoring' si no existe usando kubectl
+- name: 🔍 Verificar si existe namespace monitoring
+  command: /usr/local/bin/kubectl get namespace monitoring
+  register: ns_monitoring_status
+  failed_when: false
+  changed_when: false
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+
+- name: 📥 Crear namespace monitoring si no existe
+  command: /usr/local/bin/kubectl create namespace monitoring
+  when: ns_monitoring_status.rc != 0
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+  register: ns_create_result
+  changed_when: "'created' in ns_create_result.stdout"
+
+# 2️⃣ Añadir repositorio prometheus-community si no existe
+- name: 🔗 Añadir repositorio prometheus-community si no existe
+  command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+  register: add_repo_result
+  failed_when: add_repo_result.rc != 0 and 'exists' not in add_repo_result.stderr
+  changed_when: "'has been added' in add_repo_result.stdout"
+
+# 3️⃣ Actualizar repositorios de Helm
+- name: 🔄 Actualizar repositorios de Helm
+  command: /usr/local/bin/helm repo update
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+
+# 4️⃣ Verificar si el deployment de Prometheus ya existe
+- name: 🔍 Verificar si el deployment de Prometheus existe
   command: /usr/local/bin/kubectl get deployment prometheus-server -n monitoring
   register: prometheus_deployment_status
   failed_when: false
@@ -9,34 +42,8 @@
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
-# 2️⃣ Si el deployment de Prometheus no existe, instalarlo
-- name: Instalar Prometheus vía Helm si no está instalado
-  when: prometheus_deployment_status.rc != 0
-  command: >
-    /usr/local/bin/helm install prometheus prometheus-community/prometheus
-    --namespace monitoring
-    --set server.persistentVolume.enabled=true
-    --set server.persistentVolume.existingClaim=prometheus-pvc
-  register: install_prometheus
-  failed_when: install_prometheus.rc != 0
-  changed_when: "'STATUS: deployed' in install_prometheus.stdout"
-  environment:
-    KUBECONFIG: "/home/victory/.kube/config"
-
-# 3️⃣ Mostrar salida de la instalación de Prometheus
-- name: Mostrar salida de la instalación de Prometheus
-  debug:
-    msg: "{{ install_prometheus.stdout }}"
-  when: prometheus_deployment_status.rc != 0
-
-# 4️⃣ Mostrar que Prometheus ya está instalado
-- name: Mostrar que Prometheus ya está instalado
-  debug:
-    msg: "Prometheus ya está instalado y no se realizará la instalación."
-  when: prometheus_deployment_status.rc == 0
-
 # 5️⃣ Crear carpeta temporal para manifiestos de Prometheus si no existe
-- name: 📁 Crear carpeta temporal para manifiestos de Prometheus si no existe
+- name: 📁 Crear carpeta temporal para manifiestos de Prometheus
   file:
     path: /tmp/prometheus_manifests
     state: directory
@@ -48,38 +55,14 @@
     src: prometheus-pvc.yaml.j2
     dest: /tmp/prometheus_manifests/prometheus-pvc.yaml
 
-# 7️⃣ Crear namespace 'monitoring' si no existe usando command para evitar errores de librerías
-- name: 📥 Crear namespace monitoring (si no existe)
-  command: /usr/local/bin/kubectl create namespace monitoring
-  register: ns_result
-  failed_when: ns_result.rc != 0 and 'AlreadyExists' not in ns_result.stderr
-  changed_when: "'created' in ns_result.stdout"
-  environment:
-    KUBECONFIG: "/home/victory/.kube/config"
-
-# 8️⃣ Aplicar PVC de Prometheus vía kubectl
+# 7️⃣ Aplicar PVC de Prometheus vía kubectl
 - name: 📦 Aplicar PVC de Prometheus vía kubectl
   command: /usr/local/bin/kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
-# 9️⃣ Añadir repositorio prometheus-community si no existe
-- name: 🔗 Añadir repositorio prometheus-community si no existe
-  command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-  environment:
-    PATH: "/usr/local/bin:/usr/bin:/bin"
-  register: add_repo_result
-  failed_when: add_repo_result.rc != 0 and 'exists' not in add_repo_result.stderr
-  changed_when: "'Successfully' in add_repo_result.stdout or 'has been added' in add_repo_result.stdout"
-
-# 🔟 Actualizar repositorios de Helm
-- name: 🔄 Actualizar repositorios de Helm
-  command: /usr/local/bin/helm repo update
-  environment:
-    PATH: "/usr/local/bin:/usr/bin:/bin"
-
-# 1️⃣1️⃣ Instalar Prometheus vía Helm (si el deployment no existe)
-- name: 🚀 Instalar Prometheus vía Helm (si el deployment no existe)
+# 8️⃣ Instalar Prometheus vía Helm (si no está instalado aún)
+- name: 🚀 Instalar Prometheus vía Helm si no está instalado
   command: >
     /usr/local/bin/helm install prometheus prometheus-community/prometheus
     --namespace monitoring
@@ -90,4 +73,18 @@
     KUBECONFIG: "/home/victory/.kube/config"
   args:
     chdir: /tmp
+  register: install_prometheus_result
   when: prometheus_deployment_status.rc != 0
+  changed_when: "'STATUS: deployed' in install_prometheus_result.stdout"
+
+# 9️⃣ Mostrar salida de la instalación de Prometheus
+- name: 📜 Mostrar salida de instalación Helm Prometheus
+  debug:
+    msg: "{{ install_prometheus_result.stdout }}"
+  when: prometheus_deployment_status.rc != 0
+
+# 🔟 Mostrar mensaje si Prometheus ya está instalado
+- name: ✅ Mostrar que Prometheus ya está instalado
+  debug:
+    msg: "✅ Prometheus ya estaba instalado. No se realizó una nueva instalación."
+  when: prometheus_deployment_status.rc == 0
