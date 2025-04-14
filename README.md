@@ -120,3 +120,8 @@ sudo virt-top
 ```bash
 sudo pip3 install kubernetes
 ```
+
+
+kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
+
+kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
