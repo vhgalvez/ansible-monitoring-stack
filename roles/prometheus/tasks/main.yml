@@ -1,47 +1,51 @@
 ---
 # roles/prometheus/tasks/main.yml
 
-- name: Añadir repositorio prometheus-community si no existe
-  ansible.builtin.command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+- name: 📁 Crear carpeta temporal para manifiestos si no existe
+  file:
+    path: /tmp/prometheus_manifests
+    state: directory
+    mode: '0755'
+
+- name: 📝 Renderizar plantilla del PVC de Prometheus
+  template:
+    src: prometheus-pvc.yaml.j2
+    dest: /tmp/prometheus_manifests/prometheus-pvc.yaml
+
+- name: 📥 Crear namespace monitoring (si no existe)
+  command: kubectl create namespace monitoring
+  register: ns_result
+  failed_when: false
+  changed_when: "'created' in ns_result.stdout"
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+
+- name: 📦 Aplicar PVC de Prometheus vía kubectl
+  command: kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+
+- name: 🔗 Añadir repositorio prometheus-community si no existe
+  command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
   register: add_repo_result
   failed_when: add_repo_result.rc != 0 and "exists" not in add_repo_result.stderr
   changed_when: "'Successfully' in add_repo_result.stdout or 'has been added' in add_repo_result.stdout"
 
-- name: Actualizar repositorios de Helm
-  ansible.builtin.command: /usr/local/bin/helm repo update
+- name: 🔄 Actualizar repositorios de Helm
+  command: /usr/local/bin/helm repo update
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
 
-- name: Crear namespace monitoring si no existe
-  kubernetes.core.k8s:
-    kubeconfig: "/home/victory/.kube/config"
-    validate_certs: false
-    state: present
-    definition:
-      apiVersion: v1
-      kind: Namespace
-      metadata:
-        name: monitoring
-
-- name: Crear PVC de Prometheus
-  kubernetes.core.k8s:
-    kubeconfig: "/home/victory/.kube/config"
-    validate_certs: false
-    state: present
-    definition: "{{ lookup('template', 'prometheus-pvc.yaml.j2') }}"
-
-- name: Instalar Prometheus vía Helm
-  kubernetes.core.helm:
-    kubeconfig: "/home/victory/.kube/config"
-    validate_certs: false
-    name: prometheus
-    chart_ref: prometheus-community/prometheus
-    release_namespace: monitoring
-    create_namespace: false
-    values:
-      server:
-        persistentVolume:
-          enabled: true
-          existingClaim: prometheus-pvc
+- name: 🚀 Instalar Prometheus vía Helm
+  command: >
+    /usr/local/bin/helm install prometheus prometheus-community/prometheus
+    --namespace monitoring
+    --set server.persistentVolume.enabled=true
+    --set server.persistentVolume.existingClaim=prometheus-pvc
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+    KUBECONFIG: "/home/victory/.kube/config"
+  args:
+    chdir: /tmp
