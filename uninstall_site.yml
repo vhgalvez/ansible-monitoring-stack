@@ -1,0 +1,59 @@
+---
+# 🔁 Playbook maestro para desinstalar completamente el stack de monitoreo
+# Incluye: eliminación de Helm releases, PVCs, servicios, pods y namespace
+
+- name: 🧼 Eliminar stack de monitoreo (Grafana + Prometheus)
+  hosts: localhost
+  become: yes
+  gather_facts: false
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+
+  tasks:
+
+    # 1️⃣ Verificar si el namespace 'monitoring' existe
+    - name: 🔍 Comprobar existencia del namespace 'monitoring'
+      command: /usr/local/bin/kubectl get namespace monitoring
+      register: ns_check
+      failed_when: false
+      changed_when: false
+
+    # 2️⃣ Desinstalar Helm release de Prometheus
+    - name: ❌ Desinstalar Prometheus con Helm
+      command: /usr/local/bin/helm uninstall prometheus -n monitoring
+      when: ns_check.rc == 0
+      register: uninstall_prometheus
+      failed_when: false
+      changed_when: "'uninstalled' in uninstall_prometheus.stdout"
+
+    # 3️⃣ Desinstalar Helm release de Grafana
+    - name: ❌ Desinstalar Grafana con Helm
+      command: /usr/local/bin/helm uninstall grafana -n monitoring
+      when: ns_check.rc == 0
+      register: uninstall_grafana
+      failed_when: false
+      changed_when: "'uninstalled' in uninstall_grafana.stdout"
+
+    # 4️⃣ Eliminar PVCs de Grafana y Prometheus
+    - name: 🧹 Eliminar PVCs de Grafana y Prometheus
+      command: /usr/local/bin/kubectl delete pvc grafana-pvc prometheus-pvc -n monitoring
+      when: ns_check.rc == 0
+      failed_when: false
+
+    # 5️⃣ Eliminar recursos de Longhorn (si fueron etiquetados)
+    - name: 🧼 Eliminar PVCs de Longhorn con etiqueta app=longhorn
+      command: /usr/local/bin/kubectl delete pvc -l app=longhorn -n monitoring
+      when: ns_check.rc == 0
+      failed_when: false
+
+    # 6️⃣ Eliminar el namespace de monitoreo
+    - name: 🧨 Eliminar namespace 'monitoring'
+      command: /usr/local/bin/kubectl delete namespace monitoring
+      when: ns_check.rc == 0
+      failed_when: false
+      register: ns_delete
+
+    # 7️⃣ Mensaje final de limpieza
+    - name: ✅ Confirmación de limpieza completa
+      debug:
+        msg: "🧽 Stack de monitoreo eliminado correctamente."

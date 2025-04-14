@@ -127,3 +127,12 @@ sudo ansible-galaxy collection install community.kubernetes
 kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
 
 kubectl port-forward -n monitoring svc/prometheus-server 9090:9090
+
+
+kubectl port-forward -n monitoring svc/grafana 3000:80
+
+sudo ansible-playbook -i inventory/hosts.ini uninstall_site.yml
+
+sudo ansible-playbook -i inventory/hosts.ini site.yml
+
+sudo ansible-playbook -i inventory/hosts.ini delete_monitoring.yml

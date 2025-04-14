@@ -1,14 +1,15 @@
-# site.yml
-# 🧩 Playbook maestro para desplegar Prometheus y Grafana en Kubernetes con almacenamiento persistente (Longhorn)
+---
+# 🧩 Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes
+# Incluye: kubectl, kubeconfig, Helm, Prometheus y Grafana con almacenamiento persistente
 
-# 🧪 Instalar kubectl en el nodo de control
+# 1️⃣ Instalar kubectl en el nodo local
 - import_playbook: install_kubectl.yml
 
-# 0️⃣ Configurar kubeconfig local para acceso al clúster
+# 2️⃣ Configurar kubeconfig para acceder al clúster
 - import_playbook: setup_kubeconfig.yml
 
-# 1️⃣ Instalar Helm (v3) en el nodo de control
+# 3️⃣ Instalar Helm en el nodo local
 - import_playbook: install_helm.yml
 
-# 2️⃣ Desplegar stack de monitoreo con PVCs Longhorn
+# 4️⃣ Desplegar Prometheus y Grafana vía roles reutilizables
 - import_playbook: playbook_monitoring.yml
