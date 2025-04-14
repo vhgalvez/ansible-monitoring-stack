@@ -1,6 +1,9 @@
 # site.yml
 # 🧩 Playbook maestro para desplegar Prometheus y Grafana en Kubernetes con almacenamiento persistente (Longhorn)
 
+# 🧪 Instalar kubectl en el nodo de control
+- import_playbook: install_kubectl.yml
+
 # 0️⃣ Configurar kubeconfig local para acceso al clúster
 - import_playbook: setup_kubeconfig.yml
 
