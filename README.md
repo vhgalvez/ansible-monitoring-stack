@@ -112,3 +112,11 @@ sudo virt-top
 - 1: Ver vCPUs
 
 - q: Salir
+
+
+
+### Requisitos de Python
+
+```bash
+sudo pip3 install kubernetes
+```
