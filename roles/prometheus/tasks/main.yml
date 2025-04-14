@@ -1,17 +1,50 @@
----
 # roles/prometheus/tasks/main.yml
 
+# 1️⃣ Verificar si Prometheus ya está instalado
+- name: Verificar si Prometheus ya está instalado
+  command: /usr/local/bin/helm list --namespace monitoring --filter ^prometheus$
+  register: prometheus_installed
+  failed_when: false
+  changed_when: false
+
+# 2️⃣ Instalar Prometheus vía Helm si no está instalado
+- name: Instalar Prometheus vía Helm si no está instalado
+  when: prometheus_installed.stdout == ""
+  command: >
+    /usr/local/bin/helm install prometheus prometheus-community/prometheus
+    --namespace monitoring
+    --set server.persistentVolume.enabled=true
+    --set server.persistentVolume.existingClaim=prometheus-pvc
+  register: install_prometheus
+  failed_when: install_prometheus.rc != 0
+  changed_when: "'STATUS: deployed' in install_prometheus.stdout"
+
+# 3️⃣ Mostrar salida de la instalación de Prometheus
+- name: Mostrar salida de la instalación de Prometheus
+  debug:
+    msg: "{{ install_prometheus.stdout }}"
+  when: prometheus_installed.stdout == ""
+
+# 4️⃣ Mostrar que Prometheus ya está instalado
+- name: Mostrar que Prometheus ya está instalado
+  debug:
+    msg: "Prometheus ya está instalado y no se realizará la instalación."
+  when: prometheus_installed.stdout != ""
+
+# 5️⃣ Crear carpeta temporal para manifiestos de Prometheus si no existe
 - name: 📁 Crear carpeta temporal para manifiestos si no existe
   file:
     path: /tmp/prometheus_manifests
     state: directory
     mode: '0755'
 
+# 6️⃣ Renderizar plantilla del PVC de Prometheus
 - name: 📝 Renderizar plantilla del PVC de Prometheus
   template:
     src: prometheus-pvc.yaml.j2
     dest: /tmp/prometheus_manifests/prometheus-pvc.yaml
 
+# 7️⃣ Crear namespace 'monitoring' si no existe
 - name: 📥 Crear namespace monitoring (si no existe)
   command: /usr/local/bin/kubectl create namespace monitoring
   register: ns_result
@@ -20,11 +53,13 @@
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
+# 8️⃣ Aplicar PVC de Prometheus vía kubectl
 - name: 📦 Aplicar PVC de Prometheus vía kubectl
   command: /usr/local/bin/kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
+# 9️⃣ Añadir repositorio prometheus-community si no existe
 - name: 🔗 Añadir repositorio prometheus-community si no existe
   command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   environment:
@@ -33,11 +68,13 @@
   failed_when: add_repo_result.rc != 0 and 'exists' not in add_repo_result.stderr
   changed_when: "'Successfully' in add_repo_result.stdout or 'has been added' in add_repo_result.stdout"
 
+# 🔟 Actualizar repositorios de Helm
 - name: 🔄 Actualizar repositorios de Helm
   command: /usr/local/bin/helm repo update
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
 
+# 1️⃣1️⃣ Instalar Prometheus vía Helm
 - name: 🚀 Instalar Prometheus vía Helm
   command: >
     /usr/local/bin/helm install prometheus prometheus-community/prometheus
@@ -49,3 +86,4 @@
     KUBECONFIG: "/home/victory/.kube/config"
   args:
     chdir: /tmp
+  when: prometheus_installed.stdout == ""
