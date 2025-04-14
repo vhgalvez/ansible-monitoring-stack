@@ -1,5 +1,4 @@
-# roles/prometheus/tasks/main.yml
-
+# roles\prometheus\tasks\main.yml
 # 1️⃣ Verificar si el deployment de Prometheus ya existe
 - name: Verificar si el deployment de Prometheus ya existe
   command: /usr/local/bin/kubectl get deployment prometheus-server -n monitoring
