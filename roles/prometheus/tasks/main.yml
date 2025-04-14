@@ -1,15 +1,17 @@
 # roles/prometheus/tasks/main.yml
 
-# 1️⃣ Verificar si Prometheus ya está instalado
-- name: Verificar si Prometheus ya está instalado
-  command: /usr/local/bin/helm list --namespace monitoring --filter ^prometheus$
-  register: prometheus_installed
+# 1️⃣ Verificar si el deployment de Prometheus ya existe
+- name: Verificar si el deployment de Prometheus ya existe
+  command: /usr/local/bin/kubectl get deployment prometheus-server -n monitoring
+  register: prometheus_deployment_status
   failed_when: false
   changed_when: false
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
 
-# 2️⃣ Si Prometheus no está instalado, instalarlo
+# 2️⃣ Si el deployment de Prometheus no existe, instalarlo
 - name: Instalar Prometheus vía Helm si no está instalado
-  when: prometheus_installed.stdout == ""
+  when: prometheus_deployment_status.rc != 0
   command: >
     /usr/local/bin/helm install prometheus prometheus-community/prometheus
     --namespace monitoring
@@ -25,13 +27,13 @@
 - name: Mostrar salida de la instalación de Prometheus
   debug:
     msg: "{{ install_prometheus.stdout }}"
-  when: prometheus_installed.stdout == ""
+  when: prometheus_deployment_status.rc != 0
 
 # 4️⃣ Mostrar que Prometheus ya está instalado
 - name: Mostrar que Prometheus ya está instalado
   debug:
     msg: "Prometheus ya está instalado y no se realizará la instalación."
-  when: prometheus_installed.stdout != ""
+  when: prometheus_deployment_status.rc == 0
 
 # 5️⃣ Crear carpeta temporal para manifiestos de Prometheus si no existe
 - name: 📁 Crear carpeta temporal para manifiestos de Prometheus si no existe
@@ -76,7 +78,7 @@
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
 
-# 1️⃣1️⃣ Instalar Prometheus vía Helm solo si no está instalado
+# 1️⃣1️⃣ Instalar Prometheus vía Helm solo si el deployment no existe
 - name: 🚀 Instalar Prometheus vía Helm
   command: >
     /usr/local/bin/helm install prometheus prometheus-community/prometheus
@@ -88,4 +90,4 @@
     KUBECONFIG: "/home/victory/.kube/config"
   args:
     chdir: /tmp
-  when: prometheus_installed.stdout == ""
+  when: prometheus_deployment_status.rc != 0
