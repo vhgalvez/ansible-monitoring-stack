@@ -8,33 +8,49 @@ Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgal
 ## 📦 Estructura del Proyecto
 
 ```bash
-ansible-monitoring-stack/
 ├── ansible.cfg
-├── group_vars/
-│   └── all.yml                  # Variables globales (ej. contraseña Grafana)
 ├── inventory/
-│   └── hosts.ini                # Inventario Ansible del clúster Kubernetes
+│   └── hosts.ini                    # Inventario con grupos como [masters], [workers], [external_node_exporter]
+│
 ├── playbooks/
-│   ├── install_helm.yml         # Instalación de Helm
-│   ├── install_dependencies.yml # Instalación de Helm, kubectl y pip3
-│   ├── site.yml                 # Despliegue completo de la pila de monitorización
-│   ├── uninstall_site.yml       # Desinstalación completa de Prometheus y Grafana
-│   └── delete_monitoring.yml    # Eliminación específica de Prometheus y Grafana
+│   ├── install_site.yml            # Playbook maestro que orquesta toda la instalación
+│   ├── install_kubectl.yml         # Instala kubectl
+│   ├── setup_kubeconfig.yml        # Copia kubeconfig
+│   ├── install_helm.yml            # Instala Helm
+│   ├── playbook_monitoring.yml     # Despliega Prometheus + Grafana
+│   ├── install_node_exporter.yml   # Instala node_exporter en máquinas externas
+│   └── generate_extra_scrape_configs.yml  # Renderiza `extraScrapeConfigs.yaml`
+│
 ├── roles/
+│   ├── prometheus/
+│   │   ├── tasks/
+│   │   │   └── main.yml
+│   │   └── templates/
+│   │       ├── prometheus-pvc.yaml.j2
+│   │       ├── prometheus-configmap.yaml.j2
+│   │       ├── prometheus-deployment.yaml.j2
+│   │       └── extraScrapeConfigs.yaml.j2     # Automáticamente genera targets externos
+│   │
 │   ├── grafana/
 │   │   ├── tasks/
 │   │   │   └── main.yml
 │   │   └── templates/
-│   │       ├── grafana-deployment.yaml.j2
-│   │       └── grafana-pvc.yaml.j2
-│   └── prometheus/
+│   │       └── datasources.yaml.j2  # (opcional) conexión Prometheus
+│   │
+│   └── node_exporter/
 │       ├── tasks/
 │       │   └── main.yml
 │       └── templates/
-│           └── prometheus-pvc.yaml.j2
-├── docs/
-│   └── README.md                # Documentación detallada del proyecto
-└── .gitignore                   # Exclusiones para Git
+│           └── node_exporter.service.j2
+│
+├── vars/
+│   └── global.yml                  # (opcional) Variables comunes (puertos, versiones, paths)
+│
+├── templates/
+│   └── common/
+│       └── kubeconfig.j2           # (si aplicas rendering dinámico de kubeconfig)
+│
+└── README.md
 ```
 
 ---
