@@ -212,11 +212,13 @@ ports:
 
 
 
+sudo bash -c 'nohup kubectl port-forward -n monitoring svc/grafana 3000:80 > grafana.log 2>&1 &'
+sudo bash -c 'nohup kubectl port-forward -n monitoring svc/prometheus-server 9090:80 > prometheus.log 2>&1 &'
 
 
-nohup kubectl port-forward -n monitoring svc/grafana 3000:80 > grafana.log 2>&1 &
+sudo nohup kubectl port-forward -n monitoring svc/grafana 3000:80 > grafana.log 2>&1 &
 
-nohup kubectl port-forward -n monitoring svc/prometheus-server 9090:80 > prometheus.log 2>&1 &
+sudo nohup kubectl port-forward -n monitoring svc/prometheus-server 9090:80 > prometheus.log 2>&1 &
 
 ps aux | grep port-forward
 
