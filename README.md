@@ -73,6 +73,7 @@ ansible-monitoring-stack/
     ├── doc.md                        # 📝 Guía del proyecto y explicación de componentes
     └── mvs_monitoreo.png             # 🖼️ Diagrama de arquitectura del monitoreo
 
+
 ```
 
 ---
