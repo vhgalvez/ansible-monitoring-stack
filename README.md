@@ -1,6 +1,7 @@
 # 📊 ansible-monitoring-stack
 
-Automatización completa del despliegue de **Prometheus** y **Grafana** en un clúster Kubernetes (K3s) utilizando **Ansible**, **Helm** y **PVCs personalizados** con almacenamiento persistente `Longhorn`.
+Automatización del despliegue de **Prometheus** y **Grafana** en un clúster Kubernetes (K3s) utilizando **Ansible**, **Helm** y almacenamiento persistente con **Longhorn**.  
+Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgalvez/FlatcarMicroCloud).
 
 ---
 
@@ -8,23 +9,32 @@ Automatización completa del despliegue de **Prometheus** y **Grafana** en un cl
 
 ```bash
 ansible-monitoring-stack/
+├── ansible.cfg
 ├── group_vars/
 │   └── all.yml                  # Variables globales (ej. contraseña Grafana)
 ├── inventory/
-│   └── hosts.ini                # Inventario Ansible de tu clúster Kubernetes
-├── playbook_monitoring.yml     # Playbook principal
-└── roles/
-    ├── grafana/
-    │   ├── tasks/
-    │   │   └── main.yml         # Despliegue de Grafana
-    │   └── templates/           # Plantillas Jinja2 para PVC y configuración
-    │       ├── grafana-deployment.yaml.j2
-    │       └── grafana-pvc.yaml.j2
-    └── prometheus/
-        ├── tasks/
-        │   └── main.yml         # Despliegue de Prometheus
-        └── templates/           # Plantilla PVC Prometheus
-            └── prometheus-pvc.yaml.j2
+│   └── hosts.ini                # Inventario Ansible del clúster Kubernetes
+├── playbooks/
+│   ├── install_helm.yml         # Instalación de Helm
+│   ├── install_dependencies.yml # Instalación de Helm, kubectl y pip3
+│   ├── site.yml                 # Despliegue completo de la pila de monitorización
+│   ├── uninstall_site.yml       # Desinstalación completa de Prometheus y Grafana
+│   └── delete_monitoring.yml    # Eliminación específica de Prometheus y Grafana
+├── roles/
+│   ├── grafana/
+│   │   ├── tasks/
+│   │   │   └── main.yml
+│   │   └── templates/
+│   │       ├── grafana-deployment.yaml.j2
+│   │       └── grafana-pvc.yaml.j2
+│   └── prometheus/
+│       ├── tasks/
+│       │   └── main.yml
+│       └── templates/
+│           └── prometheus-pvc.yaml.j2
+├── docs/
+│   └── README.md                # Documentación detallada del proyecto
+└── .gitignore                   # Exclusiones para Git
 ```
 
 ---
