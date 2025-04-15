@@ -17,13 +17,26 @@ spec:
     spec:
       containers:
         - name: prometheus
-          image: prometheus/prometheus:v2.25.0
+          image: quay.io/prometheus/prometheus:v3.3.0-rc.1
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--web.enable-lifecycle"
           ports:
             - containerPort: 9090
           volumeMounts:
             - name: prometheus-storage
               mountPath: /prometheus
+            - name: config-volume
+              mountPath: /etc/prometheus
       volumes:
         - name: prometheus-storage
           persistentVolumeClaim:
             claimName: prometheus-pvc
+        - name: config-volume
+          projected:
+            sources:
+              - configMap:
+                  name: prometheus-config
+              - secret:
+                  name: prometheus-additional-scrape-configs
