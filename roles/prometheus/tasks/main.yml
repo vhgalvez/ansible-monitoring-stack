@@ -88,3 +88,17 @@
   debug:
     msg: "✅ Prometheus ya estaba instalado. No se realizó una nueva instalación."
   when: prometheus_deployment_status.rc == 0
+
+- name: 🧾 Renderizar archivo extraScrapeConfigs.yaml con nodos externos
+  template:
+    src: extraScrapeConfigs.yaml.j2
+    dest: /tmp/prometheus_manifests/extraScrapeConfigs.yaml
+
+- name: 🔐 Crear Secret con extraScrapeConfigs.yaml
+  command: >
+    /usr/local/bin/kubectl create secret generic prometheus-additional-scrape-configs
+    --from-file=extraScrapeConfigs.yaml=/tmp/prometheus_manifests/extraScrapeConfigs.yaml
+    --namespace monitoring --dry-run=client -o yaml |
+    /usr/local/bin/kubectl apply -f -
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"

@@ -1,0 +1,4 @@
+- targets:
+{% for host in groups['external_node_exporter'] %}
+  - {{ host }}:9100
+{% endfor %}

@@ -1,0 +1,5 @@
+- name: Instalar Node Exporter en máquinas externas al clúster
+  hosts: external_node_exporter
+  become: true
+  roles:
+    - node_exporter
