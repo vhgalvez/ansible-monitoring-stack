@@ -8,49 +8,71 @@ Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgal
 ## 📦 Estructura del Proyecto
 
 ```bash
-├── ansible.cfg
+ansible-monitoring-stack/
+├── README.md                         # 📘 Descripción general del proyecto
+├── LICENSE                           # ⚖️ Licencia del repositorio
+├── .gitignore                        # 📂 Ignorar archivos innecesarios
+
+# 🚀 Playbooks principales (uno todo en uno y otro modular)
+├── install_stack.yml                 # 🧩 Instala todo el stack (uso recomendado)
+├── uninstall_stack.yml              # ❌ Desinstala completamente el stack
+
+# 📦 Inventario y variables
 ├── inventory/
-│   └── hosts.ini                    # Inventario con grupos como [masters], [workers], [external_node_exporter]
-│
+│   └── hosts.ini                     # 🖧 Definición de nodos internos/externos
+
+├── group_vars/
+│   └── all.yml                       # 🌍 Variables globales compartidas
+
+# 🛠️ Playbooks individuales si se prefiere ejecución paso a paso
 ├── playbooks/
-│   ├── install_site.yml            # Playbook maestro que orquesta toda la instalación
-│   ├── install_kubectl.yml         # Instala kubectl
-│   ├── setup_kubeconfig.yml        # Copia kubeconfig
-│   ├── install_helm.yml            # Instala Helm
-│   ├── playbook_monitoring.yml     # Despliega Prometheus + Grafana
-│   ├── install_node_exporter.yml   # Instala node_exporter en máquinas externas
-│   └── generate_extra_scrape_configs.yml  # Renderiza `extraScrapeConfigs.yaml`
-│
+│   ├── install_00_dependencies.yml        # 🧱 Instala dependencias base (curl, unzip...)
+│   ├── install_01_kubectl.yml             # 🔧 Instala kubectl
+│   ├── install_02_kubeconfig.yml          # 📁 Configura el acceso al clúster
+│   ├── install_03_helm.yml                # 🧭 Instala Helm
+│   ├── install_04_monitoring.yml          # 📊 Despliega Prometheus + Grafana vía roles
+│   ├── install_05_node_exporter.yml       # 🐧 Instala node_exporter en máquinas externas
+│   ├── install_06_generate_scrapes.yml    # 🧩 Genera extraScrapeConfigs.yaml (automático)
+│   ├── install_07_update_secret.yml       # 🔐 Crea/actualiza el Secret en Kubernetes
+│   └── install_all.yml                    # 🚀 Ejecuta los 7 playbooks anteriores en orden
+
+# ♻️ Roles reutilizables para cada componente del stack
 ├── roles/
 │   ├── prometheus/
 │   │   ├── tasks/
 │   │   │   └── main.yml
 │   │   └── templates/
-│   │       ├── prometheus-pvc.yaml.j2
 │   │       ├── prometheus-configmap.yaml.j2
 │   │       ├── prometheus-deployment.yaml.j2
-│   │       └── extraScrapeConfigs.yaml.j2     # Automáticamente genera targets externos
-│   │
+│   │       ├── prometheus-pvc.yaml.j2
+│   │       ├── prometheus-service.yaml.j2
+│   │       └── extraScrapeConfigs.yaml.j2
+
 │   ├── grafana/
 │   │   ├── tasks/
 │   │   │   └── main.yml
 │   │   └── templates/
-│   │       └── datasources.yaml.j2  # (opcional) conexión Prometheus
-│   │
+│   │       ├── grafana-deployment.yaml.j2
+│   │       ├── grafana-pvc.yaml.j2
+│   │       └── grafana-service.yaml.j2
+
 │   └── node_exporter/
 │       ├── tasks/
 │       │   └── main.yml
 │       └── templates/
 │           └── node_exporter.service.j2
-│
-├── vars/
-│   └── global.yml                  # (opcional) Variables comunes (puertos, versiones, paths)
-│
-├── templates/
-│   └── common/
-│       └── kubeconfig.j2           # (si aplicas rendering dinámico de kubeconfig)
-│
-└── README.md
+
+# 🔌 Scripts opcionales para facilitar acceso desde localhost
+├── sh-forward/
+│   ├── start-monitoring.sh           # ▶️ Hace port forwarding hacia Grafana y Prometheus
+│   ├── stop-monitoring.sh            # ⛔ Detiene el port forwarding
+│   └── doc.md                        # 📓 Explicación sobre uso de los scripts
+
+# 📖 Documentación técnica y visual
+└── doc/
+    ├── doc.md                        # 📝 Guía del proyecto y explicación de componentes
+    └── mvs_monitoreo.png             # 🖼️ Diagrama de arquitectura del monitoreo
+
 ```
 
 ---
