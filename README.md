@@ -209,3 +209,61 @@ nohup kubectl port-forward -n monitoring svc/grafana 3000:80 > grafana.log 2>&1 
 nohup kubectl port-forward -n monitoring svc/prometheus-server 9090:80 > prometheus.log 2>&1 &
 
 ps aux | grep port-forward
+
+pkill -f "kubectl port-forward -n monitoring svc/grafana"
+pkill -f "kubectl port-forward -n monitoring svc/prometheus-server"
+
+
+
+
+
+🧩 PASOS PARA CONFIGURAR PROMETHEUS EN GRAFANA
+1. 👉 Ingresar a Grafana
+Abre tu navegador y entra a:
+
+arduino
+Copiar
+Editar
+http://localhost:3000
+Usuario y contraseña por defecto si no los cambiaste:
+
+pgsql
+Copiar
+Editar
+admin / admin
+
+
+
+2. ➕ Añadir Prometheus como Data Source
+En el menú lateral izquierdo haz clic en ⚙️ (Settings) → Data sources
+
+Clic en "Add data source"
+
+Selecciona Prometheus
+
+
+
+3. 🔌 Configurar conexión
+En el campo Prometheus server URL, pon:
+
+arduino
+Copiar
+Editar
+http://localhost:9090
+⚠️ Asegúrate de que estás haciendo el port-forward así:
+
+bash
+Copiar
+Editar
+nohup kubectl port-forward -n monitoring svc/prometheus-server 9090:80 > prometheus.log 2>&1 &
+No uses 9091 si Prometheus está escuchando por 9090.
+
+5. Cargar un Dashboard popular
+Ve a + (Create) → Import
+
+En el campo de "Import via grafana.com" escribe un ID de dashboard.
+
+Dashboard	ID
+Node Exporter Full	1860
+K8s Cluster Monitoring	315
+Prometheus Stats	2
