@@ -1,3 +1,4 @@
+# install_site.yml
 ---
 # 🧩 Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes
 # Incluye: kubectl, kubeconfig, Helm, Prometheus y Grafana con almacenamiento persistente

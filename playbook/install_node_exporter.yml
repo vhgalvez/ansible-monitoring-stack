@@ -1,5 +1,77 @@
-- name: Instalar Node Exporter en máquinas externas al clúster
+# ansible/playbooks/install_node_exporter.yml
+---
+- name: 🐧 Instalar y configurar Node Exporter en máquinas externas
   hosts: external_node_exporter
   become: true
-  roles:
-    - node_exporter
+  vars:
+    node_exporter_version: "1.8.1"
+    node_exporter_bin_dir: "/usr/local/bin"
+    node_exporter_user: "node_exporter"
+    node_exporter_service: "/etc/systemd/system/node_exporter.service"
+
+  tasks:
+    - name: 📦 Instalar dependencias
+      package:
+        name: curl
+        state: present
+
+    - name: 👤 Crear usuario node_exporter si no existe
+      user:
+        name: "{{ node_exporter_user }}"
+        shell: /usr/sbin/nologin
+        system: yes
+        create_home: no
+      ignore_errors: true
+
+    - name: 📥 Descargar Node Exporter
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: "/tmp/node_exporter.tar.gz"
+
+    - name: 📂 Extraer Node Exporter
+      unarchive:
+        src: "/tmp/node_exporter.tar.gz"
+        dest: "/tmp/"
+        remote_src: yes
+
+    - name: 🚀 Copiar binario a /usr/local/bin
+      copy:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+        dest: "{{ node_exporter_bin_dir }}/node_exporter"
+        mode: '0755'
+
+    - name: 🧩 Crear servicio systemd para Node Exporter
+      copy:
+        dest: "{{ node_exporter_service }}"
+        content: |
+          [Unit]
+          Description=Node Exporter
+          Wants=network-online.target
+          After=network-online.target
+
+          [Service]
+          User={{ node_exporter_user }}
+          ExecStart={{ node_exporter_bin_dir }}/node_exporter
+          Restart=always
+
+          [Install]
+          WantedBy=default.target
+        mode: '0644'
+
+    - name: ♻️ Recargar systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: ▶️ Habilitar e iniciar Node Exporter
+      systemd:
+        name: node_exporter
+        enabled: yes
+        state: started
+
+    - name: ✅ Verificar que node_exporter esté escuchando en el puerto 9100
+      shell: ss -tuln | grep 9100 || true
+      register: node_exporter_status
+
+    - name: 📊 Mostrar estado de escucha de Node Exporter
+      debug:
+        msg: "{{ node_exporter_status.stdout_lines }}"
