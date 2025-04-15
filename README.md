@@ -161,3 +161,51 @@ kubectl port-forward -n monitoring svc/grafana 3000:3000
 ```bash
 kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
 ```
+
+
+✳️ Accede correctamente con kubectl port-forward
+Usa el puerto expuesto (80) en tu comando, no el targetPort del contenedor.
+
+bash
+Copiar
+Editar
+# Para Grafana
+kubectl port-forward -n monitoring svc/grafana 3000:80
+
+# Para Prometheus
+kubectl port-forward -n monitoring svc/prometheus-server 9091:80
+Esto redirige:
+
+localhost:3000 → svc/grafana:80 → container:3000
+
+localhost:9091 → svc/prometheus-server:80 → container:9090
+
+🧠 Recomendación pro (opcional)
+Si quieres usar directamente los puertos 3000 y 9090 en el port-forward, puedes modificar los Service para exponer esos puertos (si no hay conflictos):
+
+Grafana Service:
+yaml
+Copiar
+Editar
+ports:
+  - name: http
+    port: 3000
+    targetPort: 3000
+Prometheus Service:
+yaml
+Copiar
+Editar
+ports:
+  - name: http
+    port: 9090
+    targetPort: 9090
+
+
+
+
+
+nohup kubectl port-forward -n monitoring svc/grafana 3000:80 > grafana.log 2>&1 &
+
+nohup kubectl port-forward -n monitoring svc/prometheus-server 9090:80 > prometheus.log 2>&1 &
+
+ps aux | grep port-forward
