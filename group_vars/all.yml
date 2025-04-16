@@ -2,7 +2,7 @@
 # 📦 Variables globales para todos los roles y playbooks
 
 # 🔐 Contraseña del usuario admin para acceder a Grafana
-grafana_admin_password: "SuperSecreta123"
+grafana_admin_password: "admin123"  # o la contraseña que prefieras
 
 # 🛠️ Variable de entorno para asegurar que Helm esté en el PATH
 grafana_env:
