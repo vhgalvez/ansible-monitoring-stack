@@ -1,4 +1,5 @@
 ---
+# playbook\03_install_monitoring_stack.yml
 # 3️⃣ Instalar Prometheus y Grafana con Helm y almacenamiento persistente
 
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
@@ -19,6 +20,7 @@
         validate_certs: false
       register: prometheus_installed
       ignore_errors: true
+      environment: "{{ grafana_env }}"
 
     - name: 🔍 Verificar si Grafana ya está instalado
       kubernetes.core.helm_info:
@@ -28,6 +30,7 @@
         validate_certs: false
       register: grafana_installed
       ignore_errors: true
+      environment: "{{ grafana_env }}"
 
     - name: 🚀 Instalar Prometheus vía Helm si no está instalado
       kubernetes.core.helm:
@@ -42,6 +45,7 @@
             enabled: true
             existingClaim: prometheus-pvc
       when: prometheus_installed.failed
+      environment: "{{ grafana_env }}"
 
     - name: 🚀 Instalar Grafana vía Helm si no está instalado
       kubernetes.core.helm:
@@ -59,6 +63,7 @@
           service:
             type: ClusterIP
       when: grafana_installed.failed
+      environment: "{{ grafana_env }}"
 
     - name: ✅ Mostrar mensaje final
       debug:
