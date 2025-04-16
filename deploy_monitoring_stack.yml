@@ -1,0 +1,19 @@
+---
+# 🧩 install_stack.yml
+# Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
+# Compatible con ejecución local, CI/CD y automatización general.
+
+- name: 1️⃣ Instalar herramientas locales necesarias (kubectl, pip, helm)
+  import_playbook: playbook/01_install_local_tools.yml
+
+- name: 2️⃣ Configurar kubeconfig desde master con acceso por VIP
+  import_playbook: playbook/02_setup_kubeconfig.yml
+
+- name: 3️⃣ Desplegar stack de monitoreo completo (Prometheus + Grafana)
+  import_playbook: playbook/03_install_monitoring_stack.yml
+
+- name: 4️⃣ Instalar Node Exporter en máquinas externas (si aplica)
+  import_playbook: playbook/04_install_node_exporter.yml
+
+- name: 5️⃣ Generar y aplicar configuración de scrapes externos
+  import_playbook: playbook/05_update_scrape_targets.yml

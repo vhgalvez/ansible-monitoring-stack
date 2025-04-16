@@ -1,5 +1,5 @@
 ---
-# 🧼 uninstall_stack.yml
+# 🧼 deploy_monitoring_stack.yml
 # Desinstala completamente el stack de monitoreo: Helm releases, PVCs, Pods, Servicios, Namespace y recursos de Longhorn
 
 - name: 🧼 Eliminar stack de monitoreo (Grafana + Prometheus)
