@@ -20,7 +20,6 @@
         kind: Namespace
         name: monitoring
         state: present
-      environment: "{{ grafana_env }}"
 
     - name: 🔍 Verificar si Prometheus ya está instalado
       kubernetes.core.helm_info:
@@ -30,7 +29,6 @@
         validate_certs: false
       register: prometheus_installed
       ignore_errors: true
-      environment: "{{ grafana_env }}"
 
     - name: 🔍 Verificar si Grafana ya está instalado
       kubernetes.core.helm_info:
@@ -40,7 +38,6 @@
         validate_certs: false
       register: grafana_installed
       ignore_errors: true
-      environment: "{{ grafana_env }}"
 
     - name: 🚀 Instalar o forzar reinstalación de Prometheus
       kubernetes.core.helm:
@@ -56,7 +53,6 @@
             enabled: true
             existingClaim: prometheus-pvc
       when: force_install | bool or prometheus_installed.failed
-      environment: "{{ grafana_env }}"
 
     - name: 🚀 Instalar o forzar reinstalación de Grafana
       kubernetes.core.helm:
@@ -75,7 +71,6 @@
           service:
             type: ClusterIP
       when: force_install | bool or grafana_installed.failed
-      environment: "{{ grafana_env }}"
 
     - name: ✅ Mostrar mensaje final
       debug:
