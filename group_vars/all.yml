@@ -7,3 +7,5 @@ grafana_admin_password: "SuperSecreta123"
 # 🛠️ Variable de entorno para asegurar que Helm esté en el PATH
 grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"
+
+node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
