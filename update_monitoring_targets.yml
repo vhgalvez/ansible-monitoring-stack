@@ -3,7 +3,7 @@
 # 🔄 Actualiza node_exporter en hosts externos y actualiza el Secret en Prometheus
 
 - name: 🔄 Actualizar monitoreo de nodos externos
-  hosts: localhost
+  hosts: controller
   gather_facts: false
   become: true
   tasks:

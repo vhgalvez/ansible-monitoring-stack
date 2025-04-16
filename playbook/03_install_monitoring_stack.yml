@@ -3,7 +3,7 @@
 # 3️⃣ Instalar Prometheus y Grafana con Helm y almacenamiento persistente
 
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
-  hosts: localhost
+  hosts: controller
   gather_facts: false
   become: true
 

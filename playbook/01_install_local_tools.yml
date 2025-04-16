@@ -1,7 +1,7 @@
 ---
 # playbook\01_install_local_tools.yml
 - name: 1️⃣ Instalar herramientas necesarias en el nodo controlador
-  hosts: localhost
+  hosts: controller
   gather_facts: true
   become: true
   vars:

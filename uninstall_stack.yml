@@ -3,7 +3,7 @@
 # Desinstala completamente el stack de monitoreo: Helm releases, PVCs, Pods, Servicios, Namespace y recursos de Longhorn
 
 - name: 🧼 Eliminar stack de monitoreo (Grafana + Prometheus)
-  hosts: localhost
+  hosts: controller
   become: yes
   gather_facts: false
   environment:
