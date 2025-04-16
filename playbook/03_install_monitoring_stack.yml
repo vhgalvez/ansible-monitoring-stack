@@ -1,5 +1,5 @@
 ---
-# playbook\03_install_monitoring_stack.yml
+# playbook/03_install_monitoring_stack.yml
 # 3️⃣ Instalar Prometheus y Grafana con Helm y almacenamiento persistente
 
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
@@ -11,8 +11,19 @@
     kubeconfig_path: "/home/victory/.kube/config"
     grafana_env:
       PATH: "/usr/local/bin:/usr/bin:/bin"
+    force_install: false
 
   tasks:
+    - name: 📁 Crear namespace monitoring si no existe
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        validate_certs: false
+        api_version: v1
+        kind: Namespace
+        name: monitoring
+        state: present
+      environment: "{{ grafana_env }}"
+
     - name: 🔍 Verificar si Prometheus ya está instalado
       kubernetes.core.helm_info:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -33,7 +44,7 @@
       ignore_errors: true
       environment: "{{ grafana_env }}"
 
-    - name: 🚀 Instalar Prometheus vía Helm si no está instalado
+    - name: 🚀 Instalar o forzar reinstalación de Prometheus
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         validate_certs: false
@@ -41,14 +52,15 @@
         chart_ref: prometheus-community/prometheus
         release_namespace: monitoring
         create_namespace: false
+        state: present
         values:
           persistence:
             enabled: true
             existingClaim: prometheus-pvc
-      when: prometheus_installed.failed
+      when: force_install | bool or prometheus_installed.failed
       environment: "{{ grafana_env }}"
 
-    - name: 🚀 Instalar Grafana vía Helm si no está instalado
+    - name: 🚀 Instalar o forzar reinstalación de Grafana
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
         validate_certs: false
@@ -56,6 +68,7 @@
         chart_ref: grafana/grafana
         release_namespace: monitoring
         create_namespace: false
+        state: present
         values:
           persistence:
             enabled: true
@@ -63,9 +76,9 @@
           adminPassword: "{{ grafana_admin_password }}"
           service:
             type: ClusterIP
-      when: grafana_installed.failed
+      when: force_install | bool or grafana_installed.failed
       environment: "{{ grafana_env }}"
 
     - name: ✅ Mostrar mensaje final
       debug:
-        msg: "✅ Prometheus y Grafana se han instalado correctamente (si no lo estaban ya)."
+        msg: "✅ Prometheus y Grafana se han instalado correctamente (o forzadamente reinstalados si se indicó)."
