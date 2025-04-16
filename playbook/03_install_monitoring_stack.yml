@@ -9,8 +9,6 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
-    grafana_env:
-      PATH: "/usr/local/bin:/usr/bin:/bin"
     force_install: false
 
   tasks:
@@ -73,7 +71,7 @@
           persistence:
             enabled: true
             existingClaim: grafana-pvc
-          adminPassword: "{{ grafana_admin_password }}"
+          adminPassword: "{{ grafana_admin_password | default('admin123') }}"
           service:
             type: ClusterIP
       when: force_install | bool or grafana_installed.failed
