@@ -1,5 +1,6 @@
 ---
-# 4️⃣ Instalar y configurar Node Exporter en máquinas externas
+# 📦 04_install_node_exporter.yml
+# Instalación y configuración del servicio Node Exporter en máquinas externas para Prometheus
 
 - name: 🐧 Instalar y configurar Node Exporter
   hosts: external_node_exporter
@@ -15,60 +16,5 @@
     node_exporter_src_dir: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
     node_exporter_binary: "{{ node_exporter_src_dir }}/node_exporter"
 
-  tasks:
-    - name: 📦 Instalar dependencia curl
-      package:
-        name: curl
-        state: present
-
-    - name: 👤 Crear usuario {{ node_exporter_user }} si no existe
-      user:
-        name: "{{ node_exporter_user }}"
-        shell: /usr/sbin/nologin
-        system: yes
-        create_home: no
-      ignore_errors: true
-
-    - name: 📥 Descargar Node Exporter {{ node_exporter_version }}
-      get_url:
-        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
-        dest: "{{ node_exporter_archive }}"
-        mode: "0644"
-
-    - name: 📂 Extraer Node Exporter
-      unarchive:
-        src: "{{ node_exporter_archive }}"
-        dest: "/tmp/"
-        remote_src: yes
-        creates: "{{ node_exporter_binary }}"
-
-    - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
-      copy:
-        src: "{{ node_exporter_binary }}"
-        dest: "{{ node_exporter_bin_dir }}/node_exporter"
-        mode: "0755"
-        remote_src: yes
-
-    - name: 🧩 Crear servicio systemd de Node Exporter
-      template:
-        src: templates/node_exporter.service.j2
-        dest: "{{ node_exporter_service_path }}"
-        mode: "0644"
-
-    - name: ♻️ Recargar systemd
-      systemd:
-        daemon_reload: yes
-
-    - name: ▶️ Habilitar e iniciar Node Exporter
-      systemd:
-        name: node_exporter
-        enabled: yes
-        state: started
-
-    - name: ✅ Verificar que Node Exporter está escuchando en el puerto 9100
-      shell: ss -tuln | grep 9100 || true
-      register: node_exporter_status
-
-    - name: 📊 Mostrar estado del puerto 9100
-      debug:
-        msg: "{{ node_exporter_status.stdout_lines }}"
+  roles:
+    - node_exporter
