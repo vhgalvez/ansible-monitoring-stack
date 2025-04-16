@@ -1,17 +1,19 @@
 # roles/grafana/tasks/main.yml
-
-- name: Añadir repositorio grafana si no existe
+---
+- name: 🔗 Añadir repositorio Helm de Grafana
   ansible.builtin.command: helm repo add grafana https://grafana.github.io/helm-charts
-  environment: "{{ grafana_env }}"
-  register: add_repo_result
-  failed_when: add_repo_result.rc != 0 and "exists" not in add_repo_result.stderr
-  changed_when: "'has been added' in add_repo_result.stdout"
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
+  register: grafana_repo
+  failed_when: grafana_repo.rc != 0 and "exists" not in grafana_repo.stderr
+  changed_when: "'has been added' in grafana_repo.stdout"
 
-- name: Actualizar repositorios de Helm
+- name: 🔄 Actualizar repositorios de Helm
   ansible.builtin.command: helm repo update
-  environment: "{{ grafana_env }}"
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin"
 
-- name: Crear namespace monitoring si no existe
+- name: 📁 Asegurar que el namespace 'monitoring' existe
   kubernetes.core.k8s:
     kubeconfig: "/home/victory/.kube/config"
     validate_certs: false
@@ -22,22 +24,14 @@
       metadata:
         name: monitoring
 
-- name: Crear PVC de Grafana
+- name: 📦 Crear PersistentVolumeClaim para Grafana
   kubernetes.core.k8s:
     kubeconfig: "/home/victory/.kube/config"
     validate_certs: false
     state: present
     definition: "{{ lookup('template', 'grafana-pvc.yaml.j2') }}"
 
-- name: Depurar usuario de ejecución
-  ansible.builtin.command: whoami
-  register: current_user
-
-- name: Mostrar usuario de ejecución
-  ansible.builtin.debug:
-    var: current_user.stdout
-
-- name: Instalar Grafana vía Helm
+- name: 🚀 Instalar o actualizar Grafana vía Helm
   kubernetes.core.helm:
     kubeconfig: "/home/victory/.kube/config"
     validate_certs: false
@@ -52,5 +46,6 @@
       adminPassword: "{{ grafana_admin_password }}"
       service:
         type: ClusterIP
+    state: present  # <-- Asegura que se instale o actualice
   environment:
-    PATH: "/usr/local/bin:/usr/bin:/bin:/sbin:/usr/sbin"
+    PATH: "/usr/local/bin:/usr/bin:/bin"

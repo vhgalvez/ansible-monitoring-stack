@@ -1,0 +1,30 @@
+---
+# 📁 Archivo: update_node_monitoring.yml
+# 🔄 Actualiza node_exporter en hosts externos y actualiza el Secret en Prometheus
+
+- name: 🔄 Actualizar monitoreo de nodos externos
+  hosts: localhost
+  gather_facts: false
+  become: true
+  tasks:
+    - name: 🔁 Ejecutar instalación de Node Exporter
+      import_playbook: playbooks/04_install_node_exporter.yml
+
+    - name: 📄 Generar archivo de configuración de scrapes
+      import_playbook: playbooks/05_update_scrape_targets.yml
+
+    - name: 🔐 Aplicar Secret actualizado de scrape configs
+      vars:
+        secret_file: "/tmp/prometheus_manifests/extraScrapeConfigs.yaml"
+      block:
+        - name: 🔁 Crear o actualizar Secret en Kubernetes
+          command: >
+            kubectl create secret generic prometheus-additional-scrape-configs \
+              --from-file=extraScrapeConfigs.yaml={{ secret_file }} \
+              --namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+          environment:
+            KUBECONFIG: "/home/victory/.kube/config"
+
+        - name: ✅ Mostrar mensaje de actualización exitosa
+          debug:
+            msg: "✅ Secret actualizado correctamente con nuevos scrape targets."

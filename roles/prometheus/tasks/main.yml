@@ -1,104 +1,86 @@
-
 # roles/prometheus/tasks/main.yml
+---
 
-# 1️⃣ Crear namespace 'monitoring' si no existe usando kubectl
-- name: 🔍 Verificar si existe namespace monitoring
-  command: /usr/local/bin/kubectl get namespace monitoring
-  register: ns_monitoring_status
-  failed_when: false
-  changed_when: false
-  environment:
-    KUBECONFIG: "/home/victory/.kube/config"
+- name: 📁 Asegurar que el namespace 'monitoring' existe
+  kubernetes.core.k8s:
+    kubeconfig: "/home/victory/.kube/config"
+    validate_certs: false
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: monitoring
 
-- name: 📥 Crear namespace monitoring si no existe
-  command: /usr/local/bin/kubectl create namespace monitoring
-  when: ns_monitoring_status.rc != 0
-  environment:
-    KUBECONFIG: "/home/victory/.kube/config"
-  register: ns_create_result
-  changed_when: "'created' in ns_create_result.stdout"
-
-# 2️⃣ Añadir repositorio prometheus-community si no existe
-- name: 🔗 Añadir repositorio prometheus-community si no existe
-  command: /usr/local/bin/helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+- name: 🔗 Añadir repositorio Helm prometheus-community
+  ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
-  register: add_repo_result
-  failed_when: add_repo_result.rc != 0 and 'exists' not in add_repo_result.stderr
-  changed_when: "'has been added' in add_repo_result.stdout"
+  register: prometheus_repo
+  failed_when: prometheus_repo.rc != 0 and "exists" not in prometheus_repo.stderr
+  changed_when: "'has been added' in prometheus_repo.stdout"
 
-# 3️⃣ Actualizar repositorios de Helm
 - name: 🔄 Actualizar repositorios de Helm
-  command: /usr/local/bin/helm repo update
+  ansible.builtin.command: helm repo update
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin"
 
-# 4️⃣ Verificar si el deployment de Prometheus ya existe
-- name: 🔍 Verificar si el deployment de Prometheus existe
-  command: /usr/local/bin/kubectl get deployment prometheus-server -n monitoring
-  register: prometheus_deployment_status
+- name: 🔍 Verificar si Prometheus está desplegado
+  kubernetes.core.k8s_info:
+    kubeconfig: "/home/victory/.kube/config"
+    kind: Deployment
+    namespace: monitoring
+    name: prometheus-server
+  register: prometheus_info
   failed_when: false
-  changed_when: false
-  environment:
-    KUBECONFIG: "/home/victory/.kube/config"
 
-# 5️⃣ Crear carpeta temporal para manifiestos de Prometheus si no existe
-- name: 📁 Crear carpeta temporal para manifiestos de Prometheus
-  file:
+- name: 📁 Crear carpeta temporal para manifiestos
+  ansible.builtin.file:
     path: /tmp/prometheus_manifests
     state: directory
     mode: '0755'
 
-# 6️⃣ Renderizar plantilla del PVC de Prometheus
 - name: 📝 Renderizar plantilla del PVC de Prometheus
-  template:
+  ansible.builtin.template:
     src: prometheus-pvc.yaml.j2
     dest: /tmp/prometheus_manifests/prometheus-pvc.yaml
 
-# 7️⃣ Aplicar PVC de Prometheus vía kubectl
-- name: 📦 Aplicar PVC de Prometheus vía kubectl
-  command: /usr/local/bin/kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
+- name: 📦 Aplicar PVC de Prometheus
+  ansible.builtin.command: kubectl apply -f /tmp/prometheus_manifests/prometheus-pvc.yaml -n monitoring
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
-# 8️⃣ Instalar Prometheus vía Helm (si no está instalado aún)
-- name: 🚀 Instalar Prometheus vía Helm si no está instalado
-  command: >
-    /usr/local/bin/helm install prometheus prometheus-community/prometheus
-    --namespace monitoring
-    --set server.persistentVolume.enabled=true
-    --set server.persistentVolume.existingClaim=prometheus-pvc
-  environment:
-    PATH: "/usr/local/bin:/usr/bin:/bin"
-    KUBECONFIG: "/home/victory/.kube/config"
-  args:
-    chdir: /tmp
-  register: install_prometheus_result
-  when: prometheus_deployment_status.rc != 0
-  changed_when: "'STATUS: deployed' in install_prometheus_result.stdout"
+- name: 🚀 Instalar Prometheus vía Helm (si no existe)
+  kubernetes.core.helm:
+    kubeconfig: "/home/victory/.kube/config"
+    chart_ref: prometheus-community/prometheus
+    name: prometheus
+    release_namespace: monitoring
+    create_namespace: false
+    values:
+      server:
+        persistentVolume:
+          enabled: true
+          existingClaim: prometheus-pvc
+    state: present
+  when: prometheus_info.resources | length == 0
+  register: prometheus_helm
 
-# 9️⃣ Mostrar salida de la instalación de Prometheus
-- name: 📜 Mostrar salida de instalación Helm Prometheus
+- name: ✅ Confirmar que Prometheus ya está instalado
   debug:
-    msg: "{{ install_prometheus_result.stdout }}"
-  when: prometheus_deployment_status.rc != 0
-
-# 🔟 Mostrar mensaje si Prometheus ya está instalado
-- name: ✅ Mostrar que Prometheus ya está instalado
-  debug:
-    msg: "✅ Prometheus ya estaba instalado. No se realizó una nueva instalación."
-  when: prometheus_deployment_status.rc == 0
+    msg: "✅ Prometheus ya está instalado."
+  when: prometheus_info.resources | length > 0
 
 - name: 🧾 Renderizar archivo extraScrapeConfigs.yaml con nodos externos
-  template:
+  ansible.builtin.template:
     src: extraScrapeConfigs.yaml.j2
     dest: /tmp/prometheus_manifests/extraScrapeConfigs.yaml
 
-- name: 🔐 Crear Secret con extraScrapeConfigs.yaml
-  command: >
-    /usr/local/bin/kubectl create secret generic prometheus-additional-scrape-configs
+- name: 🔐 Crear o actualizar Secret con extraScrapeConfigs.yaml
+  ansible.builtin.command: >
+    kubectl create secret generic prometheus-additional-scrape-configs
     --from-file=extraScrapeConfigs.yaml=/tmp/prometheus_manifests/extraScrapeConfigs.yaml
     --namespace monitoring --dry-run=client -o yaml |
-    /usr/local/bin/kubectl apply -f -
+    kubectl apply -f -
   environment:
     KUBECONFIG: "/home/victory/.kube/config"

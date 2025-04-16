@@ -1,9 +1,9 @@
 # group_vars/all.yml
-# 📦 Variables globales para todos los roles
+# 📦 Variables globales para todos los roles y playbooks
 
-# 🔐 Contraseña del usuario admin de Grafana
+# 🔐 Contraseña del usuario admin para acceder a Grafana
 grafana_admin_password: "SuperSecreta123"
 
-# 🛠️ Variables de entorno para asegurar que helm se encuentre correctamente
+# 🛠️ Variable de entorno para asegurar que Helm esté en el PATH
 grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"

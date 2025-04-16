@@ -1,0 +1,83 @@
+---
+# 🧼 uninstall_stack.yml
+# Desinstala completamente el stack de monitoreo: Helm releases, PVCs, Pods, Servicios, Namespace y recursos de Longhorn
+
+- name: 🧼 Eliminar stack de monitoreo (Grafana + Prometheus)
+  hosts: localhost
+  become: yes
+  gather_facts: false
+  environment:
+    KUBECONFIG: "/home/victory/.kube/config"
+
+  vars:
+    namespace: monitoring
+
+  tasks:
+    # 1️⃣ Comprobar si el namespace existe
+    - name: 🔍 Verificar existencia del namespace "{{ namespace }}"
+      command: kubectl get namespace {{ namespace }}
+      register: ns_check
+      failed_when: false
+      changed_when: false
+
+    # 2️⃣ Desinstalar Prometheus si está presente
+    - name: ❌ Desinstalar Prometheus con Helm
+      command: helm uninstall prometheus -n {{ namespace }}
+      when: ns_check.rc == 0
+      register: uninstall_prometheus
+      failed_when: false
+      changed_when: "'uninstalled' in uninstall_prometheus.stdout"
+
+    # 3️⃣ Desinstalar Grafana si está presente
+    - name: ❌ Desinstalar Grafana con Helm
+      command: helm uninstall grafana -n {{ namespace }}
+      when: ns_check.rc == 0
+      register: uninstall_grafana
+      failed_when: false
+      changed_when: "'uninstalled' in uninstall_grafana.stdout"
+
+    # 4️⃣ Eliminar PVCs principales
+    - name: 🧹 Eliminar PVCs de Grafana y Prometheus
+      command: kubectl delete pvc grafana-pvc prometheus-pvc -n {{ namespace }}
+      when: ns_check.rc == 0
+      failed_when: false
+
+    # 5️⃣ Eliminar PVCs con etiqueta app=longhorn
+    - name: 🧼 Eliminar PVCs de Longhorn con label app=longhorn
+      command: kubectl delete pvc -l app=longhorn -n {{ namespace }}
+      when: ns_check.rc == 0
+      failed_when: false
+
+    # 6️⃣ Eliminar servicios si existen (Prometheus)
+    - name: ❌ Eliminar servicios de Prometheus si existen
+      command: >
+        kubectl delete service prometheus-server
+        prometheus-alertmanager
+        prometheus-kube-state-metrics
+        prometheus-prometheus-node-exporter
+        prometheus-prometheus-pushgateway -n {{ namespace }}
+      when: ns_check.rc == 0
+      failed_when: false
+
+    # 7️⃣ Eliminar Pods (por etiqueta)
+    - name: ❌ Eliminar Pods de Grafana y Prometheus
+      command: kubectl delete pod -l app in (grafana,prometheus) -n {{ namespace }}
+      when: ns_check.rc == 0
+      failed_when: false
+
+    # 8️⃣ Eliminar el namespace
+    - name: 🧨 Eliminar namespace "{{ namespace }}"
+      command: kubectl delete namespace {{ namespace }}
+      when: ns_check.rc == 0
+      register: ns_delete
+      failed_when: false
+
+    # 9️⃣ Confirmación final
+    - name: ✅ Confirmación de limpieza completa
+      debug:
+        msg: "🧽 Stack de monitoreo eliminado correctamente."
+
+    - name: ℹ️ Namespace no existía previamente
+      debug:
+        msg: "✅ El namespace '{{ namespace }}' no existe o ya fue eliminado."
+      when: ns_check.rc != 0
