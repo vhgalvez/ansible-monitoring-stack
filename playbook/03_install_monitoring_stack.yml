@@ -9,9 +9,10 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
+    grafana_env:
+      PATH: "/usr/local/bin:/usr/bin:/bin"
 
   tasks:
-
     - name: 🔍 Verificar si Prometheus ya está instalado
       kubernetes.core.helm_info:
         kubeconfig: "{{ kubeconfig_path }}"
