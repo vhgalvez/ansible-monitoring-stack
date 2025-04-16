@@ -35,7 +35,7 @@
 
 - name: 🧩 Crear servicio systemd para Node Exporter
   template:
-    src: roles/node_exporter/templates/node_exporter.service.j2
+    src: node_exporter.service.j2
     dest: "{{ node_exporter_service_path }}"
     mode: "0644"
 
