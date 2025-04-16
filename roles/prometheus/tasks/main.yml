@@ -1,6 +1,5 @@
-# roles/prometheus/tasks/main.yml
 ---
-
+# roles/prometheus/tasks/main.yml
 - name: 📁 Asegurar que el namespace 'monitoring' existe
   kubernetes.core.k8s:
     kubeconfig: "/home/victory/.kube/config"
@@ -30,7 +29,7 @@
     kubeconfig: "/home/victory/.kube/config"
     kind: Deployment
     namespace: monitoring
-    name: prometheus-server
+    name: prometheus
   register: prometheus_info
   failed_when: false
 
