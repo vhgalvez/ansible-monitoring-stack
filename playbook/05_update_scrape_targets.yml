@@ -1,5 +1,5 @@
 ---
-# playbook\05_update_scrape_targets.yml
+# playbook/05_update_scrape_targets.yml
 # 5️⃣ Generar configuración de scraping para nodos externos (extraScrapeConfigs.yaml)
 
 - name: 📄 Generar archivo de scrape dinámico para nodos externos
@@ -9,7 +9,7 @@
 
   vars:
     output_path: "/tmp/prometheus_manifests/extraScrapeConfigs.yaml"
-    template_src: "roles/prometheus/templates/extraScrapeConfigs.yaml.j2"
+    template_src: "{{ playbook_dir }}/../roles/prometheus/templates/extraScrapeConfigs.yaml.j2"
 
   tasks:
 
@@ -23,6 +23,7 @@
       template:
         src: "{{ template_src }}"
         dest: "{{ output_path }}"
+        mode: '0644'
 
     - name: 📜 Mostrar resumen de ruta generada
       debug:
