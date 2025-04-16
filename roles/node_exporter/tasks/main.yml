@@ -1,4 +1,4 @@
-# roles/node_exporter/tasks/main.yml
+# roles\node_exporter\tasks\main.yml
 # 🐧 Instala Node Exporter en hosts externos para Prometheus
 
 - name: 📦 Instalar dependencia curl
@@ -25,7 +25,6 @@
     src: "/tmp/node_exporter.tar.gz"
     dest: "/tmp/"
     remote_src: yes
-    creates: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
 
 - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
   copy:
