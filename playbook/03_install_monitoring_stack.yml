@@ -27,6 +27,13 @@
     grafana_admin_password: "admin123"
     grafana_service_type: "ClusterIP"  # Tipo de servicio Kubernetes
 
+    # 📊 Node Exporter
+    node_exporter_version: "1.8.1"
+    node_exporter_port: 9100
+    node_exporter_bin_dir: "/usr/local/bin"
+    node_exporter_user: "node_exporter"  # Usuario para ejecutar Node Exporter
+    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+
   tasks:
     - name: 📁 Asegurar namespace 'monitoring'
       kubernetes.core.k8s:
