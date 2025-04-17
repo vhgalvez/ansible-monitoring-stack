@@ -1,5 +1,5 @@
----
 # playbook\03_install_monitoring_stack.yml
+---
 # Instalación de un stack de monitoreo (Prometheus + Grafana) en un clúster de Kubernetes utilizando Helm Charts.
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
@@ -12,7 +12,8 @@
     kubeconfig_path: "/home/victory/.kube/config"
     prometheus_service_port: 9091  # Definir el puerto explícitamente
     prometheus_container_port: 9091  # Definir el puerto explícitamente
-    grafana_service_port: "{{ grafana_service_port }}" # Puerto para Grafana
+    prometheus_storage_class: "standard"  # Definir explícitamente la clase de almacenamiento
+    grafana_service_port: "{{ grafana_service_port }}"  # Puerto para Grafana
 
   tasks:
     - name: 📁 Asegurar namespace 'monitoring'
@@ -54,6 +55,7 @@
         dest: /tmp/values-prometheus.yaml
       vars:
         prometheus_container_port: 9091  # Pasamos el puerto directamente
+        prometheus_storage_class: "standard"  # Aseguramos que la clase de almacenamiento se pase correctamente
 
     - name: 🚀 Instalar Prometheus con Helm
       kubernetes.core.helm:
