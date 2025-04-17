@@ -7,6 +7,13 @@
   hosts: controller  # Especifica que las tareas se ejecutarán en el grupo 'controller'
   vars_files:
     - group_vars/all.yml  # Carga el archivo de variables
+  vars:
+    prometheus_container_port: "{{ prometheus_container_port }}"
+    prometheus_service_port: "{{ prometheus_service_port }}"
+    prometheus_storage_class: "{{ prometheus_storage_class }}"
+    prometheus_pvc_size: "{{ prometheus_pvc_size }}"
+    prometheus_service_type: "{{ prometheus_service_type }}"
+    kubeconfig_path: "{{ kubeconfig_path }}"  # Asegúrate de pasar cualquier otra variable necesaria
 
   tasks:
     - name: 1️⃣ Instalar herramientas locales necesarias (kubectl, pip, helm)
@@ -17,13 +24,6 @@
 
     - name: 3️⃣ Desplegar stack de monitoreo completo (Prometheus + Grafana)
       import_playbook: 03_install_monitoring_stack.yml
-      vars:
-        prometheus_container_port: "{{ prometheus_container_port }}"
-        prometheus_service_port: "{{ prometheus_service_port }}"
-        prometheus_storage_class: "{{ prometheus_storage_class }}"
-        prometheus_pvc_size: "{{ prometheus_pvc_size }}"
-        prometheus_service_type: "{{ prometheus_service_type }}"
-        kubeconfig_path: "{{ kubeconfig_path }}"  # Asegúrate de pasar cualquier otra variable necesaria
 
     - name: 4️⃣ Instalar Node Exporter en máquinas externas (si aplica)
       import_playbook: 04_install_node_exporter.yml
