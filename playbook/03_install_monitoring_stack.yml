@@ -10,7 +10,8 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
-    prometheus_service_port: "{{ prometheus_port }}" # Puerto para Prometheus
+    prometheus_service_port: 9091  # Definir el puerto explícitamente
+    prometheus_container_port: 9091  # Definir el puerto explícitamente
     grafana_service_port: "{{ grafana_service_port }}" # Puerto para Grafana
 
   tasks:
@@ -51,6 +52,8 @@
       ansible.builtin.template:
         src: helm/prometheus/values-prometheus.yaml.j2
         dest: /tmp/values-prometheus.yaml
+      vars:
+        prometheus_container_port: 9091  # Pasamos el puerto directamente
 
     - name: 🚀 Instalar Prometheus con Helm
       kubernetes.core.helm:
