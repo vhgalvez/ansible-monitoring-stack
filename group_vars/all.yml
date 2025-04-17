@@ -16,8 +16,8 @@ node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
 
 # ─────────────────────────────────────────────
 # 📡 Prometheus
-prometheus_storage_class: longhorn                     
-prometheus_pvc_size: 8Gi                               
+prometheus_storage_class: longhorn                     # Clase de almacenamiento para Prometheus
+prometheus_pvc_size: 8Gi                               # Tamaño del PVC para Prometheus
 prometheus_service_type: ClusterIP                     # Tipo de servicio Kubernetes (ClusterIP, NodePort, LoadBalancer)
 prometheus_container_port: 9091                        # Puerto en el que escucha el contenedor (interno)
 prometheus_service_port: 9091                          # Puerto por el que se expone el servicio (externo)
