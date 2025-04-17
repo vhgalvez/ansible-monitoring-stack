@@ -1,6 +1,6 @@
 ---
-# 📦 04_install_node_exporter.yml
-# Instalación y configuración del servicio Node Exporter en máquinas externas para Prometheus
+# playbook\04_install_node_exporter.yml
+# 📦 Instalación y configuración del servicio Node Exporter en máquinas externas para Prometheus
 
 - name: 🐧 Instalar y configurar Node Exporter
   hosts: external_node_exporter
@@ -8,13 +8,74 @@
   gather_facts: true
 
   vars:
-    node_exporter_version: "{{ node_exporter_version }}"  # Usamos las variables definidas
-    node_exporter_bin_dir: "{{ node_exporter_bin_dir }}"
-    node_exporter_user: "{{ node_exporter_user }}"
-    node_exporter_service_path: "{{ node_exporter_service_path }}"
+    # 📊 Node Exporter
+    node_exporter_version: "1.8.1"  # Versión de Node Exporter
+    node_exporter_port: 9100
+    node_exporter_bin_dir: "/usr/local/bin"
+    node_exporter_user: "node_exporter"  # Usuario para ejecutar Node Exporter
+    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+    
+    # Rutas de instalación
     node_exporter_archive: "/tmp/node_exporter.tar.gz"
     node_exporter_src_dir: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
     node_exporter_binary: "{{ node_exporter_src_dir }}/node_exporter"
 
-  roles:
-    - node_exporter
+  tasks:
+    - name: 📦 Asegurar que curl esté instalado
+      package:
+        name: curl
+        state: present
+
+    - name: 👤 Crear usuario {{ node_exporter_user }} si no existe
+      user:
+        name: "{{ node_exporter_user }}"
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+      ignore_errors: true  # Por si ya existe
+
+    - name: 📥 Descargar Node Exporter {{ node_exporter_version }}
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: "{{ node_exporter_archive }}"
+        mode: "0644"
+        force: true
+
+    - name: 📂 Extraer Node Exporter
+      unarchive:
+        src: "{{ node_exporter_archive }}"
+        dest: "/tmp/"
+        remote_src: true
+        creates: "{{ node_exporter_binary }}"
+
+    - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
+      copy:
+        src: "{{ node_exporter_binary }}"
+        dest: "{{ node_exporter_bin_dir }}/node_exporter"
+        mode: "0755"
+        remote_src: true
+
+    - name: 🧩 Crear archivo systemd para Node Exporter
+      template:
+        src: playbook/templates/node_exporter/node_exporter.service.j2
+        dest: "{{ node_exporter_service_path }}"
+        mode: "0644"
+
+    - name: ♻️ Recargar systemd
+      systemd:
+        daemon_reload: true
+
+    - name: ✅ Habilitar e iniciar Node Exporter
+      systemd:
+        name: node_exporter
+        enabled: true
+        state: started
+
+    - name: 📊 Mostrar estado del puerto 9100
+      shell: ss -tuln | grep 9100 || true
+      register: node_exporter_status
+      changed_when: false
+
+    - name: 🔍 Mostrar resultado del escaneo del puerto
+      debug:
+        msg: "{{ node_exporter_status.stdout_lines }}"
