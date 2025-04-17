@@ -1,4 +1,5 @@
 ---
+---
 # 🧩 deploy_monitoring_stack.yml
 # Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
 # Compatible con ejecución local, CI/CD y automatización general.
@@ -17,6 +18,13 @@
 
     - name: 3️⃣ Desplegar stack de monitoreo completo (Prometheus + Grafana)
       import_playbook: 03_install_monitoring_stack.yml
+      vars:
+        prometheus_container_port: "{{ prometheus_container_port }}"
+        prometheus_service_port: "{{ prometheus_service_port }}"
+        prometheus_storage_class: "{{ prometheus_storage_class }}"
+        prometheus_pvc_size: "{{ prometheus_pvc_size }}"
+        prometheus_service_type: "{{ prometheus_service_type }}"
+        kubeconfig_path: "{{ kubeconfig_path }}"  # Asegúrate de pasar cualquier otra variable necesaria
 
     - name: 4️⃣ Instalar Node Exporter en máquinas externas (si aplica)
       import_playbook: 04_install_node_exporter.yml
