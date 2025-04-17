@@ -1,5 +1,4 @@
 ---
----
 # 🧩 deploy_monitoring_stack.yml
 # Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
 # Compatible con ejecución local, CI/CD y automatización general.
