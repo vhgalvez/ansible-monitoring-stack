@@ -3,6 +3,10 @@
 # Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
 # Compatible con ejecución local, CI/CD y automatización general.
 
+- name: Cargar variables de group_vars
+  vars_files:
+    - group_vars/all.yml
+
 - name: 1️⃣ Instalar herramientas locales necesarias (kubectl, pip, helm)
   import_playbook: 01_install_local_tools.yml
 
@@ -17,3 +21,4 @@
 
 - name: 5️⃣ Generar y aplicar configuración de scrapes externos
   import_playbook: 05_update_scrape_targets.yml
+
