@@ -4,21 +4,21 @@
 # Compatible con ejecución local, CI/CD y automatización general.
 
 - name: Cargar variables de group_vars y ejecutar playbooks en 'controller'
-  hosts: controller  # Especifica que las tareas se ejecutarán en el grupo 'controller'
   vars_files:
-    - group_vars/all.yml  # Carga el archivo de variables
-  tasks:
-    - name: 1️⃣ Instalar herramientas locales necesarias (kubectl, pip, helm)
-      include_tasks: 01_install_local_tools.yml
+    - group_vars/all.yml
+  hosts: controller
 
-    - name: 2️⃣ Configurar kubeconfig desde master con acceso por VIP
-      include_tasks: 02_setup_kubeconfig.yml
+- name: 1️⃣ Instalar herramientas locales necesarias (kubectl, pip, helm)
+  import_playbook: 01_install_local_tools.yml
 
-    - name: 3️⃣ Desplegar stack de monitoreo completo (Prometheus + Grafana)
-      include_tasks: 03_install_monitoring_stack.yml
+- name: 2️⃣ Configurar kubeconfig desde master con acceso por VIP
+  import_playbook: 02_setup_kubeconfig.yml
 
-    - name: 4️⃣ Instalar Node Exporter en máquinas externas (si aplica)
-      include_tasks: 04_install_node_exporter.yml
+- name: 3️⃣ Desplegar stack de monitoreo completo (Prometheus + Grafana)
+  import_playbook: 03_install_monitoring_stack.yml
 
-    - name: 5️⃣ Generar y aplicar configuración de scrapes externos
-      include_tasks: 05_update_scrape_targets.yml
+- name: 4️⃣ Instalar Node Exporter en máquinas externas (si aplica)
+  import_playbook: 04_install_node_exporter.yml
+
+- name: 5️⃣ Generar y aplicar configuración de scrapes externos
+  import_playbook: 05_update_scrape_targets.yml
