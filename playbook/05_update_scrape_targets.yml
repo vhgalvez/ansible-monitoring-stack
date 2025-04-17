@@ -1,38 +1,102 @@
-# playbook/05_update_scrape_targets.yml
-# 5️⃣ Generar configuración de scraping para nodos externos (extraScrapeConfigs.yaml)
+--- 
+# playbook\03_install_monitoring_stack.yml
+# Instalación de un stack de monitoreo (Prometheus + Grafana) en un clúster de Kubernetes utilizando Helm Charts.
 
-- name: 📄 Generar archivo de scrape dinámico para nodos externos
+- name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
-  connection: local
   gather_facts: false
+  become: true
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
   vars:
-    output_path: "/tmp/prometheus_manifests/extraScrapeConfigs.yaml"
-    template_src: "{{ playbook_dir }}/templates/node_exporter/extraScrapeConfigs.yaml.j2"
+    kubeconfig_path: "/home/victory/.kube/config"
 
+    # 📡 Prometheus
+    prometheus_service_port: 9091
+    prometheus_container_port: 9091
+    prometheus_storage_class: "longhorn"
+    prometheus_pvc_size: "8Gi"
+    prometheus_service_type: "ClusterIP"  # Definir el tipo de servicio explícitamente
+    prometheus_chart_version: "27.9.0"  # Versión de Prometheus
+
+    # 📈 Grafana
+    grafana_service_port: 3000  # Puerto para el servicio Grafana
+    grafana_container_port: 3000  # Puerto del contenedor Grafana
+    grafana_storage_class: "longhorn"
+    grafana_pvc_size: "5Gi"
+    grafana_admin_password: "admin123"
+    grafana_service_type: "ClusterIP"  # Tipo de servicio Kubernetes
+    grafana_chart_version: "8.12.1"  # Versión de Grafana
 
   tasks:
-    - name: 📁 Crear carpeta para manifests si no existe
-      file:
-        path: "{{ output_path | dirname }}"
-        state: directory
-        mode: '0755'
+    - name: 📁 Asegurar namespace 'monitoring'
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        validate_certs: false
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: monitoring
 
-    - name: 🧩 Renderizar plantilla extraScrapeConfigs.yaml
-      template:
-        src: "{{ template_src }}"
-        dest: "{{ output_path }}"
-        mode: '0644'
+    - name: 🔗 Añadir repositorios Helm
+      block:
+        - name: Añadir repo Prometheus
+          ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          register: prometheus_repo
+          failed_when: prometheus_repo.rc != 0 and "exists" not in prometheus_repo.stderr
+          changed_when: "'has been added' in prometheus_repo.stdout"
 
-    - name: 📜 Mostrar resumen de ruta generada
+        - name: Añadir repo Grafana
+          ansible.builtin.command: helm repo add grafana https://grafana.github.io/helm-charts
+          register: grafana_repo
+          failed_when: grafana_repo.rc != 0 and "exists" not in grafana_repo.stderr
+          changed_when: "'has been added' in grafana_repo.stdout"
+
+        - name: 🔄 Actualizar repositorios Helm
+          ansible.builtin.command: helm repo update
+
+    - name: 🐞 DEBUG - Verificar prometheus_container_port ANTES de renderizar
+      ansible.builtin.debug:
+        var: prometheus_container_port
+      tags: always
+
+    - name: 📄 Renderizar values para Prometheus
+      ansible.builtin.template:
+        src: helm/prometheus/values-prometheus.yaml.j2
+        dest: /tmp/values-prometheus.yaml
+
+    - name: 🚀 Instalar Prometheus con Helm
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: monitoring
+        create_namespace: false
+        chart_version: "{{ prometheus_chart_version }}"  # Usar 'chart_version' en lugar de 'version'
+        values_files:
+          - /tmp/values-prometheus.yaml
+        state: present
+
+    - name: 📄 Renderizar values para Grafana
+      ansible.builtin.template:
+        src: helm/grafana/values-grafana.yaml.j2
+        dest: /tmp/values-grafana.yaml
+
+    - name: 🚀 Instalar Grafana con Helm
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        name: grafana
+        chart_ref: grafana/grafana
+        release_namespace: monitoring
+        create_namespace: false
+        chart_version: "{{ grafana_chart_version }}"  # Usar 'chart_version' en lugar de 'version'
+        values_files:
+          - /tmp/values-grafana.yaml
+        state: present
+
+    - name: ✅ Confirmación final
       debug:
-        msg: "✅ Archivo de scrapes generado en {{ output_path }}"
-
-    # (Opcional) Aplicar configuración como Secret en Kubernetes
-    - name: 🛠️ Aplicar configuración de scraping como un Secret en Kubernetes
-      command: >
-        kubectl create secret generic prometheus-additional-scrape-configs \
-          --from-file=extraScrapeConfigs.yaml={{ output_path }} \
-          --namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
-      environment:
-        KUBECONFIG: "/home/victory/.kube/config"
+        msg: "✅ Prometheus y Grafana instalados correctamente con almacenamiento persistente y Helm Charts."
