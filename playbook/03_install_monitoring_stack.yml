@@ -29,7 +29,6 @@
     grafana_service_type: "ClusterIP"  # Tipo de servicio Kubernetes
     grafana_chart_version: "8.12.1"  # Versión de Grafana
 
-   
   tasks:
     - name: 📁 Asegurar namespace 'monitoring'
       kubernetes.core.k8s:
@@ -76,7 +75,7 @@
         chart_ref: prometheus-community/prometheus
         release_namespace: monitoring
         create_namespace: false
-        version: "{{ prometheus_chart_version }}"
+        chart_version: "{{ prometheus_chart_version }}"  # Usar 'chart_version' en lugar de 'version'
         values_files:
           - /tmp/values-prometheus.yaml
         state: present
@@ -93,7 +92,7 @@
         chart_ref: grafana/grafana
         release_namespace: monitoring
         create_namespace: false
-        version: "{{ grafana_chart_version }}"
+        chart_version: "{{ grafana_chart_version }}"  # Usar 'chart_version' en lugar de 'version'
         values_files:
           - /tmp/values-grafana.yaml
         state: present
