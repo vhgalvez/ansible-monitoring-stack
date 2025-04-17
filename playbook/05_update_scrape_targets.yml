@@ -8,7 +8,8 @@
 
   vars:
     output_path: "/tmp/prometheus_manifests/extraScrapeConfigs.yaml"
-    template_src: "{{ playbook_dir }}/roles/node_exporter/templates/extraScrapeConfigs.yaml.j2"  # Ruta actualizada
+    template_src: "{{ playbook_dir }}/templates/node_exporter/extraScrapeConfigs.yaml.j2"
+
 
   tasks:
     - name: 📁 Crear carpeta para manifests si no existe
