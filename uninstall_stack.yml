@@ -97,6 +97,7 @@
       when: ns_check.rc == 0
       register: ns_delete
       failed_when: false
+      changed_when: ns_delete.rc != 0
 
     # Confirmación de limpieza completa
     - name: ✅ Confirmación de limpieza completa
