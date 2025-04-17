@@ -10,11 +10,12 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
-    prometheus_service_port: 9091  # Definir el puerto explícitamente
-    prometheus_container_port: 9091  # Definir el puerto explícitamente
-    prometheus_storage_class: "standard"  # Definir explícitamente la clase de almacenamiento
-    prometheus_pvc_size: "10Gi"  # Definir el tamaño del PVC explícitamente
-    grafana_service_port: "{{ grafana_service_port }}"  # Puerto para Grafana
+    prometheus_service_port: 9091
+    prometheus_container_port: 9091
+    prometheus_storage_class: "longhorn"
+    prometheus_pvc_size: "8Gi"
+    prometheus_service_type: "ClusterIP"  # Definir el tipo de servicio explícitamente
+    grafana_service_port: "{{ grafana_service_port }}"
 
   tasks:
     - name: 📁 Asegurar namespace 'monitoring'
@@ -48,16 +49,12 @@
     - name: 🐞 DEBUG - Verificar prometheus_container_port ANTES de renderizar
       ansible.builtin.debug:
         var: prometheus_container_port
-      tags: always # Asegura que se ejecute siempre
+      tags: always
 
     - name: 📄 Renderizar values para Prometheus
       ansible.builtin.template:
         src: helm/prometheus/values-prometheus.yaml.j2
         dest: /tmp/values-prometheus.yaml
-      vars:
-        prometheus_container_port: 9091  # Pasamos el puerto directamente
-        prometheus_storage_class: "standard"  # Aseguramos que la clase de almacenamiento se pase correctamente
-        prometheus_pvc_size: "10Gi"  # Definir el tamaño del PVC directamente
 
     - name: 🚀 Instalar Prometheus con Helm
       kubernetes.core.helm:
