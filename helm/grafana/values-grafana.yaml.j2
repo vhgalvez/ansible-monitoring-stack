@@ -1,0 +1,18 @@
+# helm/grafana/values-grafana.yaml.j2
+
+adminUser: admin
+adminPassword: {{ grafana_admin_password }}
+
+persistence:
+  enabled: true
+  existingClaim: grafana-pvc
+  storageClassName: {{ grafana_storage_class }}
+  accessModes:
+    - ReadWriteOnce
+  size: {{ grafana_pvc_size }}
+
+service:
+  type: {{ grafana_service_type }}                # Tipo de servicio
+  port: {{ grafana_service_port }}                # Puerto expuesto en Kubernetes
+  targetPort: {{ grafana_container_port }}        # Puerto dentro del contenedor
+  name: http

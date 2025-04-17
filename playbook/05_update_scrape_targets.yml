@@ -1,4 +1,3 @@
----
 # playbook/05_update_scrape_targets.yml
 # 5️⃣ Generar configuración de scraping para nodos externos (extraScrapeConfigs.yaml)
 
@@ -9,10 +8,9 @@
 
   vars:
     output_path: "/tmp/prometheus_manifests/extraScrapeConfigs.yaml"
-    template_src: "{{ playbook_dir }}/../roles/prometheus/templates/extraScrapeConfigs.yaml.j2"
+    template_src: "{{ playbook_dir }}/roles/node_exporter/templates/extraScrapeConfigs.yaml.j2"  # Ruta actualizada
 
   tasks:
-
     - name: 📁 Crear carpeta para manifests si no existe
       file:
         path: "{{ output_path | dirname }}"
@@ -28,3 +26,12 @@
     - name: 📜 Mostrar resumen de ruta generada
       debug:
         msg: "✅ Archivo de scrapes generado en {{ output_path }}"
+
+    # (Opcional) Aplicar configuración como Secret en Kubernetes
+    - name: 🛠️ Aplicar configuración de scraping como un Secret en Kubernetes
+      command: >
+        kubectl create secret generic prometheus-additional-scrape-configs \
+          --from-file=extraScrapeConfigs.yaml={{ output_path }} \
+          --namespace monitoring --dry-run=client -o yaml | kubectl apply -f -
+      environment:
+        KUBECONFIG: "/home/victory/.kube/config"

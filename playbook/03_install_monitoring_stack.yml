@@ -1,7 +1,6 @@
 ---
-# playbook/03_install_monitoring_stack.yml
-# 3️⃣ Instalar Prometheus y Grafana con Helm y almacenamiento persistente
-
+# playbook\03_install_monitoring_stack.yml
+# Instalación de un stack de monitoreo (Prometheus + Grafana) en un clúster de Kubernetes utilizando Helm Charts.
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   gather_facts: false
@@ -11,69 +10,70 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
-    force_install: false
+    prometheus_service_port: "{{ prometheus_port }}"  # Puerto para Prometheus
+    grafana_service_port: "{{ grafana_service_port }}"  # Puerto para Grafana
 
   tasks:
-    - name: 📁 Crear namespace monitoring si no existe
+    - name: 📁 Asegurar namespace 'monitoring'
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
         validate_certs: false
-        api_version: v1
-        kind: Namespace
-        name: monitoring
         state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: monitoring
 
-    - name: 🔍 Verificar si Prometheus ya está instalado
-      kubernetes.core.helm_info:
-        kubeconfig: "{{ kubeconfig_path }}"
-        name: prometheus
-        namespace: monitoring
-        validate_certs: false
-      register: prometheus_installed
-      ignore_errors: true
+    - name: 🔗 Añadir repositorios Helm
+      block:
+        - name: Añadir repo Prometheus
+          ansible.builtin.command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          register: prometheus_repo
+          failed_when: prometheus_repo.rc != 0 and "exists" not in prometheus_repo.stderr
+          changed_when: "'has been added' in prometheus_repo.stdout"
 
-    - name: 🔍 Verificar si Grafana ya está instalado
-      kubernetes.core.helm_info:
-        kubeconfig: "{{ kubeconfig_path }}"
-        name: grafana
-        namespace: monitoring
-        validate_certs: false
-      register: grafana_installed
-      ignore_errors: true
+        - name: Añadir repo Grafana
+          ansible.builtin.command: helm repo add grafana https://grafana.github.io/helm-charts
+          register: grafana_repo
+          failed_when: grafana_repo.rc != 0 and "exists" not in grafana_repo.stderr
+          changed_when: "'has been added' in grafana_repo.stdout"
 
-    - name: 🚀 Instalar o forzar reinstalación de Prometheus
+        - name: 🔄 Actualizar repositorios Helm
+          ansible.builtin.command: helm repo update
+
+    - name: 📄 Renderizar values para Prometheus
+      ansible.builtin.template:
+        src: helm/prometheus/values-prometheus.yaml.j2
+        dest: /tmp/values-prometheus.yaml
+
+    - name: 🚀 Instalar Prometheus con Helm
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
-        validate_certs: false
         name: prometheus
         chart_ref: prometheus-community/prometheus
         release_namespace: monitoring
         create_namespace: false
+        values_files:
+          - /tmp/values-prometheus.yaml
         state: present
-        values:
-          persistence:
-            enabled: true
-            existingClaim: prometheus-pvc
-      when: force_install | bool or prometheus_installed.failed
 
-    - name: 🚀 Instalar o forzar reinstalación de Grafana
+    - name: 📄 Renderizar values para Grafana
+      ansible.builtin.template:
+        src: helm/grafana/values-grafana.yaml.j2
+        dest: /tmp/values-grafana.yaml
+
+    - name: 🚀 Instalar Grafana con Helm
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
-        validate_certs: false
         name: grafana
         chart_ref: grafana/grafana
         release_namespace: monitoring
         create_namespace: false
+        values_files:
+          - /tmp/values-grafana.yaml
         state: present
-        values:
-          persistence:
-            enabled: true
-            existingClaim: grafana-pvc
-          adminPassword: "{{ grafana_admin_password | default('admin123') }}"
-          service:
-            type: ClusterIP
-      when: force_install | bool or grafana_installed.failed
 
-    - name: ✅ Mostrar mensaje final
+    - name: ✅ Confirmación final
       debug:
-        msg: "✅ Prometheus y Grafana se han instalado correctamente (o forzadamente reinstalados si se indicó)."
+        msg: "✅ Prometheus y Grafana instalados correctamente con almacenamiento persistente y Helm Charts."

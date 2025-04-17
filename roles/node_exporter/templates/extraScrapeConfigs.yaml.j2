@@ -1,8 +1,10 @@
-- targets:
-    - '10.17.3.11:9100'
-    - '10.17.3.12:9100'
-    - '10.17.3.13:9100'
-    - '10.17.3.14:9100'
-    - '10.17.5.20:9100'
-  labels:
+# roles/node_exporter/templates/extraScrapeConfigs.yaml.j2
+# 🔍 Generado automáticamente por Ansible para monitorear nodos externos con Node Exporter
+
+- labels:
     job: 'external-nodes'
+  targets:
+{% for host in groups['external_node_exporter'] | sort %}
+{%   set ip = hostvars[host]['ansible_host'] | default(host) %}
+  - '{{ ip }}:{{ node_exporter_port }}'
+{% endfor %}

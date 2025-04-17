@@ -1,11 +1,32 @@
-# group_vars/all.yml
-# 📦 Variables globales para todos los roles y playbooks
+# 📦 group_vars/all.yml
+# Variables globales para todos los playbooks y roles del stack de monitoreo (Prometheus + Grafana + Node Exporter)
 
-# 🔐 Contraseña del usuario admin para acceder a Grafana
-grafana_admin_password: "admin123"  # o la contraseña que prefieras
-
-# 🛠️ Variable de entorno para asegurar que Helm esté en el PATH
+# ─────────────────────────────────────────────
+# 🛠️ Variables de entorno para Helm y kubectl
 grafana_env:
-  PATH: "/usr/local/bin:/usr/bin:/bin"
+  PATH: "/usr/local/bin:/usr/bin:/bin"  # PATH extendido para Helm/kubectl desde Ansible
 
-node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+# ─────────────────────────────────────────────
+# 📊 Node Exporter (monitoreo de máquinas externas)
+node_exporter_version: "1.8.1"                           
+node_exporter_port: 9100                                
+node_exporter_bin_dir: "/usr/local/bin"                 
+node_exporter_user: "node_exporter"                     
+node_exporter_service_path: "/etc/systemd/system/node_exporter.service"  
+
+# ─────────────────────────────────────────────
+# 📡 Prometheus
+prometheus_storage_class: longhorn                     
+prometheus_pvc_size: 8Gi                               
+prometheus_service_type: ClusterIP                     # Tipo de servicio Kubernetes (ClusterIP, NodePort, LoadBalancer)
+prometheus_container_port: 9091                        # Puerto en el que escucha el contenedor (interno)
+prometheus_service_port: 9091                          # Puerto por el que se expone el servicio (externo)
+
+# ─────────────────────────────────────────────
+# 📈 Grafana
+grafana_storage_class: longhorn                        
+grafana_pvc_size: 5Gi                                  
+grafana_admin_password: admin123                       
+grafana_service_type: ClusterIP                        # Tipo de servicio Kubernetes
+grafana_container_port: 3000                           # Puerto del contenedor (interno)
+grafana_service_port: 3000                             # Puerto expuesto por el servicio (externo)

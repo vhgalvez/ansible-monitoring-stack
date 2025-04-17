@@ -57,6 +57,24 @@
       failed_when: false
       ignore_errors: true
 
+    - name: ❌ Eliminar servicios de Grafana si existen
+      command: kubectl delete service grafana -n {{ namespace }}
+      when: ns_check.rc == 0
+      failed_when: false
+      ignore_errors: true
+
+    - name: Verificar si los servicios de Prometheus fueron eliminados
+      command: kubectl get service prometheus-server -n {{ namespace }}
+      register: prometheus_server_check
+      failed_when: prometheus_server_check.rc == 0
+      changed_when: false
+
+    - name: Verificar si los servicios de Grafana fueron eliminados
+      command: kubectl get service grafana -n {{ namespace }}
+      register: grafana_check
+      failed_when: grafana_check.rc == 0
+      changed_when: false
+
     - name: ❌ Eliminar Pods de Grafana y Prometheus
       command: kubectl delete pod -l app in (grafana,prometheus) -n {{ namespace }}
       when: ns_check.rc == 0

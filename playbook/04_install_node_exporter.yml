@@ -8,10 +8,10 @@
   gather_facts: true
 
   vars:
-    node_exporter_version: "1.8.1"
-    node_exporter_bin_dir: "/usr/local/bin"
-    node_exporter_user: "node_exporter"
-    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+    node_exporter_version: "{{ node_exporter_version }}"  # Usamos las variables definidas
+    node_exporter_bin_dir: "{{ node_exporter_bin_dir }}"
+    node_exporter_user: "{{ node_exporter_user }}"
+    node_exporter_service_path: "{{ node_exporter_service_path }}"
     node_exporter_archive: "/tmp/node_exporter.tar.gz"
     node_exporter_src_dir: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
     node_exporter_binary: "{{ node_exporter_src_dir }}/node_exporter"

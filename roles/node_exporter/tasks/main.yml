@@ -1,7 +1,8 @@
+---
 # roles/node_exporter/tasks/main.yml
 # 🐧 Instala Node Exporter en hosts externos para Prometheus
 
-- name: 📦 Instalar dependencia curl
+- name: 📦 Asegurar que curl esté instalado
   package:
     name: curl
     state: present
@@ -10,21 +11,22 @@
   user:
     name: "{{ node_exporter_user }}"
     shell: /usr/sbin/nologin
-    system: yes
-    create_home: no
-  ignore_errors: true
+    system: true
+    create_home: false
+  ignore_errors: true  # Por si ya existe
 
 - name: 📥 Descargar Node Exporter {{ node_exporter_version }}
   get_url:
     url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
     dest: "{{ node_exporter_archive }}"
     mode: "0644"
+    force: true
 
 - name: 📂 Extraer Node Exporter
   unarchive:
     src: "{{ node_exporter_archive }}"
     dest: "/tmp/"
-    remote_src: yes
+    remote_src: true
     creates: "{{ node_exporter_binary }}"
 
 - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
@@ -32,9 +34,9 @@
     src: "{{ node_exporter_binary }}"
     dest: "{{ node_exporter_bin_dir }}/node_exporter"
     mode: "0755"
-    remote_src: yes
+    remote_src: true
 
-- name: 🧩 Crear servicio systemd para Node Exporter
+- name: 🧩 Crear archivo systemd para Node Exporter
   template:
     src: node_exporter.service.j2
     dest: "{{ node_exporter_service_path }}"
@@ -42,17 +44,18 @@
 
 - name: ♻️ Recargar systemd
   systemd:
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: ✅ Habilitar e iniciar Node Exporter
   systemd:
     name: node_exporter
-    enabled: yes
+    enabled: true
     state: started
 
 - name: 📊 Mostrar estado del puerto 9100
   shell: ss -tuln | grep 9100 || true
   register: node_exporter_status
+  changed_when: false
 
 - name: 🔍 Mostrar resultado del escaneo del puerto
   debug:
