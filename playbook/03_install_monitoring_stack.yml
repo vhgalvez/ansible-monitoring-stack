@@ -10,8 +10,8 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
-    prometheus_service_port: "{{ prometheus_port }}"  # Puerto para Prometheus
-    grafana_service_port: "{{ grafana_service_port }}"  # Puerto para Grafana
+    prometheus_service_port: "{{ prometheus_port }}" # Puerto para Prometheus
+    grafana_service_port: "{{ grafana_service_port }}" # Puerto para Grafana
 
   tasks:
     - name: 📁 Asegurar namespace 'monitoring'
@@ -41,6 +41,11 @@
 
         - name: 🔄 Actualizar repositorios Helm
           ansible.builtin.command: helm repo update
+
+    - name: 🐞 DEBUG - Verificar prometheus_container_port ANTES de renderizar
+      ansible.builtin.debug:
+        var: prometheus_container_port
+      tags: always # Asegura que se ejecute siempre
 
     - name: 📄 Renderizar values para Prometheus
       ansible.builtin.template:
