@@ -13,6 +13,7 @@
     prometheus_service_port: 9091  # Definir el puerto explícitamente
     prometheus_container_port: 9091  # Definir el puerto explícitamente
     prometheus_storage_class: "standard"  # Definir explícitamente la clase de almacenamiento
+    prometheus_pvc_size: "10Gi"  # Definir el tamaño del PVC explícitamente
     grafana_service_port: "{{ grafana_service_port }}"  # Puerto para Grafana
 
   tasks:
@@ -56,6 +57,7 @@
       vars:
         prometheus_container_port: 9091  # Pasamos el puerto directamente
         prometheus_storage_class: "standard"  # Aseguramos que la clase de almacenamiento se pase correctamente
+        prometheus_pvc_size: "10Gi"  # Definir el tamaño del PVC directamente
 
     - name: 🚀 Instalar Prometheus con Helm
       kubernetes.core.helm:
