@@ -1,7 +1,6 @@
 # playbook\03_install_monitoring_stack.yml
 ---
 # Instalación de un stack de monitoreo (Prometheus + Grafana) en un clúster de Kubernetes utilizando Helm Charts.
-
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   gather_facts: false
@@ -12,27 +11,20 @@
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
 
-    # 📡 Prometheus
-    prometheus_service_port: 9091
-    prometheus_container_port: 9091
-    prometheus_storage_class: "longhorn"
-    prometheus_pvc_size: "8Gi"
-    prometheus_service_type: "ClusterIP"  # Definir el tipo de servicio explícitamente
+    # Referenciando las variables de Prometheus definidas en group_vars
+    prometheus_service_port: "{{ prometheus_service_port }}"
+    prometheus_container_port: "{{ prometheus_container_port }}"
+    prometheus_storage_class: "{{ prometheus_storage_class }}"
+    prometheus_pvc_size: "{{ prometheus_pvc_size }}"
+    prometheus_service_type: "{{ prometheus_service_type }}"
 
-    # 📈 Grafana
-    grafana_service_port: 3000  # Puerto para el servicio Grafana
-    grafana_container_port: 3000  # Puerto del contenedor Grafana
-    grafana_storage_class: "longhorn"
-    grafana_pvc_size: "5Gi"
-    grafana_admin_password: "admin123"
-    grafana_service_type: "ClusterIP"  # Tipo de servicio Kubernetes
-
-    # 📊 Node Exporter
-    node_exporter_version: "1.8.1"
-    node_exporter_port: 9100
-    node_exporter_bin_dir: "/usr/local/bin"
-    node_exporter_user: "node_exporter"  # Usuario para ejecutar Node Exporter
-    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+    # Referenciando las variables de Grafana definidas en group_vars
+    grafana_service_port: "{{ grafana_service_port }}"
+    grafana_container_port: "{{ grafana_container_port }}"
+    grafana_storage_class: "{{ grafana_storage_class }}"
+    grafana_pvc_size: "{{ grafana_pvc_size }}"
+    grafana_admin_password: "{{ grafana_admin_password }}"
+    grafana_service_type: "{{ grafana_service_type }}"
 
   tasks:
     - name: 📁 Asegurar namespace 'monitoring'
