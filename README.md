@@ -5,7 +5,7 @@
 sudo ansible-galaxy collection install community.kubernetes kubernetes.core
 
 # Instalar stack completo
-sudo ansible-playbook -i inventory/hosts.ini deploy_monitoring_stack.yml
+sudo ansible-playbook -i inventory/hosts.ini  playbook/deploy_monitoring_stack.yml
 
 # Añadir nuevos nodos a monitoreo
 sudo ansible-playbook -i inventory/hosts.ini update_monitoring_targets.yml
