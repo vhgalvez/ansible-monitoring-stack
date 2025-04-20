@@ -84,3 +84,6 @@ Para que Ansible reconozca la configuración de `kubectl`, exporta la variable d
 ```bash
 export K8S_AUTH_KUBECONFIG=~/.kube/config
 ```
+
+
+
