@@ -1,11 +1,9 @@
 # helm/grafana/values-grafana.yaml.j2
-
 adminUser: admin
 adminPassword: {{ grafana_admin_password }}
 
 persistence:
   enabled: true
-  existingClaim: grafana-pvc
   storageClassName: {{ grafana_storage_class }}
   accessModes:
     - ReadWriteOnce
