@@ -1,10 +1,10 @@
 # roles/node_exporter/templates/extraScrapeConfigs.yaml.j2
-# 🔍 Generado automáticamente por Ansible para monitorear nodos externos con Node Exporter
+# 🔍 Configuración adicional para Prometheus - nodos externos
 
-- labels:
-    job: 'external-nodes'
-  targets:
+- job_name: 'external-nodes'
+  static_configs:
+    - targets:
 {% for host in groups['external_node_exporter'] | sort %}
 {%   set ip = hostvars[host]['ansible_host'] | default(host) %}
-  - '{{ ip }}:{{ node_exporter_port }}'
+      - '{{ ip }}:{{ node_exporter_port }}'
 {% endfor %}

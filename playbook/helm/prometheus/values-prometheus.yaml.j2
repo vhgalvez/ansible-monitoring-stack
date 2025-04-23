@@ -1,9 +1,10 @@
 # helm/prometheus/values-prometheus.yaml.j2
+
 server:
-  containerPort: {{ prometheus_container_port }}   # Puerto dentro del contenedor Prometheus
+  containerPort: {{ prometheus_container_port }}
 
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"  # Hace que Prometheus escuche internamente por ese puerto
+    web.listen-address: ":{{ prometheus_container_port }}"
 
   persistentVolume:
     enabled: true
@@ -14,5 +15,5 @@ server:
 
   service:
     type: {{ prometheus_service_type }}
-    port: {{ prometheus_service_port }}        # Puerto expuesto por el Service
-    targetPort: {{ prometheus_container_port }} # Puerto del contenedor al que redirige el Service
+    port: {{ prometheus_service_port }}
+    targetPort: {{ prometheus_container_port }}

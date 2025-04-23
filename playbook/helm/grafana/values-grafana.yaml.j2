@@ -1,5 +1,6 @@
 # helm/grafana/values-grafana.yaml.j2
-adminUser: admin
+
+adminUser: {{ grafana_admin_user }}
 adminPassword: {{ grafana_admin_password }}
 
 persistence:
@@ -10,7 +11,7 @@ persistence:
   size: {{ grafana_pvc_size }}
 
 service:
-  type: {{ grafana_service_type }}                # Tipo de servicio
-  port: {{ grafana_service_port }}                # Puerto expuesto en Kubernetes
-  targetPort: {{ grafana_container_port }}        # Puerto dentro del contenedor
+  type: {{ grafana_service_type }}
+  port: {{ grafana_service_port }}
+  targetPort: {{ grafana_container_port }}
   name: http
