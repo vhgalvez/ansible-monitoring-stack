@@ -1,4 +1,4 @@
-# playbook/03_install_monitoring_stack.yml
+# playbook/01_install_monitoring_stack.yml
 # Instalación de un stack de monitoreo (Prometheus + Grafana) en un clúster de Kubernetes utilizando Helm Charts.
 
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
