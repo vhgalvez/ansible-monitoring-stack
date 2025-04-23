@@ -8,11 +8,11 @@
     - group_vars/all.yml
   hosts: controller
 
-- name: 3️⃣ Desplegar stack de monitoreo completo (Prometheus + Grafana)
+- name: 1 Desplegar stack de monitoreo completo (Prometheus + Grafana)
   import_playbook: 01_install_monitoring_stack.yml
 
-- name: 4️⃣ Instalar Node Exporter en máquinas externas (si aplica)
+- name: 2 Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
 
-- name: 5️⃣ Generar y aplicar configuración de scrapes externos
+- name: 3 Generar y aplicar configuración de scrapes externos
   import_playbook: 03_update_scrape_targets.yml

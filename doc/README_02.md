@@ -183,7 +183,7 @@ sudo ansible-playbook -i inventory/hosts.ini delete_monitoring.yml
 kubectl port-forward -n monitoring svc/grafana 3000:3000
 ```
 
-# Prometheus: Accede a la UI de Prometheus en el puerto 9093 (externo)
+# Prometheus: Accede a la UI de Prometheus en el puerto 9091 (externo)
 
 ```bash
 kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
@@ -297,10 +297,6 @@ Node Exporter Full	1860
 K8s Cluster Monitoring	315
 Prometheus Stats	2
 
- ps aux | grep port-forward
-
-# Matar forwards viejos
-sudo pkill -f "kubectl port-forward"
 
 
 
@@ -312,5 +308,18 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 9091:80 > ~/prometheus.log 2>&1 &
 
 
-http://192.168.0.19:3001   → Grafana  
+
+
+ ps aux | grep port-forward
+# ✅ Matar antiguos
+sudo pkill -f "kubectl port-forward"
+
+# ✅ Port-forward de Grafana
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 3000:3000 > ~/grafana.log 2>&1 &
+
+# ✅ Port-forward de Prometheus
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 9091:9091 > ~/prometheus.log 2>&1 &
+
+
+http://192.168.0.19:3000   → Grafana  
 http://192.168.0.19:9091   → Prometheus

@@ -1,5 +1,5 @@
 ---
-# playbook\04_install_node_exporter.yml
+# playbook\02_install_node_exporter.yml
 # 📦 Instalación y configuración del servicio Node Exporter en máquinas externas para Prometheus
 
 - name: 🐧 Instalar y configurar Node Exporter
