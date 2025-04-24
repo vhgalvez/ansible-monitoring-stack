@@ -1,8 +1,5 @@
 # uninstall_stack.yml
 ---
-# 🧼 uninstall_stack.yml
-# Desinstalación completa del stack de monitoreo (Prometheus + Grafana) y sus recursos asociados
-
 - name: 🧼 Eliminar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   become: true
@@ -12,7 +9,6 @@
 
   vars:
     namespace: monitoring
-    temp_file: /tmp/force_delete_ns.json
 
   tasks:
 
@@ -25,66 +21,54 @@
     - name: ❌ Desinstalar Prometheus con Helm
       command: helm uninstall prometheus -n {{ namespace }}
       when: ns_check.rc == 0
-      failed_when: false
       ignore_errors: true
 
     - name: ❌ Desinstalar Grafana con Helm
       command: helm uninstall grafana -n {{ namespace }}
       when: ns_check.rc == 0
-      failed_when: false
       ignore_errors: true
 
-    - name: 🧹 Eliminar todos los PVCs del namespace
-      command: kubectl delete pvc --all -n {{ namespace }}
+    - name: 🧹 Eliminar PVCs, SVCs, PODs, Secrets y ConfigMaps
+      shell: |
+        kubectl delete pvc --all -n {{ namespace }} || true
+        kubectl delete svc --all -n {{ namespace }} || true
+        kubectl delete pod --all -n {{ namespace }} || true
+        kubectl delete secret --all -n {{ namespace }} || true
+        kubectl delete configmap --all -n {{ namespace }} || true
       when: ns_check.rc == 0
-      failed_when: false
-      ignore_errors: true
-
-    - name: ❌ Eliminar todos los servicios del namespace
-      command: kubectl delete svc --all -n {{ namespace }}
-      when: ns_check.rc == 0
-      failed_when: false
-      ignore_errors: true
-
-    - name: ❌ Eliminar todos los pods del namespace
-      command: kubectl delete pod --all -n {{ namespace }}
-      when: ns_check.rc == 0
-      failed_when: false
-      ignore_errors: true
-
-    - name: ❌ Eliminar ConfigMaps y Secrets
-      command: kubectl delete secret --all -n {{ namespace }}
-      when: ns_check.rc == 0
-      failed_when: false
       ignore_errors: true
 
     - name: ❌ Eliminar namespace '{{ namespace }}'
-      command: kubectl delete namespace {{ namespace }}
+      shell: |
+        kubectl delete namespace {{ namespace }} || true
       when: ns_check.rc == 0
-      register: ns_delete
-      failed_when: false
-      changed_when: ns_delete.rc == 0
 
-    - name: ⏳ Esperar 10 segundos antes de verificar finalizers
+    - name: 💤 Esperar 10s por si el namespace entra en terminación
       pause:
         seconds: 10
       when: ns_check.rc == 0
 
-    - name: 🛠 Forzar eliminación si namespace sigue colgado (finalizers)
+    - name: 🛠 Forzar eliminación de finalizers si el namespace sigue colgado
       shell: |
-        kubectl get namespace {{ namespace }} -o json | \
-        jq 'del(.spec.finalizers)' > {{ temp_file }} && \
-        kubectl replace --raw "/api/v1/namespaces/{{ namespace }}/finalize" -f {{ temp_file }}
+        kubectl get namespace {{ namespace }} -o json \
+        | jq 'del(.spec.finalizers)' \
+        | kubectl replace --raw "/api/v1/namespaces/{{ namespace }}/finalize" -f -
       when: ns_check.rc == 0
       ignore_errors: true
-      register: force_ns_cleanup
+      register: force_delete
+
+    - name: ✅ Verificar que el namespace fue eliminado
+      shell: kubectl get namespace {{ namespace }}
+      register: final_check
+      failed_when: false
+      changed_when: false
 
     - name: ✅ Confirmación de limpieza completa
       debug:
-        msg: "🧽 Stack de monitoreo eliminado correctamente."
-      when: ns_check.rc == 0
+        msg: "🧽 Stack de monitoreo y namespace '{{ namespace }}' eliminados correctamente."
+      when: final_check.rc != 0
 
-    - name: ℹ️ El namespace '{{ namespace }}' no existía
+    - name: ⚠️ El namespace sigue existiendo
       debug:
-        msg: "✅ El namespace '{{ namespace }}' no existe o ya fue eliminado."
-      when: ns_check.rc != 0
+        msg: "🚨 Atención: El namespace '{{ namespace }}' aún existe. Puede estar colgado por otros finalizers o CRDs."
+      when: final_check.rc == 0
