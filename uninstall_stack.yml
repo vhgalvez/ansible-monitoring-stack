@@ -1,4 +1,5 @@
 ---
+---
 # uninstall_stack.yml
 # 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace
 
@@ -6,76 +7,72 @@
   hosts: controller
   become: true
   gather_facts: false
+  vars:
+    ns: monitoring
   environment:
     KUBECONFIG: "/home/victory/.kube/config"
 
-  vars:
-    namespace: monitoring
-
   tasks:
-
-    - name: 🔍 Verificar si el namespace '{{ namespace }}' existe
-      command: kubectl get namespace {{ namespace }}
+    - name: 🔍 Verificar si el namespace '{{ ns }}' existe
+      command: kubectl get namespace {{ ns }}
       register: ns_check
       failed_when: false
       changed_when: false
 
     - name: ❌ Desinstalar Prometheus con Helm
-      command: helm uninstall prometheus -n {{ namespace }}
+      command: helm uninstall prometheus -n {{ ns }}
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: ❌ Desinstalar Grafana con Helm
-      command: helm uninstall grafana -n {{ namespace }}
+      command: helm uninstall grafana -n {{ ns }}
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: 🧽 Eliminar todos los recursos comunes del namespace
       shell: |
-        kubectl delete pvc,svc,pod,secret,configmap --all -n {{ namespace }} --ignore-not-found=true
+        kubectl delete pvc,svc,pod,secret,configmap --all -n {{ ns }} --ignore-not-found=true
       when: ns_check.rc == 0
       ignore_errors: true
 
-    - name: ❌ Eliminar namespace '{{ namespace }}'
-      command: kubectl delete namespace {{ namespace }} --ignore-not-found=true
+    - name: ❌ Eliminar namespace '{{ ns }}'
+      command: kubectl delete namespace {{ ns }} --ignore-not-found=true
       when: ns_check.rc == 0
+      register: ns_delete
       ignore_errors: true
 
-    - name: 💤 Esperar a que namespace entre en terminación (si aplica)
+    - name: 💤 Esperar 5s
       pause:
-        seconds: 10
+        seconds: 5
       when: ns_check.rc == 0
 
-    - name: 📦 Verificar si jq está instalado para eliminar finalizers
-      command: which jq
-      register: jq_check
-      failed_when: jq_check.rc != 0
-      changed_when: false
-
-    - name: 🛠 Forzar eliminación de finalizers si el namespace sigue colgado
-      shell: |
-        kubectl get namespace {{ namespace }} -o json \
-        | jq 'del(.spec.finalizers)' \
-        | kubectl replace --raw "/api/v1/namespaces/{{ namespace }}/finalize" -f -
-      when:
-        - ns_check.rc == 0
-        - final_check.rc == 0
-        - jq_check.rc == 0
-      ignore_errors: true
-      register: force_delete
-
-    - name: ✅ Verificar que el namespace fue eliminado
-      shell: kubectl get namespace {{ namespace }}
-      register: final_check
+    - name: 🔁 Comprobar si el namespace aún existe
+      command: kubectl get namespace {{ ns }}
+      register: ns_still_exists
       failed_when: false
       changed_when: false
 
-    - name: ✅ Confirmación de limpieza completa
-      debug:
-        msg: "🧽 Stack de monitoreo y namespace '{{ namespace }}' eliminados correctamente."
-      when: final_check.rc != 0
+    - name: 🛠 Eliminar finalizers si el namespace está colgado
+      shell: |
+        kubectl get namespace {{ ns }} -o json \
+        | jq 'del(.spec.finalizers)' \
+        | kubectl replace --raw "/api/v1/namespaces/{{ ns }}/finalize" -f -
+      when:
+        - ns_still_exists.rc == 0
+      ignore_errors: true
 
-    - name: ⚠️ El namespace sigue existiendo
+    - name: ✅ Confirmación final
+      shell: kubectl get namespace {{ ns }}
+      register: ns_check_final
+      failed_when: false
+      changed_when: false
+
+    - name: ✅ Namespace eliminado correctamente
       debug:
-        msg: "🚨 Atención: El namespace '{{ namespace }}' aún existe. Revisa CRDs o finalizers manualmente."
-      when: final_check.rc == 0
+        msg: "✅ Namespace '{{ ns }}' eliminado correctamente."
+      when: ns_check_final.rc != 0
+
+    - name: ⚠️ El namespace aún persiste
+      debug:
+        msg: "⚠️ Namespace '{{ ns }}' aún está activo. Revisa si hay CRDs o operadores recreándolo automáticamente."
+      when: ns_check_final.rc == 0
