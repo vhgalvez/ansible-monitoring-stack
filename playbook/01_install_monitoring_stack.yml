@@ -12,7 +12,7 @@
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
 
-    # Prometheus config
+    # Configuración de Prometheus
     prometheus_container_port: 9091
     prometheus_service_port: 9091
     prometheus_storage_class: "longhorn"
@@ -21,7 +21,7 @@
     prometheus_service_type: "ClusterIP"
     prometheus_values_path: "/tmp/values-prometheus.yaml"
 
-    # Grafana config
+    # Configuración de Grafana
     grafana_container_port: 3000
     grafana_service_port: 3000
     grafana_storage_class: "longhorn"
