@@ -311,7 +311,7 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 
 # muestra el estado de los port-forwards
  ps aux | grep port-forward
- 
+
 # ✅ Matar antiguos
 sudo pkill -f "kubectl port-forward"
 
@@ -326,3 +326,6 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 
 http://192.168.0.15:3000   → Grafana  
 http://192.168.0.15:9091   → Prometheus
+
+
+ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml

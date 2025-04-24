@@ -75,7 +75,7 @@
           metadata:
             name: prometheus-additional-scrape-configs
           data:
-            extraScrapeConfigs.yaml: "{{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | b64encode }}"
+            extraScrapeConfigs.yaml: "{{ lookup('template', 'templates/node_exporter/extraScrapeConfigs.yaml.j2') | b64encode }}"
           type: Opaque
 
     - name: 🚀 Instalar Prometheus con Helm

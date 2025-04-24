@@ -15,3 +15,7 @@ sudo ansible-playbook -i inventory/hosts.ini uninstall_stack.yml
 
 # Forward para UI (opcional)
 sudo bash sh-forward/start-monitoring.sh
+
+# update_monitoring_targets.yml
+ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
+
