@@ -8,33 +8,37 @@
   gather_facts: false
   vars:
     ns: monitoring
+    kubeconfig_path: "/home/victory/.kube/config"
+    kubectl_path: "/usr/local/bin/kubectl"
+
   environment:
-    KUBECONFIG: "/home/victory/.kube/config"
+    KUBECONFIG: "{{ kubeconfig_path }}"
+    PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
   tasks:
     - name: 🔍 Verificar si el namespace '{{ ns }}' existe
-      command: kubectl get namespace {{ ns }} --ignore-not-found
+      command: "{{ kubectl_path }} get namespace {{ ns }}"
       register: ns_check
       failed_when: false
       changed_when: false
 
     - name: ❌ Desinstalar Prometheus con Helm
-      command: helm uninstall prometheus -n {{ ns }}
+      command: "{{ kubectl_path }} helm uninstall prometheus -n {{ ns }}"
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: ❌ Desinstalar Grafana con Helm
-      command: helm uninstall grafana -n {{ ns }}
+      command: "{{ kubectl_path }} helm uninstall grafana -n {{ ns }}"
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: 🧽 Eliminar todos los recursos del namespace
-      command: kubectl delete all --all -n {{ ns }} --ignore-not-found=true
+      shell: "{{ kubectl_path }} delete pvc,svc,pod,secret,configmap --all -n {{ ns }} --ignore-not-found=true"
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: ❌ Eliminar namespace '{{ ns }}'
-      command: kubectl delete namespace {{ ns }} --ignore-not-found=true
+      command: "{{ kubectl_path }} delete namespace {{ ns }} --ignore-not-found=true"
       when: ns_check.rc == 0
       register: ns_delete
       ignore_errors: true
@@ -45,20 +49,22 @@
       when: ns_check.rc == 0
 
     - name: 🔁 Comprobar si el namespace aún existe
-      command: kubectl get namespace {{ ns }} --ignore-not-found
+      command: "{{ kubectl_path }} get namespace {{ ns }}"
       register: ns_still_exists
       failed_when: false
       changed_when: false
 
     - name: 🛠 Eliminar finalizers si el namespace está colgado
       shell: |
-        kubectl get namespace {{ ns }} -o json | kubectl patch namespace {{ ns }} -p '{"metadata":{"finalizers":[]}}'
+        {{ kubectl_path }} get namespace {{ ns }} -o json \
+        | jq 'del(.spec.finalizers)' \
+        | {{ kubectl_path }} replace --raw "/api/v1/namespaces/{{ ns }}/finalize" -f -
       when:
         - ns_still_exists.rc == 0
       ignore_errors: true
 
     - name: ✅ Confirmación final del namespace
-      shell: kubectl get namespace {{ ns }} --ignore-not-found
+      shell: "{{ kubectl_path }} get namespace {{ ns }}"
       register: ns_check_final
       failed_when: false
       changed_when: false
@@ -74,13 +80,13 @@
       when: ns_check_final.rc == 0
 
     - name: ❌ Eliminar ClusterRole 'system:monitoring'
-      command: kubectl delete clusterrole system:monitoring --ignore-not-found=true
+      command: "{{ kubectl_path }} delete clusterrole system:monitoring --ignore-not-found=true"
       ignore_errors: true
 
     - name: ❌ Eliminar ClusterRoleBinding 'system:monitoring'
-      command: kubectl delete clusterrolebinding system:monitoring --ignore-not-found=true
+      command: "{{ kubectl_path }} delete clusterrolebinding system:monitoring --ignore-not-found=true"
       ignore_errors: true
 
     - name: ❌ Eliminar CRDs relacionadas con monitoreo (si existen)
-      command: kubectl get crd | grep monitoring | awk '{print $1}' | xargs -I {} kubectl delete crd {}
+      command: "{{ kubectl_path }} get crd | grep monitoring | awk '{print $1}' | xargs -I '{}' {{ kubectl_path }} delete crd '{}'"
       ignore_errors: true
