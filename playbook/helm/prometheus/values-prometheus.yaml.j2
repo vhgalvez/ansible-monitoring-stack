@@ -4,8 +4,8 @@ server:
   containerPort: {{ prometheus_container_port }}
 
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"  # Asegúrate de que el puerto de escucha esté en 9091
-    storage.tsdb.retention.time: "15d"  # Mantener esta opción solo una vez
+    web.listen-address: ":{{ prometheus_container_port }}"
+    storage.tsdb.retention.time: "15d"
 
   readinessProbe:
     httpGet:
@@ -32,5 +32,5 @@ server:
 
   service:
     type: {{ prometheus_service_type }}
-    port: {{ prometheus_service_port }}  # Puerto del servicio, en este caso 9091
-    targetPort: {{ prometheus_container_port }}  # Puerto del contenedor de Prometheus, 9091
+    port: {{ prometheus_service_port }}
+    targetPort: {{ prometheus_container_port }}
