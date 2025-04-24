@@ -5,7 +5,8 @@ server:
 
   extraArgs:
     web.listen-address: ":{{ prometheus_container_port }}"
-    storage.tsdb.retention.time: "15d"  # Asegúrate de que este parámetro no esté duplicado
+    # Retención de datos de Prometheus
+    storage.tsdb.retention.time: "15d"  # Mantener este solo en un lugar
 
   readinessProbe:
     httpGet:
