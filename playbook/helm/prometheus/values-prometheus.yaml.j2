@@ -1,17 +1,16 @@
 # helm/prometheus/values-prometheus.yaml.j2
 
 server:
-  containerPort: {{ prometheus_container_port }}
+  containerPort: {{ prometheus_container_port }}  # El puerto del contenedor de Prometheus
 
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"
-    # Retención de datos de Prometheus
-    storage.tsdb.retention.time: "15d"  # Mantener este solo en un lugar
+    - web.listen-address: ":{{ prometheus_container_port }}"  # Establecer el puerto de escucha para Prometheus
+    - storage.tsdb.retention.time: "15d"  # Retención de datos de Prometheus
 
   readinessProbe:
     httpGet:
       path: /-/ready
-      port: {{ prometheus_container_port }}
+      port: {{ prometheus_container_port }}  # Verificación de disponibilidad del puerto de Prometheus
     initialDelaySeconds: 10
     timeoutSeconds: 3
     periodSeconds: 10
@@ -19,19 +18,19 @@ server:
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: {{ prometheus_container_port }}
+      port: {{ prometheus_container_port }}  # Verificación de estado saludable del puerto de Prometheus
     initialDelaySeconds: 30
     timeoutSeconds: 5
     periodSeconds: 15
 
   persistentVolume:
     enabled: true
-    storageClass: "{{ prometheus_storage_class }}"
-    size: "{{ prometheus_pvc_size }}"
+    storageClass: "{{ prometheus_storage_class }}"  # Clase de almacenamiento de Prometheus
+    size: "{{ prometheus_pvc_size }}"  # Tamaño del volumen persistente
     accessModes:
       - ReadWriteOnce
 
   service:
-    type: {{ prometheus_service_type }}
-    port: {{ prometheus_service_port }}
-    targetPort: {{ prometheus_container_port }}
+    type: {{ prometheus_service_type }}  # Tipo de servicio (ClusterIP, etc.)
+    port: {{ prometheus_service_port }}  # Puerto del servicio Prometheus
+    targetPort: {{ prometheus_container_port }}  # Puerto al que se dirige el tráfico (el mismo que el del contenedor)
