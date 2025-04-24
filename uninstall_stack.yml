@@ -1,4 +1,5 @@
 ---
+#  uninstall_stack.yml
 # 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace + RBAC
 
 - name: 🧼 Eliminar stack de monitoreo (Prometheus + Grafana)
@@ -12,7 +13,7 @@
 
   tasks:
     - name: 🔍 Verificar si el namespace '{{ ns }}' existe
-      command: kubectl get namespace {{ ns }}
+      command: kubectl get namespace {{ ns }} --ignore-not-found
       register: ns_check
       failed_when: false
       changed_when: false
@@ -27,9 +28,8 @@
       when: ns_check.rc == 0
       ignore_errors: true
 
-    - name: 🧽 Eliminar todos los recursos comunes del namespace
-      shell: |
-        kubectl delete pvc,svc,pod,secret,configmap --all -n {{ ns }} --ignore-not-found=true
+    - name: 🧽 Eliminar todos los recursos del namespace
+      command: kubectl delete all --all -n {{ ns }} --ignore-not-found=true
       when: ns_check.rc == 0
       ignore_errors: true
 
@@ -39,28 +39,26 @@
       register: ns_delete
       ignore_errors: true
 
-    - name: 💤 Esperar 5s
+    - name: 💤 Esperar 5s antes de verificar nuevamente
       pause:
         seconds: 5
       when: ns_check.rc == 0
 
     - name: 🔁 Comprobar si el namespace aún existe
-      command: kubectl get namespace {{ ns }}
+      command: kubectl get namespace {{ ns }} --ignore-not-found
       register: ns_still_exists
       failed_when: false
       changed_when: false
 
     - name: 🛠 Eliminar finalizers si el namespace está colgado
       shell: |
-        kubectl get namespace {{ ns }} -o json \
-        | jq 'del(.spec.finalizers)' \
-        | kubectl replace --raw "/api/v1/namespaces/{{ ns }}/finalize" -f -
+        kubectl get namespace {{ ns }} -o json | kubectl patch namespace {{ ns }} -p '{"metadata":{"finalizers":[]}}'
       when:
         - ns_still_exists.rc == 0
       ignore_errors: true
 
-    - name: ✅ Confirmación final
-      shell: kubectl get namespace {{ ns }}
+    - name: ✅ Confirmación final del namespace
+      shell: kubectl get namespace {{ ns }} --ignore-not-found
       register: ns_check_final
       failed_when: false
       changed_when: false
@@ -81,4 +79,8 @@
 
     - name: ❌ Eliminar ClusterRoleBinding 'system:monitoring'
       command: kubectl delete clusterrolebinding system:monitoring --ignore-not-found=true
+      ignore_errors: true
+
+    - name: ❌ Eliminar CRDs relacionadas con monitoreo (si existen)
+      command: kubectl get crd | grep monitoring | awk '{print $1}' | xargs -I {} kubectl delete crd {}
       ignore_errors: true

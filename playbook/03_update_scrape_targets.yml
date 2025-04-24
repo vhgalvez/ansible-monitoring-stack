@@ -1,44 +1,84 @@
-# playbook/03_update_scrape_targets.yml
-# 🎯 Actualiza las máquinas externas que serán monitoreadas por Prometheus
+# playbook/02_install_node_exporter.yml
+# 📦 Instalación y configuración de Node Exporter en máquinas externas para Prometheus
 
-- name: 🔄 Actualizar objetivos de scrape para Prometheus
-  hosts: controller
-  gather_facts: false
+- name: 🐧 Instalar y configurar Node Exporter
+  hosts: external_node_exporter
   become: true
+  gather_facts: true
+
   vars:
-    kubeconfig_path: "/home/victory/.kube/config"
+    node_exporter_version: "1.8.1"
     node_exporter_port: 9100
+    node_exporter_bin_dir: "/usr/local/bin"
+    node_exporter_user: "node_exporter"
+    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+
+    # Rutas de instalación
+    node_exporter_archive: "/tmp/node_exporter.tar.gz"
+    node_exporter_src_dir: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
+    node_exporter_binary: "{{ node_exporter_src_dir }}/node_exporter"
 
   tasks:
-    - name: 📄 Renderizar archivo extraScrapeConfigs.yaml
-      ansible.builtin.template:
-        src: templates/node_exporter/extraScrapeConfigs.yaml.j2
-        dest: /tmp/extraScrapeConfigs.yaml
 
-    - name: 🔐 Crear o actualizar Secret de Prometheus con extraScrapeConfigs
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        namespace: monitoring
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: prometheus-additional-scrape-configs
-          type: Opaque
-          data:
-            extraScrapeConfigs.yaml: "{{ lookup('file', '/tmp/extraScrapeConfigs.yaml') | b64encode }}"
+    - name: 📦 Asegurar que curl esté instalado
+      package:
+        name: curl
+        state: present
 
-    - name: 🔁 Forzar reinicio del Deployment de Prometheus
-      shell: >
-        kubectl rollout restart deployment prometheus-server -n monitoring
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"
+    - name: 👤 Crear usuario {{ node_exporter_user }} si no existe
+      user:
+        name: "{{ node_exporter_user }}"
+        shell: /usr/sbin/nologin
+        system: true
+        create_home: false
+      register: user_created
+      failed_when: false
 
-    - name: 📦 Verificar estado de pods en namespace monitoring
-      shell: kubectl get pods -n monitoring
-      register: pods_status
-      changed_when: false
+    - name: 📥 Descargar Node Exporter {{ node_exporter_version }}
+      get_url:
+        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: "{{ node_exporter_archive }}"
+        mode: "0644"
+        force: true
+      failed_when: false
 
-    - name: 🔍 Mostrar resultado del estado de los pods
+    - name: 📂 Extraer Node Exporter
+      unarchive:
+        src: "{{ node_exporter_archive }}"
+        dest: "/tmp/"
+        remote_src: true
+        creates: "{{ node_exporter_binary }}"
+
+    - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
+      copy:
+        src: "{{ node_exporter_binary }}"
+        dest: "{{ node_exporter_bin_dir }}/node_exporter"
+        mode: "0755"
+      when: node_exporter_binary is defined and node_exporter_binary | length > 0
+
+    - name: 🧩 Crear archivo systemd para Node Exporter
+      template:
+        src: templates/node_exporter/node_exporter.service.j2
+        dest: "{{ node_exporter_service_path }}"
+        mode: "0644"
+
+    - name: ♻️ Recargar systemd
+      systemd:
+        daemon_reload: true
+
+    - name: ✅ Habilitar e iniciar Node Exporter
+      systemd:
+        name: node_exporter
+        enabled: true
+        state: restarted
+
+    - name: 📊 Verificar puerto {{ node_exporter_port }}
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: "{{ node_exporter_port }}"
+        state: started
+        timeout: 30
+
+    - name: 🔍 Resultado del escaneo del puerto
       debug:
-        var: pods_status.stdout_lines
+        msg: "Node Exporter escuchando en el puerto {{ node_exporter_port }}."

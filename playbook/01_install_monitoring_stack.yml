@@ -1,13 +1,13 @@
 ---
 # playbook/01_install_monitoring_stack.yml
 # Instalación robusta de Prometheus + Grafana con Helm y configuración persistente
-
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   become: true
   gather_facts: false
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    KUBECONFIG: "/home/victory/.kube/config"  # Usando la misma ruta de kubeconfig
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
@@ -38,7 +38,7 @@
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
-      command: kubectl version --client
+      command: "/usr/local/bin/kubectl version --client"
       register: kubectl_check
       failed_when: kubectl_check.rc != 0
       changed_when: false
@@ -85,6 +85,7 @@
         --namespace=monitoring --dry-run=client -o yaml | kubectl apply -f -
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
+        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
     - name: 🚀 Desplegar Prometheus con Helm
       kubernetes.core.helm:
@@ -121,6 +122,7 @@
       changed_when: false
       environment:
         KUBECONFIG: "{{ kubeconfig_path }}"
+        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
     - name: 🔍 Mostrar estado de los pods
       debug:
