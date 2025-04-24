@@ -1,5 +1,4 @@
 ---
----
 # uninstall_stack.yml
 # 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace
 
