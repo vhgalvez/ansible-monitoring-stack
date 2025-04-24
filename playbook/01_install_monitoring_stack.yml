@@ -73,7 +73,7 @@
           apiVersion: v1
           kind: Secret
           metadata:
-            name: extra-scrape-configs
+            name: prometheus-additional-scrape-configs
           data:
             extraScrapeConfigs.yaml: "{{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | b64encode }}"
           type: Opaque

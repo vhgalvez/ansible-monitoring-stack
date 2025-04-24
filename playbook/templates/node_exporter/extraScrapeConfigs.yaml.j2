@@ -1,6 +1,7 @@
 # roles/node_exporter/templates/extraScrapeConfigs.yaml.j2
 # 🔍 Configuración adicional para Prometheus - nodos externos
 
+{% if groups['external_node_exporter'] is defined and groups['external_node_exporter'] | length > 0 %}
 - job_name: 'external-nodes'
   static_configs:
     - targets:
@@ -8,3 +9,4 @@
 {%   set ip = hostvars[host]['ansible_host'] | default(host) %}
       - '{{ ip }}:{{ node_exporter_port }}'
 {% endfor %}
+{% endif %}
