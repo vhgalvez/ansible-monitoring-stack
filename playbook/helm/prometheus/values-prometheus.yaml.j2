@@ -2,28 +2,31 @@
 # helm/prometheus/values-prometheus.yaml.j2
 
 server:
-  containerPort: {{ prometheus_container_port }}
+  containerPort: 9091
 
-  # Eliminamos cualquier duplicación de parámetros como storage.tsdb.retention.time que ya están configurados de manera predeterminada.
+  # Configuración de la dirección web para Prometheus
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"
+    web.listen-address: ":9091"
 
-  # Configuramos probes de salud con tiempos más largos para dar más tiempo a Prometheus a arrancar
-  readinessProbe:
-    httpGet:
-      path: /-/ready
-      port: {{ prometheus_container_port }}
-    initialDelaySeconds: 60  # Aseguramos que Prometheus tenga suficiente tiempo para arrancar
-    timeoutSeconds: 5
-    periodSeconds: 10
-
+  # Configuración del livenessProbe
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: {{ prometheus_container_port }}
-    initialDelaySeconds: 90  # Tiempo de espera para la salud del contenedor
-    timeoutSeconds: 5
-    periodSeconds: 15
+      port: 9091
+    initialDelaySeconds: 30      # Tiempo de espera inicial para comprobar si el contenedor está vivo
+    timeoutSeconds: 5            # Tiempo de espera para cada intento de conexión
+    periodSeconds: 10            # Frecuencia de las comprobaciones
+    failureThreshold: 3          # Número de fallos antes de marcar el contenedor como no saludable
+
+  # Configuración del readinessProbe
+  readinessProbe:
+    httpGet:
+      path: /-/ready
+      port: 9091
+    initialDelaySeconds: 30      # Tiempo de espera inicial para comprobar si el contenedor está listo
+    timeoutSeconds: 3            # Tiempo de espera para cada intento de conexión
+    periodSeconds: 5             # Frecuencia de las comprobaciones
+    failureThreshold: 3          # Número de fallos antes de marcar el contenedor como no listo
 
   # Configuración de almacenamiento persistente
   persistentVolume:
@@ -33,13 +36,13 @@ server:
     accessModes:
       - ReadWriteOnce
 
-  # Servicio de Prometheus
+  # Configuración del servicio de Prometheus
   service:
-    type: {{ prometheus_service_type }}  # El tipo de servicio (ClusterIP, NodePort, LoadBalancer, etc.)
+    type: {{ prometheus_service_type }}  # Tipo de servicio (ClusterIP, NodePort, LoadBalancer, etc.)
     port: {{ prometheus_service_port }}  # Puerto del servicio
     targetPort: {{ prometheus_container_port }}  # El puerto expuesto por el contenedor de Prometheus
 
-  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria para evitar terminación por falta de recursos
+  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
   resources:
     requests:
       memory: "4Gi"   # Ajusta la memoria de acuerdo con el tamaño de tu entorno
