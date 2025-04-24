@@ -5,8 +5,7 @@ server:
   containerPort: {{ prometheus_container_port }}
 
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"  # Revisa que no haya conflictos en las configuraciones
-    storage.tsdb.retention.time: "15d"  # Esta es una opción estándar
+    web.listen-address: ":{{ prometheus_container_port }}"
 
   readinessProbe:
     httpGet:
