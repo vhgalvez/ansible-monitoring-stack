@@ -309,8 +309,9 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 
 
 
-
+# muestra el estado de los port-forwards
  ps aux | grep port-forward
+ 
 # ✅ Matar antiguos
 sudo pkill -f "kubectl port-forward"
 
