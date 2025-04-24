@@ -30,6 +30,9 @@
     grafana_chart_version: "8.12.1"
     grafana_service_type: "ClusterIP"
 
+    # Añade esta línea ⬇️
+    node_exporter_port: 9100
+
   tasks:
     - name: 📁 Crear namespace 'monitoring' si no existe
       kubernetes.core.k8s:
