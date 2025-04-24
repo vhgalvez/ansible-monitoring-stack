@@ -72,7 +72,7 @@
         dest: /tmp/extraScrapeConfigs.yaml
 
     - name: 🔐 Crear Secret con extraScrapeConfigs renderizado
-      command: >
+      shell: >
         kubectl create secret generic prometheus-additional-scrape-configs
         --from-file=extraScrapeConfigs.yaml=/tmp/extraScrapeConfigs.yaml
         --namespace=monitoring --dry-run=client -o yaml | kubectl apply -f -
