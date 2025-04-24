@@ -1,3 +1,4 @@
+# uninstall_stack.yml
 ---
 # 🧼 uninstall_stack.yml
 # Desinstalación completa del stack de monitoreo (Prometheus + Grafana) y sus recursos asociados
@@ -11,6 +12,7 @@
 
   vars:
     namespace: monitoring
+    temp_file: /tmp/force_delete_ns.json
 
   tasks:
 
@@ -62,6 +64,20 @@
       register: ns_delete
       failed_when: false
       changed_when: ns_delete.rc == 0
+
+    - name: ⏳ Esperar 10 segundos antes de verificar finalizers
+      pause:
+        seconds: 10
+      when: ns_check.rc == 0
+
+    - name: 🛠 Forzar eliminación si namespace sigue colgado (finalizers)
+      shell: |
+        kubectl get namespace {{ namespace }} -o json | \
+        jq 'del(.spec.finalizers)' > {{ temp_file }} && \
+        kubectl replace --raw "/api/v1/namespaces/{{ namespace }}/finalize" -f {{ temp_file }}
+      when: ns_check.rc == 0
+      ignore_errors: true
+      register: force_ns_cleanup
 
     - name: ✅ Confirmación de limpieza completa
       debug:
