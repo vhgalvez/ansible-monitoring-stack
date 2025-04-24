@@ -5,6 +5,23 @@ server:
 
   extraArgs:
     web.listen-address: ":{{ prometheus_container_port }}"
+    storage.tsdb.retention.time: 15d
+
+  readinessProbe:
+    httpGet:
+      path: /-/ready
+      port: {{ prometheus_container_port }}
+    initialDelaySeconds: 10
+    timeoutSeconds: 3
+    periodSeconds: 10
+
+  livenessProbe:
+    httpGet:
+      path: /-/healthy
+      port: {{ prometheus_container_port }}
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 15
 
   persistentVolume:
     enabled: true
