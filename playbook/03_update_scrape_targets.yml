@@ -14,7 +14,7 @@
 
     - name: 📄 Renderizar archivo extraScrapeConfigs.yaml
       ansible.builtin.template:
-        src: helm/prometheus/extraScrapeConfigs.yaml.j2
+        src: playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2
         dest: /tmp/extraScrapeConfigs.yaml
 
     - name: 🔐 Crear o actualizar Secret de Prometheus con extraScrapeConfigs
