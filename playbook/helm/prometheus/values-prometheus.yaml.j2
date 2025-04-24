@@ -4,25 +4,28 @@
 server:
   containerPort: {{ prometheus_container_port }}
 
+  # Eliminamos cualquier duplicación de parámetros como storage.tsdb.retention.time que ya están configurados de manera predeterminada.
   extraArgs:
     web.listen-address: ":{{ prometheus_container_port }}"
 
+  # Configuramos probes de salud con tiempos más largos para dar más tiempo a Prometheus a arrancar
   readinessProbe:
     httpGet:
       path: /-/ready
       port: {{ prometheus_container_port }}
-    initialDelaySeconds: 10
-    timeoutSeconds: 3
+    initialDelaySeconds: 60  # Tiempo de espera inicial para asegurar que Prometheus tenga suficiente tiempo
+    timeoutSeconds: 5
     periodSeconds: 10
 
   livenessProbe:
     httpGet:
       path: /-/healthy
       port: {{ prometheus_container_port }}
-    initialDelaySeconds: 30
+    initialDelaySeconds: 90  # Tiempo de espera para la salud del contenedor
     timeoutSeconds: 5
     periodSeconds: 15
 
+  # Configuración de almacenamiento persistente
   persistentVolume:
     enabled: true
     storageClass: "{{ prometheus_storage_class }}"
@@ -30,7 +33,17 @@ server:
     accessModes:
       - ReadWriteOnce
 
+  # Servicio de Prometheus
   service:
     type: {{ prometheus_service_type }}
     port: {{ prometheus_service_port }}
     targetPort: {{ prometheus_container_port }}
+
+  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria para evitar terminación por falta de recursos
+  resources:
+    requests:
+      memory: "4Gi"   # Ajusta la memoria de acuerdo con el tamaño de tu entorno
+      cpu: "2"        # Ajusta la CPU según los recursos disponibles
+    limits:
+      memory: "8Gi"   # Limita la memoria máxima
+      cpu: "4"        # Limita la CPU máxima
