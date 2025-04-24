@@ -13,7 +13,7 @@ server:
     httpGet:
       path: /-/ready
       port: {{ prometheus_container_port }}
-    initialDelaySeconds: 60  # Tiempo de espera inicial para asegurar que Prometheus tenga suficiente tiempo
+    initialDelaySeconds: 60  # Aseguramos que Prometheus tenga suficiente tiempo para arrancar
     timeoutSeconds: 5
     periodSeconds: 10
 
@@ -35,9 +35,9 @@ server:
 
   # Servicio de Prometheus
   service:
-    type: {{ prometheus_service_type }}
-    port: {{ prometheus_service_port }}
-    targetPort: {{ prometheus_container_port }}
+    type: {{ prometheus_service_type }}  # El tipo de servicio (ClusterIP, NodePort, LoadBalancer, etc.)
+    port: {{ prometheus_service_port }}  # Puerto del servicio
+    targetPort: {{ prometheus_container_port }}  # El puerto expuesto por el contenedor de Prometheus
 
   # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria para evitar terminación por falta de recursos
   resources:
