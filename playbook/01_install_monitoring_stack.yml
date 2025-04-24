@@ -117,8 +117,10 @@
 
     - name: 📦 Verificar estado de los pods en 'monitoring'
       shell: kubectl get pods -n monitoring
-      register: monitoring_pods
+      register: pod_status
       changed_when: false
+      environment:
+        KUBECONFIG: "{{ kubeconfig_path }}"
 
     - name: 🔍 Mostrar estado de los pods
       debug:
