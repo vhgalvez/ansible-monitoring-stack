@@ -1,5 +1,4 @@
 ---
----
 # 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace + RBAC
 
 - name: 🧼 Eliminar stack de monitoreo (Prometheus + Grafana)
