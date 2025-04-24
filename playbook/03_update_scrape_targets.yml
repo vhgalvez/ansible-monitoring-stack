@@ -9,9 +9,9 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
+    node_exporter_port: 9100
 
   tasks:
-
     - name: 📄 Renderizar archivo extraScrapeConfigs.yaml
       ansible.builtin.template:
         src: templates/node_exporter/extraScrapeConfigs.yaml.j2
