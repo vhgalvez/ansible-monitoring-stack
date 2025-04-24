@@ -1,6 +1,6 @@
 ---
 # uninstall_stack.yml
-# 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace
+# 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace + RBAC
 
 - name: 🧼 Eliminar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
@@ -75,3 +75,11 @@
       debug:
         msg: "⚠️ Namespace '{{ ns }}' aún está activo. Revisa si hay CRDs o operadores recreándolo automáticamente."
       when: ns_check_final.rc == 0
+
+    - name: ❌ Eliminar ClusterRole 'system:monitoring'
+      command: kubectl delete clusterrole system:monitoring --ignore-not-found=true
+      ignore_errors: true
+
+    - name: ❌ Eliminar ClusterRoleBinding 'system:monitoring'
+      command: kubectl delete clusterrolebinding system:monitoring --ignore-not-found=true
+      ignore_errors: true
