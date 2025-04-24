@@ -8,10 +8,10 @@ server:
 
   persistentVolume:
     enabled: true
-    storageClass: {{ prometheus_storage_class }}
+    storageClass: "{{ prometheus_storage_class }}"
+    size: "{{ prometheus_pvc_size }}"
     accessModes:
       - ReadWriteOnce
-    size: {{ prometheus_pvc_size }}
 
   service:
     type: {{ prometheus_service_type }}
