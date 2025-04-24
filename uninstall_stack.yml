@@ -1,5 +1,7 @@
-# uninstall_stack.yml
 ---
+# uninstall_stack.yml
+# 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace
+
 - name: 🧼 Eliminar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   become: true
@@ -28,32 +30,37 @@
       when: ns_check.rc == 0
       ignore_errors: true
 
-    - name: 🧹 Eliminar PVCs, SVCs, PODs, Secrets y ConfigMaps
+    - name: 🧽 Eliminar todos los recursos comunes del namespace
       shell: |
-        kubectl delete pvc --all -n {{ namespace }} || true
-        kubectl delete svc --all -n {{ namespace }} || true
-        kubectl delete pod --all -n {{ namespace }} || true
-        kubectl delete secret --all -n {{ namespace }} || true
-        kubectl delete configmap --all -n {{ namespace }} || true
+        kubectl delete pvc,svc,pod,secret,configmap --all -n {{ namespace }} --ignore-not-found=true
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: ❌ Eliminar namespace '{{ namespace }}'
-      shell: |
-        kubectl delete namespace {{ namespace }} || true
+      command: kubectl delete namespace {{ namespace }} --ignore-not-found=true
       when: ns_check.rc == 0
+      ignore_errors: true
 
-    - name: 💤 Esperar 10s por si el namespace entra en terminación
+    - name: 💤 Esperar a que namespace entre en terminación (si aplica)
       pause:
         seconds: 10
       when: ns_check.rc == 0
+
+    - name: 📦 Verificar si jq está instalado para eliminar finalizers
+      command: which jq
+      register: jq_check
+      failed_when: jq_check.rc != 0
+      changed_when: false
 
     - name: 🛠 Forzar eliminación de finalizers si el namespace sigue colgado
       shell: |
         kubectl get namespace {{ namespace }} -o json \
         | jq 'del(.spec.finalizers)' \
         | kubectl replace --raw "/api/v1/namespaces/{{ namespace }}/finalize" -f -
-      when: ns_check.rc == 0
+      when:
+        - ns_check.rc == 0
+        - final_check.rc == 0
+        - jq_check.rc == 0
       ignore_errors: true
       register: force_delete
 
@@ -70,5 +77,5 @@
 
     - name: ⚠️ El namespace sigue existiendo
       debug:
-        msg: "🚨 Atención: El namespace '{{ namespace }}' aún existe. Puede estar colgado por otros finalizers o CRDs."
+        msg: "🚨 Atención: El namespace '{{ namespace }}' aún existe. Revisa CRDs o finalizers manualmente."
       when: final_check.rc == 0
