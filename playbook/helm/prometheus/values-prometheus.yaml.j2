@@ -1,11 +1,12 @@
+---
 # helm/prometheus/values-prometheus.yaml.j2
 
 server:
   containerPort: {{ prometheus_container_port }}
 
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"
-    storage.tsdb.retention.time: "15d"
+    web.listen-address: ":{{ prometheus_container_port }}"  # Revisa que no haya conflictos en las configuraciones
+    storage.tsdb.retention.time: "15d"  # Esta es una opción estándar
 
   readinessProbe:
     httpGet:
