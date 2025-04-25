@@ -1,4 +1,7 @@
 ---
+# playbook/01_install_monitoring_stack.yml
+# Instalación robusta de Prometheus + Grafana con Helm y configuración persistente
+
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   become: true
@@ -15,7 +18,7 @@
     prometheus_service_port: 9091
     prometheus_storage_class: "longhorn"
     prometheus_pvc_size: "8Gi"
-    prometheus_chart_version: " 27.11.0"
+    prometheus_chart_version: "27.11.0"  # Versión correcta del chart
     prometheus_service_type: "ClusterIP"
     prometheus_values_path: "/tmp/values-prometheus.yaml"
 

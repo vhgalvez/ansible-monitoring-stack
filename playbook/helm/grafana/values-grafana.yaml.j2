@@ -12,6 +12,6 @@ persistence:
 
 service:
   type: {{ grafana_service_type }}
-  port: {{ grafana_service_port }}  # Puerto del servicio, 3000 en este caso
-  targetPort: {{ grafana_container_port }}  # El puerto del contenedor de Grafana, por defecto 3000
+  port: {{ grafana_service_port }}
+  targetPort: {{ grafana_container_port }}
   name: http
