@@ -22,4 +22,5 @@ server:
       memory: 2Gi  # Memoria máxima
 
 extraScrapeConfigs:
-  - configMapName: extraScrapeConfigs
+  - name: "extraScrapeConfigs.yaml"
+    configMapName: "extraScrapeConfigs"
