@@ -1,26 +1,26 @@
 # helm/prometheus/values-prometheus.yaml.j2
 server:
-  enabled: {{ prometheus_enabled | default(true) }}
-  replicas: {{ prometheus_replicas | default(1) }}
+  enabled: True
+  replicas: 1
   image:
-    repository: {{ prometheus_image_repository | default('quay.io/prometheus/prometheus') }}
-    tag: {{ prometheus_image_tag | default('v3.2.1') }}
-    pullPolicy: {{ prometheus_image_pullPolicy | default('IfNotPresent') }}
+    repository: quay.io/prometheus/prometheus
+    tag: v3.2.1
+    pullPolicy: IfNotPresent
   service:
     type: ClusterIP
-    port: 9091
+    port: 9091  # Cambiado a 9091
     targetPort: 9091
   resources:
     requests:
-      cpu: {{ prometheus_cpu_requests | default('2') }}
-      memory: {{ prometheus_memory_requests | default('4Gi') }}
+      cpu: 2
+      memory: 4Gi
     limits:
-      cpu: {{ prometheus_cpu_limits | default('4') }}
-      memory: {{ prometheus_memory_limits | default('8Gi') }}
+      cpu: 4
+      memory: 8Gi
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: 9091
+      port: 9091  # Cambiado a 9091
     initialDelaySeconds: 30
     timeoutSeconds: 10
     periodSeconds: 15
@@ -28,14 +28,14 @@ server:
   readinessProbe:
     httpGet:
       path: /-/ready
-      port: 9091
+      port: 9091  # Cambiado a 9091
     initialDelaySeconds: 30
     timeoutSeconds: 4
     periodSeconds: 5
     failureThreshold: 3
   extraArgs:
-    web.listen-address: ":9090"
+    web.listen-address: ":9091"  # Cambiado a 9091
   extraScrapeConfigs: |
     - job_name: 'custom-job'
       static_configs:
-        - targets: ['localhost:9091']
+        - targets: ['localhost:9091']  # Cambiado a 9091
