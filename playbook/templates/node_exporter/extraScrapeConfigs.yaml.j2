@@ -3,12 +3,6 @@ scrape_configs:
   - job_name: 'node_exporter'
     static_configs:
       - targets:
-        - "10.17.3.11:9100"
-        - "10.17.3.12:9100"
-        - "10.17.3.13:9100"
-        - "10.17.3.14:9100"
-        - "10.17.5.20:9100"
-        - "192.168.0.23:9100"
         {% for host in groups['external_node_exporter'] %}
           {% if hostvars[host].ansible_facts.default_ipv4 is defined %}
             - "{{ hostvars[host].ansible_facts.default_ipv4.address }}:{{ node_exporter_port }}"

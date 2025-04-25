@@ -1,7 +1,5 @@
 # playbook/03_update_scrape_targets.yml
 ---
-# 🔄 Actualizar los targets de scrape de Prometheus para nodos externos (Node Exporter)
-
 - name: 🔄 Actualizar targets de scrape en Prometheus
   hosts: controller
   become: true
@@ -20,7 +18,7 @@
     - name: 🔄 Si el archivo extraScrapeConfigs.yaml existe, actualizar configuración de scraping en Prometheus
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        state: present  # Se usa 'present' en lugar de 'merged'
+        state: present
         definition:
           apiVersion: v1
           kind: ConfigMap
@@ -31,17 +29,6 @@
             extraScrapeConfigs.yaml: "{{ lookup('file', prometheus_extra_scrape_config_path) }}"
       when: scrape_config_stat.stat.exists
 
-    - name: 🔍 Si el archivo extraScrapeConfigs.yaml no existe, mostrar un mensaje
-      debug:
-        msg: "El archivo extraScrapeConfigs.yaml no existe, no se actualizó la configuración de scrape."
-      when: not scrape_config_stat.stat.exists
-
     - name: ✅ Confirmación final
       debug:
         msg: "🎉 Targets de scrape actualizados exitosamente en Prometheus."
-
-    - name: Asegurarse de que los hechos de Ansible se recopilen
-      ansible.builtin.setup:
-        gather_subset:
-          - network  # Solo se recopila información relacionada con la red
-      when: ansible_facts is not defined

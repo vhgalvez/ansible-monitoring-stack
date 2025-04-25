@@ -1,0 +1,9 @@
+# playbook\helm\prometheus\values.yaml
+nodeExporter:
+  targets:
+    - "10.17.3.11"
+    - "10.17.3.12"
+    - "10.17.3.13"
+    - "10.17.3.14"
+    - "10.17.5.20"
+    - "192.168.0.23"
