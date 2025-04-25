@@ -13,7 +13,7 @@
     kubeconfig_path: "/home/victory/.kube/config"
 
   # Configuración de Prometheus
-  prometheus_container_port: 9091
+  
   prometheus_service_port: 9091
   prometheus_storage_class: "longhorn"
   prometheus_pvc_size: "8Gi"
