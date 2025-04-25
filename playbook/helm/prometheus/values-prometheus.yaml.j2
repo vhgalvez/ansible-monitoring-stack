@@ -3,7 +3,7 @@ server:
   service:
     type: NodePort  # Cambiado de ClusterIP a NodePort
     port: 9091
-    targetPort: 9091
+    targetPort: 9092
     nodePort: 32001  # Puerto expuesto en el nodo
 
   ingress:
