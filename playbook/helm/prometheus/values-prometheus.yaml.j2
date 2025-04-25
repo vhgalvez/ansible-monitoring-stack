@@ -1,46 +1,41 @@
----
-# helm/prometheus/values-prometheus.yaml
+# helm/prometheus/values-prometheus.yaml.j2
 server:
-  containerPort: 9091  # Puerto interno del contenedor de Prometheus (puede que no se aplique directamente)
-  extraArgs:
-    web.listen-address: ":9091"  # Dirección y puerto en el que Prometheus escucha las solicitudes web
-
-  # Configuración del livenessProbe
+  enabled: {{ prometheus_enabled | default(true) }}
+  replicas: {{ prometheus_replicas | default(1) }}
+  image:
+    repository: {{ prometheus_image_repository | default('quay.io/prometheus/prometheus') }}
+    tag: {{ prometheus_image_tag | default('v3.2.1') }}
+    pullPolicy: {{ prometheus_image_pullPolicy | default('IfNotPresent') }}
+  service:
+    type: ClusterIP
+    port: 9090
+    targetPort: 9090
+  resources:
+    requests:
+      cpu: {{ prometheus_cpu_requests | default('2') }}
+      memory: {{ prometheus_memory_requests | default('4Gi') }}
+    limits:
+      cpu: {{ prometheus_cpu_limits | default('4') }}
+      memory: {{ prometheus_memory_limits | default('8Gi') }}
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: 9091  # ¡Cambiado a 9091!
+      port: 9090
     initialDelaySeconds: 30
-    timeoutSeconds: 5
-    periodSeconds: 10
+    timeoutSeconds: 10
+    periodSeconds: 15
     failureThreshold: 3
-
-  # Configuración del readinessProbe
   readinessProbe:
     httpGet:
       path: /-/ready
-      port: 9091  # ¡Cambiado a 9091!
+      port: 9090
     initialDelaySeconds: 30
-    timeoutSeconds: 3
+    timeoutSeconds: 4
     periodSeconds: 5
     failureThreshold: 3
-
-  # Configuración del servicio de Prometheus
-  service:
-    type: ClusterIP
-    port: 9091  # Puerto del servicio de Prometheus
-    targetPort: 9091  # Puerto al que el servicio redirige el tráfico
-    ports:
-      - name: web
-        protocol: TCP
-        port: 9091
-        targetPort: 9091
-
-  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
-  resources:
-    requests:
-      memory: "4Gi"    # Memoria solicitada para Prometheus
-      cpu: "2"       # CPU solicitada para Prometheus
-    limits:
-      memory: "8Gi"    # Memoria máxima para Prometheus
-      cpu: "4"       # CPU máxima para Prometheus
+  extraArgs:
+    web.listen-address: ":9090"
+  extraScrapeConfigs: |
+    - job_name: 'custom-job'
+      static_configs:
+        - targets: ['localhost:9091']
