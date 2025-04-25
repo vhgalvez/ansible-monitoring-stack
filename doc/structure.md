@@ -1,5 +1,3 @@
-
-
 📦 ansible-monitoring-stack/
 │
 ├── 📚 Documentación
@@ -18,7 +16,6 @@
 │       ├── 03_install_monitoring_stack.yml
 │       ├── 04_install_node_exporter.yml
 │       ├── 05_update_scrape_targets.yml
-│       
 │
 ├── ♻️ Otras automatizaciones
 │   ├── update_monitoring_targets.yml
