@@ -22,4 +22,4 @@ server:
       memory: 2Gi
 
 extraScrapeConfigs: |
-  {{ extraScrapeConfigs | toYaml | nindent 4 }}  # Convierte extraScrapeConfigs a formato YAML y lo indenta correctamente
+  {{ extraScrapeConfigs | to_yaml | indent(4) }}
