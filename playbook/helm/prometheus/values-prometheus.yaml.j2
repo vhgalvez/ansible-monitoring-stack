@@ -1,19 +1,23 @@
 # helm/prometheus/values-prometheus.yaml.j2
+
 server:
   service:
+    type: NodePort  # Cambiado de ClusterIP a NodePort
     port: 9091
     targetPort: 9091
-    nodePort: 32001
+    nodePort: 32001  # Puerto expuesto en el nodo
+
   ingress:
     enabled: true
     hosts:
       - prometheus.local
     paths:
       - /
+
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: 500m  # CPU solicitada
+      memory: 1Gi  # Memoria solicitada
     limits:
-      cpu: 1
-      memory: 2Gi
+      cpu: 1  # CPU máxima
+      memory: 2Gi  # Memoria máxima
