@@ -331,8 +331,14 @@ http://192.168.0.15:9091   → Prometheus
 ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
 
 
-# Para Prometheus
-sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 9091:9092 > ~/prometheus.log 2>&1 &
+
 
 # Para Grafana
 sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 3000:3000 > ~/grafana.log 2>&1 &
+
+# Prometheus
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 9091:9091 > ~/prometheus.log 2>&1 &
+
+
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 3000:3000 > ~/grafana.log 2>&1 &
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 9091:9091 > ~/prometheus.log 2>&1 &
