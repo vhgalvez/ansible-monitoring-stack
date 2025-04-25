@@ -30,9 +30,9 @@ server:
 
   # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
   resources:
-    requests:
-      memory: "{{ prometheus_memory_requests }}"   # Ajusta la memoria de acuerdo con el tamaño de tu entorno
-      cpu: "{{ prometheus_cpu_requests }}"         # Ajusta la CPU según los recursos disponibles
-    limits:
-      memory: "{{ prometheus_memory_limits }}"     # Limita la memoria máxima
-      cpu: "{{ prometheus_cpu_limits }}"           # Limita la CPU máxima
+  requests:
+    memory: "4Gi"     # Ajusta según tus necesidades
+    cpu: "2"          # Ajusta según tus necesidades
+  limits:
+    memory: "8Gi"     # Limita la memoria máxima
+    cpu: "4"          # Limita la CPU máxima
