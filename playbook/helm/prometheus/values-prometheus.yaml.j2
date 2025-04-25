@@ -1,52 +1,27 @@
 ---
 # helm/prometheus/values-prometheus.yaml.j2
-
 server:
-  containerPort: 9091
+  containerPort: 9091  # El puerto en el que el contenedor de Prometheus escuchará las solicitudes (por defecto 9091)
 
-  # Configuración de la dirección web para Prometheus
   extraArgs:
-    web.listen-address: ":9091"
+    web.listen-address: ":9091"  # Configuración para escuchar en el puerto 9091 para las conexiones web de Prometheus
 
   # Configuración del livenessProbe
   livenessProbe:
     httpGet:
-      path: /-/healthy
-      port: 9091
-    initialDelaySeconds: 30      # Tiempo de espera inicial para comprobar si el contenedor está vivo
-    timeoutSeconds: 5            # Tiempo de espera para cada intento de conexión
-    periodSeconds: 10            # Frecuencia de las comprobaciones
-    failureThreshold: 3          # Número de fallos antes de marcar el contenedor como no saludable
+      path: /-/healthy  # Endpoint de salud (para verificar si Prometheus está funcionando)
+      port: 9091  # Puerto en el que se realiza la comprobación de la sonda
+    initialDelaySeconds: 30  # Tiempo que espera Kubernetes antes de realizar la primera comprobación de liveness
+    timeoutSeconds: 5  # Tiempo que espera Kubernetes para obtener una respuesta antes de considerar la comprobación como fallida
+    periodSeconds: 10  # Frecuencia con la que Kubernetes realizará las comprobaciones
+    failureThreshold: 3  # Número de fallos consecutivos necesarios antes de considerar al contenedor como no saludable
 
   # Configuración del readinessProbe
   readinessProbe:
     httpGet:
-      path: /-/ready
-      port: 9091
-    initialDelaySeconds: 30      # Tiempo de espera inicial para comprobar si el contenedor está listo
-    timeoutSeconds: 3            # Tiempo de espera para cada intento de conexión
-    periodSeconds: 5             # Frecuencia de las comprobaciones
-    failureThreshold: 3          # Número de fallos antes de marcar el contenedor como no listo
-
-  # Configuración de almacenamiento persistente
-  persistentVolume:
-    enabled: true
-    storageClass: "{{ prometheus_storage_class }}"
-    size: "{{ prometheus_pvc_size }}"
-    accessModes:
-      - ReadWriteOnce
-
-  # Configuración del servicio de Prometheus
-  service:
-    type: {{ prometheus_service_type }}  # Tipo de servicio (ClusterIP, NodePort, LoadBalancer, etc.)
-    port: {{ prometheus_service_port }}  # Puerto del servicio
-    targetPort: {{ prometheus_container_port }}  # El puerto expuesto por el contenedor de Prometheus
-
-  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
-  resources:
-    requests:
-      memory: "4Gi"   # Ajusta la memoria de acuerdo con el tamaño de tu entorno
-      cpu: "2"        # Ajusta la CPU según los recursos disponibles
-    limits:
-      memory: "8Gi"   # Limita la memoria máxima
-      cpu: "4"        # Limita la CPU máxima
+      path: /-/ready  # Endpoint de readiness (para verificar si Prometheus está listo para recibir tráfico)
+      port: 9091  # Puerto en el que se realiza la comprobación de la sonda
+    initialDelaySeconds: 30  # Tiempo que espera Kubernetes antes de realizar la primera comprobación de readiness
+    timeoutSeconds: 3  # Tiempo que espera Kubernetes para obtener una respuesta antes de considerar la comprobación como fallida
+    periodSeconds: 5  # Frecuencia con la que Kubernetes realizará las comprobaciones
+    failureThreshold: 3  # Número de fallos consecutivos necesarios antes de considerar al contenedor como no listo para recibir tráfico
