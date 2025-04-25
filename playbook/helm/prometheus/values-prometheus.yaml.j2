@@ -8,8 +8,8 @@ server:
     pullPolicy: {{ prometheus_image_pullPolicy | default('IfNotPresent') }}
   service:
     type: ClusterIP
-    port: 9090
-    targetPort: 9090
+    port: 9091
+    targetPort: 9091
   resources:
     requests:
       cpu: {{ prometheus_cpu_requests | default('2') }}
@@ -20,7 +20,7 @@ server:
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: 9090
+      port: 9091
     initialDelaySeconds: 30
     timeoutSeconds: 10
     periodSeconds: 15
@@ -28,7 +28,7 @@ server:
   readinessProbe:
     httpGet:
       path: /-/ready
-      port: 9090
+      port: 9091
     initialDelaySeconds: 30
     timeoutSeconds: 4
     periodSeconds: 5
