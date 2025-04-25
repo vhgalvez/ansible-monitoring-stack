@@ -10,7 +10,7 @@ server:
   replicas: 1  # Número de réplicas del servidor Prometheus
   image:
     repository: quay.io/prometheus/prometheus  # Repositorio de la imagen Docker
-    tag: "{{ prometheus_version | default('v3.17.3') }}"  # Versión de Prometheus
+    tag: "{{ prometheus_version | default('v3.2.1') }}"  # Versión de Prometheus (¡Corregido a una versión existente!)
     pullPolicy: IfNotPresent  # Política de actualización de la imagen
 
   # Configuración de los puertos y probes de salud
