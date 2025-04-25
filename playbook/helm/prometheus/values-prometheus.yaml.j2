@@ -1,27 +1,38 @@
 ---
 # helm/prometheus/values-prometheus.yaml.j2
 server:
-  containerPort: 9091  # El puerto en el que el contenedor de Prometheus escuchará las solicitudes (por defecto 9091)
+  containerPort: {{ prometheus_container_port }}  # Usar variable de Ansible
 
   extraArgs:
-    web.listen-address: ":9091"  # Configuración para escuchar en el puerto 9091 para las conexiones web de Prometheus
+    web.listen-address: ":{{ prometheus_container_port }}"  # Variable de puerto para la dirección web
 
-  # Configuración del livenessProbe
   livenessProbe:
     httpGet:
-      path: /-/healthy  # Endpoint de salud (para verificar si Prometheus está funcionando)
-      port: 9091  # Puerto en el que se realiza la comprobación de la sonda
-    initialDelaySeconds: 30  # Tiempo que espera Kubernetes antes de realizar la primera comprobación de liveness
-    timeoutSeconds: 5  # Tiempo que espera Kubernetes para obtener una respuesta antes de considerar la comprobación como fallida
-    periodSeconds: 10  # Frecuencia con la que Kubernetes realizará las comprobaciones
-    failureThreshold: 3  # Número de fallos consecutivos necesarios antes de considerar al contenedor como no saludable
+      path: /-/healthy
+      port: {{ prometheus_container_port }}  # Puerto de la sonda de liveness con la variable
+    initialDelaySeconds: 30
+    timeoutSeconds: 5
+    periodSeconds: 10
+    failureThreshold: 3
 
-  # Configuración del readinessProbe
   readinessProbe:
     httpGet:
-      path: /-/ready  # Endpoint de readiness (para verificar si Prometheus está listo para recibir tráfico)
-      port: 9091  # Puerto en el que se realiza la comprobación de la sonda
-    initialDelaySeconds: 30  # Tiempo que espera Kubernetes antes de realizar la primera comprobación de readiness
-    timeoutSeconds: 3  # Tiempo que espera Kubernetes para obtener una respuesta antes de considerar la comprobación como fallida
-    periodSeconds: 5  # Frecuencia con la que Kubernetes realizará las comprobaciones
-    failureThreshold: 3  # Número de fallos consecutivos necesarios antes de considerar al contenedor como no listo para recibir tráfico
+      path: /-/ready
+      port: {{ prometheus_container_port }}  # Puerto de la sonda de readiness con la variable
+    initialDelaySeconds: 30
+    timeoutSeconds: 3
+    periodSeconds: 5
+    failureThreshold: 3
+
+  service:
+    port: {{ prometheus_service_port }}  # Puerto del servicio de Prometheus
+    targetPort: {{ prometheus_container_port }}  # Puerto del contenedor que se expondrá a través del servicio
+
+  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
+  resources:
+    requests:
+      memory: "{{ prometheus_memory_requests }}"   # Ajusta la memoria de acuerdo con el tamaño de tu entorno
+      cpu: "{{ prometheus_cpu_requests }}"         # Ajusta la CPU según los recursos disponibles
+    limits:
+      memory: "{{ prometheus_memory_limits }}"     # Limita la memoria máxima
+      cpu: "{{ prometheus_cpu_limits }}"           # Limita la CPU máxima

@@ -126,7 +126,7 @@
 
     - name: 🔍 Mostrar estado de los pods
       debug:
-        var: monitoring_pods.stdout_lines
+        var: pod_status.stdout_lines
 
     - name: ✅ Confirmación final
       debug:
