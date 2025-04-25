@@ -40,8 +40,8 @@
       debug:
         msg: "🎉 Targets de scrape actualizados exitosamente en Prometheus."
 
-- name: Asegurarse de que los hechos de Ansible se recopilen
-  ansible.builtin.setup:
-    gather_subset:
-      - network  # Solo se recopila información relacionada con la red
-  when: ansible_facts is not defined
+    - name: Asegurarse de que los hechos de Ansible se recopilen
+      ansible.builtin.setup:
+        gather_subset:
+          - network # Solo se recopila información relacionada con la red
+      when: ansible_facts is not defined
