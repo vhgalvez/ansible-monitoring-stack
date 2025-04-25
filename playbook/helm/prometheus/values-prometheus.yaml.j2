@@ -1,10 +1,10 @@
 # helm/prometheus/values-prometheus.yaml.j2
 server:
   service:
-    type: NodePort  # Cambiado de ClusterIP a NodePort
+    type: NodePort
     port: 9091
     targetPort: 9091
-    nodePort: 32001  # Puerto expuesto en el nodo
+    nodePort: 32001
 
   ingress:
     enabled: true
@@ -15,11 +15,11 @@ server:
 
   resources:
     requests:
-      cpu: 500m  # CPU solicitada
-      memory: 1Gi  # Memoria solicitada
+      cpu: 500m
+      memory: 1Gi
     limits:
-      cpu: 1  # CPU máxima
-      memory: 2Gi  # Memoria máxima
+      cpu: 1
+      memory: 2Gi
 
 extraScrapeConfigs: |
-  - configMapName: extraScrapeConfigs
+  {{ extraScrapeConfigs | toYaml | nindent 4 }}  # Convierte extraScrapeConfigs a formato YAML y lo indenta correctamente
