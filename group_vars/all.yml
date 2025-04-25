@@ -6,30 +6,3 @@
 # 🛠️ Variables de entorno para Helm y kubectl
 grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"  # PATH extendido para Helm/kubectl desde Ansible
-
-node_exporter_port: 9100
-
-
-# Configuración de Prometheus
-prometheus_container_port: 9091
-prometheus_service_port: 9091
-prometheus_storage_class: "longhorn"
-prometheus_pvc_size: "8Gi"
-prometheus_chart_version: "27.9.0"
-prometheus_service_type: "ClusterIP"
-prometheus_values_path: "/tmp/values-prometheus.yaml"
-
-# Configuración de Grafana
-grafana_container_port: 3000
-grafana_service_port: 3000
-grafana_storage_class: "longhorn"
-grafana_pvc_size: "5Gi"
-grafana_admin_user: "admin"
-grafana_admin_password: "admin123"
-grafana_chart_version: "8.12.1"
-grafana_service_type: "ClusterIP"
-grafana_values_path: "/tmp/values-grafana.yaml"
-
-# Extras
-node_exporter_port: 9100
-extra_scrape_config_path: "/tmp/extraScrapeConfigs.yaml"
