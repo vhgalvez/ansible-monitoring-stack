@@ -2,19 +2,6 @@
 
 # 🔍 Configuración adicional de Prometheus para hacer scrape a nodos externos
 
-{% if groups['external_node_exporter'] is defined and groups['external_node_exporter'] | length > 0 %}
-- job_name: 'external-nodes'
-  metrics_path: /metrics
-  scrape_interval: 15s
-  scrape_timeout: 10s
-  scheme: http
-  static_configs:
-    - targets:
-{% for host in groups['external_node_exporter'] | sort %}
-{%   set ip = hostvars[host]['ansible_host'] | default(host) %}
-      - '{{ ip }}:{{ node_exporter_port }}'
-{% endfor %}
-{% else %}
-# ⚠️ No se detectaron nodos en el grupo 'external_node_exporter'.
-# Verifica el inventario y asegúrate de que el grupo esté correctamente definido.
+{% if node_exporter.extraScrapeConfigs is defined %}
+{{ node_exporter.extraScrapeConfigs | to_nice_yaml(indent=2) }}
 {% endif %}

@@ -1,41 +1,131 @@
 # helm/prometheus/values-prometheus.yaml.j2
+
+# Configuración de RBAC (Role-Based Access Control)
+rbac:
+  create: true  # Habilita la creación de roles y role bindings
+
+# Configuración del servidor Prometheus
 server:
-  enabled: True
-  replicas: 1
+  enabled: true  # Habilitar el servidor Prometheus
+  replicas: 1  # Número de réplicas del servidor Prometheus
   image:
-    repository: quay.io/prometheus/prometheus
-    tag: v3.2.1
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 9091  # Cambiado a 9091
-    targetPort: 9091
-  resources:
-    requests:
-      cpu: 2
-      memory: 4Gi
-    limits:
-      cpu: 4
-      memory: 8Gi
+    repository: quay.io/prometheus/prometheus  # Repositorio de la imagen Docker
+    tag: "{{ prometheus_version | default('v3.17.3') }}"  # Versión de Prometheus
+    pullPolicy: IfNotPresent  # Política de actualización de la imagen
+
+  # Configuración de los puertos y probes de salud
+  containerPort: "{{ prometheus_container_port | default(9091) }}"  # Puerto del contenedor de Prometheus
   livenessProbe:
     httpGet:
-      path: /-/healthy
-      port: 9091  # Cambiado a 9091
+      path: /-/healthy  # Ruta para el liveness probe
+      port: "{{ prometheus_container_port | default(9091) }}"  # Puerto dinámico para el probe
     initialDelaySeconds: 30
-    timeoutSeconds: 10
-    periodSeconds: 15
+    timeoutSeconds: 5
+    periodSeconds: 10
     failureThreshold: 3
+
   readinessProbe:
     httpGet:
-      path: /-/ready
-      port: 9091  # Cambiado a 9091
+      path: /-/ready  # Ruta para el readiness probe
+      port: "{{ prometheus_container_port | default(9091) }}"  # Puerto dinámico para el probe
     initialDelaySeconds: 30
-    timeoutSeconds: 4
+    timeoutSeconds: 3
     periodSeconds: 5
     failureThreshold: 3
+
+  # Configuración del servicio para exponer Prometheus
+  service:
+    type: "{{ prometheus_service_type | default('ClusterIP') }}"  # Tipo de servicio (ClusterIP, NodePort, etc.)
+    port: "{{ prometheus_service_port | default(9091) }}"  # Puerto del servicio
+    targetPort: "{{ prometheus_container_port | default(9091) }}"  # Puerto del contenedor
+
+  # Argumentos adicionales para Prometheus (puerto de escucha)
   extraArgs:
-    web.listen-address: ":9091"  # Cambiado a 9091
-  extraScrapeConfigs: |
-    - job_name: 'custom-job'
-      static_configs:
-        - targets: ['localhost:9091']  # Cambiado a 9091
+    web.listen-address: ":{{ prometheus_container_port | default(9091) }}"  # Puerto de escucha para Prometheus
+
+  # Almacenamiento persistente
+  persistentVolume:
+    enabled: true  # Habilitar almacenamiento persistente
+    storageClass: "{{ prometheus_storage_class | default('longhorn') }}"  # Clase de almacenamiento
+    size: "{{ prometheus_pvc_size | default('8Gi') }}"  # Tamaño del volumen persistente
+    accessModes:
+      - ReadWriteOnce  # Modo de acceso al volumen
+
+  # Recursos del contenedor (CPU y memoria)
+  resources:
+    requests:
+      memory: "{{ prometheus_memory_request | default('4Gi') }}"  # Memoria solicitada
+      cpu: "{{ prometheus_cpu_request | default('2') }}"  # CPU solicitada
+    limits:
+      memory: "{{ prometheus_memory_limit | default('8Gi') }}"  # Memoria máxima
+      cpu: "{{ prometheus_cpu_limit | default('4') }}"  # CPU máxima
+
+# Configuración de Alertmanager
+alertmanager:
+  enabled: true  # Habilitar Alertmanager
+  replicas: 1  # Número de réplicas del Alertmanager
+  image:
+    repository: quay.io/prometheus/alertmanager  # Repositorio de la imagen Docker de Alertmanager
+    tag: "{{ alertmanager_version | default('v0.22.2') }}"  # Versión de Alertmanager
+    pullPolicy: IfNotPresent  # Política de actualización de la imagen
+  service:
+    type: ClusterIP  # Tipo de servicio (ClusterIP, NodePort, etc.)
+    port: 9093  # Puerto del servicio de Alertmanager
+    targetPort: 9093  # Puerto de destino del contenedor de Alertmanager
+  persistentVolume:
+    enabled: true  # Habilitar almacenamiento persistente
+    size: "{{ alertmanager_pv_size | default('2Gi') }}"  # Tamaño del volumen persistente de Alertmanager
+    storageClass: "{{ alertmanager_storage_class | default('standard') }}"  # Clase de almacenamiento
+
+# Configuración de Scrape y Targets personalizados
+serverFiles:
+  prometheus.yml:
+    global:
+      scrape_interval: "{{ scrape_interval | default('1m') }}"  # Intervalo de scrape global
+      evaluation_interval: "{{ evaluation_interval | default('1m') }}"  # Intervalo de evaluación global
+    scrape_configs:
+      - job_name: prometheus
+        static_configs:
+          - targets: ['localhost:9090']  # Objetivos de scrape por defecto (Prometheus mismo)
+      {% if extra_scrape_configs is defined %}
+      {% for scrape in extra_scrape_configs %}
+      - job_name: {{ scrape.job_name }}
+        static_configs:
+          - targets: {{ scrape.targets }}
+      {% endfor %}
+      {% endif %}
+
+# Configuración de los nodos de exporter (Node Exporter y PushGateway)
+nodeExporter:
+  enabled: true  # Habilitar Node Exporter
+  replicas: 1  # Número de réplicas del Node Exporter
+  image:
+    repository: quay.io/prometheus/node-exporter  # Repositorio de la imagen Docker de Node Exporter
+    tag: v1.3.1  # Versión de Node Exporter
+    pullPolicy: IfNotPresent  # Política de actualización de la imagen
+  resources:
+    requests:
+      cpu: 500m  # CPU solicitada
+      memory: 1Gi  # Memoria solicitada
+    limits:
+      cpu: 1  # CPU máxima
+      memory: 2Gi  # Memoria máxima
+
+pushgateway:
+  enabled: true  # Habilitar PushGateway
+  replicas: 1  # Número de réplicas del PushGateway
+  image:
+    repository: quay.io/prometheus/pushgateway  # Repositorio de la imagen Docker de PushGateway
+    tag: v1.5.0  # Versión de PushGateway
+    pullPolicy: IfNotPresent  # Política de actualización de la imagen
+  service:
+    type: ClusterIP  # Tipo de servicio (ClusterIP, NodePort, etc.)
+    port: 9091  # Puerto del servicio de PushGateway
+    targetPort: 9091  # Puerto de destino del contenedor de PushGateway
+  resources:
+    requests:
+      cpu: 500m  # CPU solicitada
+      memory: 1Gi  # Memoria solicitada
+    limits:
+      cpu: 1  # CPU máxima
+      memory: 2Gi  # Memoria máxima
