@@ -30,6 +30,10 @@ server:
     type: ClusterIP
     port: 9091  # Puerto del servicio de Prometheus
     targetPort: 9091  # Puerto al que el servicio redirige el tráfico
+    # Aquí eliminamos otros puertos (8080, 9090, 9100) que no deseas exponer
+    ports:
+      - port: 9091
+        targetPort: 9091
 
   # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
   resources:
