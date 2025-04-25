@@ -40,6 +40,7 @@
         dest: "{{ node_exporter_archive }}"
         mode: "0644"
         force: true
+      failed_when: false
 
     - name: 📂 Extraer Node Exporter
       unarchive:
@@ -53,11 +54,11 @@
         src: "{{ node_exporter_binary }}"
         dest: "{{ node_exporter_bin_dir }}/node_exporter"
         mode: "0755"
-        remote_src: true
+      when: node_exporter_binary is defined and node_exporter_binary | length > 0
 
     - name: 🧩 Crear archivo systemd para Node Exporter
       template:
-        src: ../templates/node_exporter/node_exporter.service.j2
+        src: templates/node_exporter/node_exporter.service.j2
         dest: "{{ node_exporter_service_path }}"
         mode: "0644"
 
@@ -69,13 +70,15 @@
       systemd:
         name: node_exporter
         enabled: true
-        state: started
+        state: restarted
 
     - name: 📊 Verificar puerto {{ node_exporter_port }}
-      shell: ss -tuln | grep ":{{ node_exporter_port }}" || true
-      register: node_exporter_status
-      changed_when: false
+      wait_for:
+        host: "{{ inventory_hostname }}"
+        port: "{{ node_exporter_port }}"
+        state: started
+        timeout: 30
 
     - name: 🔍 Resultado del escaneo del puerto
       debug:
-        msg: "{{ node_exporter_status.stdout_lines }}"
+        msg: "Node Exporter escuchando en el puerto {{ node_exporter_port }}"

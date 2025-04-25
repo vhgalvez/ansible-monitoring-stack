@@ -1,83 +1,36 @@
-# playbook/02_install_node_exporter.yml
-# 📦 Instalación y configuración de Node Exporter en máquinas externas para Prometheus
+---
+# playbook/03_update_scrape_targets.yml
+# 🔄 Actualizar los targets de scrape de Prometheus para nodos externos (Node Exporter)
 
-- name: 🐧 Instalar y configurar Node Exporter
-  hosts: external_node_exporter
+- name: 🔄 Actualizar targets de scrape en Prometheus
+  hosts: controller
   become: true
-  gather_facts: true
+  gather_facts: false
 
   vars:
-    node_exporter_version: "1.8.1"
-    node_exporter_port: 9100
-    node_exporter_bin_dir: "/usr/local/bin"
-    node_exporter_user: "node_exporter"
-    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
-
-    # Rutas de instalación
-    node_exporter_archive: "/tmp/node_exporter.tar.gz"
-    node_exporter_src_dir: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
-    node_exporter_binary: "{{ node_exporter_src_dir }}/node_exporter"
+    kubeconfig_path: "/home/victory/.kube/config"
+    prometheus_extra_scrape_config_path: "/tmp/extraScrapeConfigs.yaml"
 
   tasks:
-    - name: 📦 Asegurar que curl esté instalado
-      package:
-        name: curl
-        state: present
+    - name: 📂 Verificar si el archivo de configuración extraScrapeConfigs.yaml existe
+      stat:
+        path: "{{ prometheus_extra_scrape_config_path }}"
+      register: scrape_config_stat
 
-    - name: 👤 Crear usuario {{ node_exporter_user }} si no existe
-      user:
-        name: "{{ node_exporter_user }}"
-        shell: /usr/sbin/nologin
-        system: true
-        create_home: false
-      register: user_created
-      failed_when: false
+    - name: 🔄 Si el archivo extraScrapeConfigs.yaml existe, actualizar configuración de scraping en Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: merged
+        definition:
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: prometheus-server
+            namespace: monitoring
+          data:
+            extraScrapeConfigs.yaml: "{{ lookup('file', prometheus_extra_scrape_config_path) }}"
+      when: scrape_config_stat.stat.exists
 
-    - name: 📥 Descargar Node Exporter {{ node_exporter_version }}
-      get_url:
-        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
-        dest: "{{ node_exporter_archive }}"
-        mode: "0644"
-        force: true
-      failed_when: false
-
-    - name: 📂 Extraer Node Exporter
-      unarchive:
-        src: "{{ node_exporter_archive }}"
-        dest: "/tmp/"
-        remote_src: true
-        creates: "{{ node_exporter_binary }}"
-
-    - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
-      copy:
-        src: "{{ node_exporter_binary }}"
-        dest: "{{ node_exporter_bin_dir }}/node_exporter"
-        mode: "0755"
-      when: node_exporter_binary is defined and node_exporter_binary | length > 0
-
-    - name: 🧩 Crear archivo systemd para Node Exporter
-      template:
-        src: templates/node_exporter/node_exporter.service.j2
-        dest: "{{ node_exporter_service_path }}"
-        mode: "0644"
-
-    - name: ♻️ Recargar systemd
-      systemd:
-        daemon_reload: true
-
-    - name: ✅ Habilitar e iniciar Node Exporter
-      systemd:
-        name: node_exporter
-        enabled: true
-        state: restarted
-
-    - name: 📊 Verificar puerto {{ node_exporter_port }}
-      wait_for:
-        host: "{{ inventory_hostname }}"
-        port: "{{ node_exporter_port }}"
-        state: started
-        timeout: 30
-
-    - name: 🔍 Resultado del escaneo del puerto
+    - name: ✅ Confirmación final
       debug:
-        msg: "Node Exporter escuchando en el puerto {{ node_exporter_port }}."
+        msg: "🎉 Targets de scrape actualizados exitosamente en Prometheus."
