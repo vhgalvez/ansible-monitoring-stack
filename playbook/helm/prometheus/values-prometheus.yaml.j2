@@ -22,4 +22,4 @@ server:
       memory: 2Gi
 
 extraScrapeConfigs: |
-  {{ extraScrapeConfigs | to_yaml | indent(4) }}
+  {{ extraScrapeConfigs | to_yaml | nindent(4) }}

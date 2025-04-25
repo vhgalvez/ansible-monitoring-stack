@@ -7,8 +7,9 @@
 grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"  # PATH extendido para Helm/kubectl desde Ansible
 
+
+
 # ─────────────────────────────────────────────
-# Variables globales para todos los playbooks y roles del stack de monitoreo
 
 extraScrapeConfigs:
   - job_name: 'node-exporter'
