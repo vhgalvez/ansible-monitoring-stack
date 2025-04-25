@@ -1,15 +1,15 @@
 ---
 # helm/prometheus/values-prometheus.yaml.j2
 server:
-  containerPort: {{ prometheus_container_port }}  # Usar variable de Ansible
+  containerPort: 9091  # Puerto del contenedor de Prometheus
 
   extraArgs:
-    web.listen-address: ":{{ prometheus_container_port }}"  # Variable de puerto para la dirección web
+    web.listen-address: ":9091"  # Dirección web del contenedor en el puerto 9091
 
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: {{ prometheus_container_port }}  # Puerto de la sonda de liveness con la variable
+      port: 9091  # Puerto de la sonda de liveness
     initialDelaySeconds: 30
     timeoutSeconds: 5
     periodSeconds: 10
@@ -18,21 +18,21 @@ server:
   readinessProbe:
     httpGet:
       path: /-/ready
-      port: {{ prometheus_container_port }}  # Puerto de la sonda de readiness con la variable
+      port: 9091  # Puerto de la sonda de readiness
     initialDelaySeconds: 30
     timeoutSeconds: 3
     periodSeconds: 5
     failureThreshold: 3
 
   service:
-    port: {{ prometheus_service_port }}  # Puerto del servicio de Prometheus
-    targetPort: {{ prometheus_container_port }}  # Puerto del contenedor que se expondrá a través del servicio
+    port: 9091  # Puerto del servicio de Prometheus
+    targetPort: 9091  # El puerto del contenedor que se expondrá a través del servicio
 
   # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
   resources:
-  requests:
-    memory: "4Gi"     # Ajusta según tus necesidades
-    cpu: "2"          # Ajusta según tus necesidades
-  limits:
-    memory: "8Gi"     # Limita la memoria máxima
-    cpu: "4"          # Limita la CPU máxima
+    requests:
+      memory: "4Gi"   # Memoria solicitada para Prometheus
+      cpu: "2"         # CPU solicitada para Prometheus
+    limits:
+      memory: "8Gi"    # Memoria máxima para Prometheus
+      cpu: "4"         # CPU máxima para Prometheus
