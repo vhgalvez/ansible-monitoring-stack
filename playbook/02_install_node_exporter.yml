@@ -88,13 +88,10 @@
         gather_subset:
           - network  # Solo se recopila información relacionada con la red
 
-    - name: Verificar si la IP está definida
+- name: Verificar IPs de los nodos
+  hosts: external_node_exporter
+  gather_facts: true
+  tasks:
+    - name: Mostrar IP de los nodos
       debug:
         msg: "IP de {{ inventory_hostname }}: {{ hostvars[inventory_hostname].ansible_facts.default_ipv4.address }}"
-        
-    - name: Verificar las IPs de los nodos
-      hosts: external_node_exporter
-      tasks:
-        - name: Mostrar IP de los nodos
-          debug:
-            msg: "IP de {{ inventory_hostname }}: {{ hostvars[inventory_hostname].ansible_facts.default_ipv4.address }}"
