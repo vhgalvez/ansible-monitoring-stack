@@ -1,4 +1,5 @@
 # playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2
+
 # 🔍 Configuración adicional de Prometheus para hacer scrape a nodos externos
 
 {% if groups['external_node_exporter'] is defined and groups['external_node_exporter'] | length > 0 %}
