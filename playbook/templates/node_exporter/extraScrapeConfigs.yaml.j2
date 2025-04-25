@@ -7,8 +7,8 @@ scrape_configs:
       - targets:
         {% for host in groups['external_node_exporter'] %}
           {% if hostvars[host].ansible_facts.default_ipv4 is defined %}
-          - "{{ hostvars[host].ansible_facts.default_ipv4.address }}:{{ node_exporter_port }}"
+          - "{{ hostvars[host].ansible_facts.default_ipv4.address }}:9100"
           {% else %}
-          - "IP_NO_DISPONIBLE:{{ node_exporter_port }}"  # En caso de que no haya IPv4
+          - "IP_NO_DISPONIBLE:9100"
           {% endif %}
         {% endfor %}
