@@ -9,7 +9,6 @@ grafana_env:
 
 node_exporter_port: 9100
 
- kubeconfig_path: "/home/victory/.kube/config"
 
 # Configuración de Prometheus
 prometheus_container_port: 9091

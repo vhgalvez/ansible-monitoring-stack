@@ -10,6 +10,8 @@
     KUBECONFIG: "/home/victory/.kube/config"  # Usando la misma ruta de kubeconfig
 
   vars:
+     kubeconfig_path: "/home/victory/.kube/config"
+
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
