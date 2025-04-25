@@ -6,5 +6,3 @@
 # 🛠️ Variables de entorno para Helm y kubectl
 grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"  # PATH extendido para Helm/kubectl desde Ansible
-
-prometheus_container_port: 9091
