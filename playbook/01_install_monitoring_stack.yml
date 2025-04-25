@@ -15,7 +15,7 @@
     prometheus_service_port: 9091
     prometheus_storage_class: "longhorn"
     prometheus_pvc_size: "8Gi"
-    prometheus_chart_version: "27.9.0"
+    prometheus_chart_version: " 27.11.0"
     prometheus_service_type: "ClusterIP"
     prometheus_values_path: "/tmp/values-prometheus.yaml"
 
