@@ -21,5 +21,12 @@ server:
       cpu: 1
       memory: 2Gi
 
+# Configuración adicional de scrape
 extraScrapeConfigs: |
-  {{ extraScrapeConfigs | to_yaml | nindent(4) }}
+  - job_name: 'node-exporter'
+    kubernetes_sd_configs:
+      - role: endpoints
+    relabel_configs:
+      - source_labels: [__meta_kubernetes_endpoints_name]
+        regex: 'node-exporter-prometheus-node-exporter'
+        action: keep

@@ -8,14 +8,3 @@ grafana_env:
   PATH: "/usr/local/bin:/usr/bin:/bin"  # PATH extendido para Helm/kubectl desde Ansible
 
 
-
-# ─────────────────────────────────────────────
-
-extraScrapeConfigs:
-  - job_name: 'node-exporter'
-    kubernetes_sd_configs:
-      - role: endpoints
-    relabel_configs:
-      - source_labels: [__meta_kubernetes_endpoints_name]
-        regex: 'node-exporter-prometheus-node-exporter'
-        action: keep
