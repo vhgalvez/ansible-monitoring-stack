@@ -82,3 +82,19 @@
     - name: 🔍 Resultado del escaneo del puerto
       debug:
         msg: "Node Exporter escuchando en el puerto {{ node_exporter_port }}"
+
+    - name: Asegurarse de que se recopilen los hechos de Ansible
+      ansible.builtin.setup:
+        gather_subset:
+          - network  # Solo se recopila información relacionada con la red
+
+    - name: Verificar si la IP está definida
+      debug:
+        msg: "IP de {{ inventory_hostname }}: {{ hostvars[inventory_hostname].ansible_facts.default_ipv4.address }}"
+        
+    - name: Verificar las IPs de los nodos
+      hosts: external_node_exporter
+      tasks:
+        - name: Mostrar IP de los nodos
+          debug:
+            msg: "IP de {{ inventory_hostname }}: {{ hostvars[inventory_hostname].ansible_facts.default_ipv4.address }}"
