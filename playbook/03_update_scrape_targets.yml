@@ -20,7 +20,7 @@
     - name: 🔄 Si el archivo extraScrapeConfigs.yaml existe, actualizar configuración de scraping en Prometheus
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
-        state: merged
+        state: present  # Se usa 'present' en lugar de 'merged'
         definition:
           apiVersion: v1
           kind: ConfigMap
@@ -43,5 +43,5 @@
     - name: Asegurarse de que los hechos de Ansible se recopilen
       ansible.builtin.setup:
         gather_subset:
-          - network # Solo se recopila información relacionada con la red
+          - network  # Solo se recopila información relacionada con la red
       when: ansible_facts is not defined
