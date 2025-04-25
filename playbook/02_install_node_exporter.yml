@@ -20,7 +20,6 @@
     node_exporter_binary: "{{ node_exporter_src_dir }}/node_exporter"
 
   tasks:
-
     - name: 📦 Asegurar que curl esté instalado
       package:
         name: curl

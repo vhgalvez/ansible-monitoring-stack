@@ -7,7 +7,7 @@
   gather_facts: false
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    KUBECONFIG: "/home/victory/.kube/config"  # Usando la misma ruta de kubeconfig
+    KUBECONFIG: "/home/victory/.kube/config" # Usando la misma ruta de kubeconfig
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
