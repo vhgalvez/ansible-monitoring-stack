@@ -1,38 +1,32 @@
 ---
 # helm/prometheus/values-prometheus.yaml.j2
 server:
-  containerPort: 9091  # Puerto del contenedor de Prometheus
-
+  containerPort: 9091  # Puerto interno del contenedor de Prometheus
   extraArgs:
-    web.listen-address: ":9091"  # Dirección web del contenedor en el puerto 9091
+    web.listen-address: ":9091"  # Dirección y puerto en el que Prometheus escucha las solicitudes web
 
+  # Configuración del livenessProbe
   livenessProbe:
     httpGet:
       path: /-/healthy
-      port: 9091  # Puerto de la sonda de liveness
+      port: 9091  # Puerto en el que se realiza la comprobación de liveness
     initialDelaySeconds: 30
     timeoutSeconds: 5
     periodSeconds: 10
     failureThreshold: 3
 
+  # Configuración del readinessProbe
   readinessProbe:
     httpGet:
       path: /-/ready
-      port: 9091  # Puerto de la sonda de readiness
+      port: 9091  # Puerto en el que se realiza la comprobación de readiness
     initialDelaySeconds: 30
     timeoutSeconds: 3
     periodSeconds: 5
     failureThreshold: 3
 
+  # Configuración del servicio de Prometheus
   service:
+    type: ClusterIP
     port: 9091  # Puerto del servicio de Prometheus
-    targetPort: 9091  # El puerto del contenedor que se expondrá a través del servicio
-
-  # Recursos de Prometheus: Asegurando que tenga suficiente CPU y memoria
-  resources:
-    requests:
-      memory: "4Gi"   # Memoria solicitada para Prometheus
-      cpu: "2"         # CPU solicitada para Prometheus
-    limits:
-      memory: "8Gi"    # Memoria máxima para Prometheus
-      cpu: "4"         # CPU máxima para Prometheus
+    targetPort: 9091  # Puerto al que el servicio redirige el tráfico
