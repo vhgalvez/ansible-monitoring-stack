@@ -54,6 +54,14 @@ Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgal
 ```
 
 ---
+![alt text](additional_resources/image/grafana.png)
+
+![alt text](additional_resources/image/grafana.png)
+
+![alt text](additional_resources/image/prometeus.png)
+
+![alt text](additional_resources/image/monitoreo_03.png)
+---
 
 ## ⚙️ Requisitos
 
