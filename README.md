@@ -52,22 +52,6 @@ Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgal
 ├── LICENSE
 └── README.md
 ```
-
----
-![alt text](image/monitoreo_01.png)
-
-![alt text](image/monitoreo_02.png)
-
-![alt text](image/monitoreo_03.png)
-
-![alt text](image/monitoreo_grafana_01.png)
-
-![alt text](image/monitoreo_grafana_02.png)
-
-![alt text](image/monitoreo_prometheus.png)
-
----
-
 ## ⚙️ Requisitos
 
 Antes de comenzar, asegúrate de tener lo siguiente instalado y configurado:
@@ -190,24 +174,20 @@ kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
 
 ---
 
-## 🧩 Monitorización con virt-top
+---
+![alt text](image/monitoreo_01.png)
 
-Si estás en un entorno virtualizado, puedes usar `virt-top` para monitorear el uso de recursos de las máquinas virtuales en tiempo real:
+![alt text](image/monitoreo_02.png)
 
-### Instalación de virt-top:
+![alt text](image/monitoreo_03.png)
 
-```bash
-sudo dnf install virt-top
-```
+![alt text](image/monitoreo_grafana_01.png)
 
-### Uso básico:
+![alt text](image/monitoreo_grafana_02.png)
 
-```bash
-sudo virt-top
-```
+![alt text](image/monitoreo_prometheus.png)
 
 ---
-
 ## 📦 Notas adicionales
 
 - Grafana quedará accesible internamente en el namespace `monitoring` con el password definido en `group_vars/all.yml`.
