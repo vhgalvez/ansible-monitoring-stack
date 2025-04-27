@@ -309,12 +309,6 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 
 
 
-# muestra el estado de los port-forwards
- ps aux | grep port-forward
-
-# ✅ Matar antiguos
-sudo pkill -f "kubectl port-forward"
-
 # ✅ Port-forward de Grafana
 sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 3000:3000 > ~/grafana.log 2>&1 &
 
@@ -366,6 +360,14 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 32001:80
 
 kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:3000
+
+
+# muestra el estado de los port-forwards
+ ps aux | grep port-forward
+
+# ✅ Matar antiguos
+sudo pkill -f "kubectl port-forward"
+
 
 
 nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 32001:80 > /tmp/prometheus-port-forward.log 2>&1 &
