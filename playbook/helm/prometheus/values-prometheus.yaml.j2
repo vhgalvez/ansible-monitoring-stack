@@ -20,3 +20,8 @@ server:
     limits:
       cpu: 1
       memory: 2Gi
+
+## 🔥 Cargar configuraciones extra de scrape
+  extraScrapeConfigs:
+    existingSecret: prometheus-additional-scrape-configs
+    key: extraScrapeConfigs.yaml
