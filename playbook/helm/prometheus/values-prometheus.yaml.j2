@@ -23,10 +23,9 @@ server:
       memory: 2Gi
 
   serverFiles:
-    prometheus.yml:
-      scrape_configs: []
+    prometheus.yml: {}
 
-extraScrapeConfigsSecret:
-  enabled: true
-  name: prometheus-additional-scrape-configs
-  key: extraScrapeConfigs.yaml
+  extraScrapeConfigsSecret:
+    enabled: true
+    name: prometheus-additional-scrape-configs
+    key: extraScrapeConfigs.yaml
