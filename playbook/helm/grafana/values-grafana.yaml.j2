@@ -11,7 +11,7 @@ persistence:
   size: {{ grafana_pvc_size }}
 
 service:
-  type: {{ grafana_service_type }}
-  port: {{ grafana_service_port }}
-  targetPort: {{ grafana_container_port }}
-  name: http
+  type: NodePort
+  port: 3000
+  targetPort: 3000
+  nodePort: 32002

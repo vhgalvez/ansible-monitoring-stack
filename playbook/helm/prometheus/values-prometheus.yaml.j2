@@ -1,18 +1,14 @@
 # helm/prometheus/values-prometheus.yaml.j2
+
 server:
   service:
     type: NodePort
-    port: 80
+    port: 9090
     targetPort: 9090
     nodePort: 32001
 
   ingress:
-    enabled: true
-    hosts:
-      - prometheus.local
-    paths:
-      - /
-
+    enabled: false
   resources:
     requests:
       cpu: 500m
