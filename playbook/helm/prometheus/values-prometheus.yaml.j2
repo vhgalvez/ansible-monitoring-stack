@@ -1,5 +1,4 @@
 # helm/prometheus/values-prometheus.yaml.j2
-
 server:
   service:
     type: NodePort
@@ -25,7 +24,8 @@ server:
   serverFiles:
     prometheus.yml:
       scrape_configs: []
-    extraScrapeConfigsSecret:
-      enabled: true
-      name: prometheus-additional-scrape-configs
-      key: extraScrapeConfigs.yaml
+
+  extraScrapeConfigsSecret:
+    enabled: true
+    name: prometheus-additional-scrape-configs
+    key: extraScrapeConfigs.yaml
