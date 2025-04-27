@@ -3,12 +3,17 @@
 server:
   service:
     type: NodePort
-    port: 9090
+    port: 80
     targetPort: 9090
     nodePort: 32001
 
   ingress:
-    enabled: false
+    enabled: true
+    hosts:
+      - prometheus.local
+    paths:
+      - /
+
   resources:
     requests:
       cpu: 500m
@@ -17,6 +22,10 @@ server:
       cpu: 1
       memory: 2Gi
 
-extraScrapeConfigs:
-  existingSecret: prometheus-additional-scrape-configs
-  key: extraScrapeConfigs.yaml
+  serverFiles:
+    prometheus.yml:
+      scrape_configs: []
+    extraScrapeConfigsSecret:
+      enabled: true
+      name: prometheus-additional-scrape-configs
+      key: extraScrapeConfigs.yaml
