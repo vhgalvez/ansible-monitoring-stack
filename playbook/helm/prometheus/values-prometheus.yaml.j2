@@ -2,8 +2,8 @@
 server:
   service:
     type: NodePort
-    port: 9091
-    targetPort: 9091
+    port: 80
+    targetPort: 9090
     nodePort: 32001
 
   ingress:
@@ -21,7 +21,6 @@ server:
       cpu: 1
       memory: 2Gi
 
-## 🔥 Cargar configuraciones extra de scrape
-  extraScrapeConfigs:
-    existingSecret: prometheus-additional-scrape-configs
-    key: extraScrapeConfigs.yaml
+extraScrapeConfigs:
+  existingSecret: prometheus-additional-scrape-configs
+  key: extraScrapeConfigs.yaml

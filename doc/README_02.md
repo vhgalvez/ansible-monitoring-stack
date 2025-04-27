@@ -351,3 +351,11 @@ sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -
 
 
 sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 3000:80 > ~/grafana.log 2>&1 &
+
+
+
+
+
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 3000:3000 > ~/grafana.log 2>&1 & disown
+
+sudo env "PATH=$PATH" KUBECONFIG=$HOME/.kube/config nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 9091:80 > ~/prometheus.log 2>&1 & disown
