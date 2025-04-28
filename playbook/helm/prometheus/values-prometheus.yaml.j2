@@ -27,6 +27,7 @@ server:
         evaluation_interval: 15s
 
       scrape_configs:
+        # Kubernetes APIservers
         - job_name: 'kubernetes-apiservers'
           kubernetes_sd_configs:
             - role: endpoints
@@ -35,6 +36,7 @@ server:
               action: keep
               regex: default;kubernetes;https
 
+        # Kubernetes Nodes (Internos)
         - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
             - role: node
@@ -42,7 +44,8 @@ server:
             - action: labelmap
               regex: __meta_kubernetes_node_label_(.+)
 
-        - job_name: 'node-exporter'
+        # Node Exporter en nodos externos
+        - job_name: 'node-exporter-externos'
           static_configs:
             - targets:
                 - "10.17.3.11:9100"
@@ -50,4 +53,7 @@ server:
                 - "10.17.3.13:9100"
                 - "10.17.3.14:9100"
                 - "10.17.5.20:9100"
-                - "192.168.0.23:9100"
+                - "192.168.0.15:9100"
+              labels:
+                environment: "external"
+                monitored_by: "prometheus"
