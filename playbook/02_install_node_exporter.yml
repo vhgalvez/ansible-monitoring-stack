@@ -2,7 +2,7 @@
 # playbook/02_install_node_exporter.yml
 # 📦 Instalación y configuración de Node Exporter en máquinas externas para Prometheus
 
-- name: 🐧 Instalar y configurar Node Exporter
+- name: 🐧 Instalar y configurar Node Exporter en nodos externos
   hosts: external_node_exporter
   become: true
   gather_facts: true
@@ -13,57 +13,72 @@
     node_exporter_bin_dir: "/usr/local/bin"
     node_exporter_user: "node_exporter"
     node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
+    node_exporter_download_url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+    node_exporter_tmp_dir: "/tmp/node_exporter"
 
   tasks:
-    - name: 📦 Asegurar que curl esté instalado
+    - name: 📦 Asegurar que 'curl' esté instalado
       package:
         name: curl
         state: present
 
-    - name: 👤 Crear usuario {{ node_exporter_user }} si no existe
+    - name: 👤 Crear usuario '{{ node_exporter_user }}' si no existe
       user:
         name: "{{ node_exporter_user }}"
         shell: /usr/sbin/nologin
         system: true
         create_home: false
+      register: user_created
+      ignore_errors: true
 
-    - name: 📥 Descargar Node Exporter {{ node_exporter_version }}
+    - name: 🧹 Limpiar carpeta temporal anterior si existe
+      file:
+        path: "{{ node_exporter_tmp_dir }}"
+        state: absent
+
+    - name: 📥 Descargar Node Exporter
       get_url:
-        url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        url: "{{ node_exporter_download_url }}"
         dest: "/tmp/node_exporter.tar.gz"
         mode: "0644"
 
     - name: 📂 Extraer Node Exporter
       unarchive:
         src: "/tmp/node_exporter.tar.gz"
-        dest: "/tmp/"
+        dest: "{{ node_exporter_tmp_dir }}"
         remote_src: true
+        creates: "{{ node_exporter_tmp_dir }}/node_exporter-{{ node_exporter_version }}.linux-amd64"
 
-    - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
+    - name: 🚀 Copiar binario a '{{ node_exporter_bin_dir }}'
       copy:
-        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+        src: "{{ node_exporter_tmp_dir }}/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
         dest: "{{ node_exporter_bin_dir }}/node_exporter"
         mode: "0755"
+        owner: root
+        group: root
 
     - name: 🧩 Crear archivo systemd para Node Exporter
       template:
         src: "templates/node_exporter/node_exporter.service.j2"
         dest: "{{ node_exporter_service_path }}"
         mode: "0644"
+        owner: root
+        group: root
 
     - name: ✅ Habilitar e iniciar Node Exporter
       systemd:
         name: node_exporter
         enabled: true
-        state: started
+        state: restarted
+        daemon_reload: true
 
-    - name: 📊 Verificar puerto {{ node_exporter_port }}
+    - name: 📊 Esperar que el puerto '{{ node_exporter_port }}' esté escuchando
       wait_for:
         host: "{{ inventory_hostname }}"
         port: "{{ node_exporter_port }}"
         state: started
         timeout: 30
 
-    - name: 🔍 Resultado del escaneo del puerto
+    - name: 🔍 Mostrar resultado del escaneo del puerto
       debug:
-        msg: "Node Exporter escuchando en el puerto {{ node_exporter_port }}"
+        msg: "🎯 Node Exporter escuchando correctamente en el puerto {{ node_exporter_port }}"

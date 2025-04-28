@@ -13,6 +13,3 @@
 
 - name: 2 Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
-
-- name: 3 Generar y aplicar configuración de scrapes externos
-  import_playbook: 03_update_scrape_targets.yml

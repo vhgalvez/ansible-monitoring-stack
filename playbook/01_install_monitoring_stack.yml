@@ -1,6 +1,6 @@
 ---
 # playbook/01_install_monitoring_stack.yml
-# Instalación robusta de Prometheus + Grafana con Helm y configuración persistente
+# 🧱 Instalación robusta de Prometheus + Grafana con Helm y configuración persistente
 
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
@@ -8,40 +8,31 @@
   gather_facts: false
   environment:
     PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    KUBECONFIG: "/home/victory/.kube/config" # Usando la misma ruta de kubeconfig
+    KUBECONFIG: "/home/victory/.kube/config"
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
 
     # Configuración de Prometheus
-    prometheus_container_port: 9091
-    prometheus_service_port: 9091
-    prometheus_storage_class: "longhorn"
-    prometheus_pvc_size: "8Gi"
-    prometheus_chart_version: "27.11.0"  # Versión correcta del chart
-    prometheus_service_type: "ClusterIP"
+    prometheus_chart_version: "27.11.0"
     prometheus_values_path: "/tmp/values-prometheus.yaml"
 
     # Configuración de Grafana
-    grafana_container_port: 3000
-    grafana_service_port: 3000
-    grafana_storage_class: "longhorn"
-    grafana_pvc_size: "5Gi"
-    grafana_admin_user: "admin"
-    grafana_admin_password: "admin123"
     grafana_chart_version: "8.12.1"
-    grafana_service_type: "ClusterIP"
     grafana_values_path: "/tmp/values-grafana.yaml"
-
-    # Extras
-    node_exporter_port: 9100
-    extra_scrape_config_path: "/tmp/extraScrapeConfigs.yaml"
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
       command: "/usr/local/bin/kubectl version --client"
       register: kubectl_check
       failed_when: kubectl_check.rc != 0
+      changed_when: false
+
+    # 🔹 Namespace 'monitoring'
+    - name: 📁 Verificar si namespace 'monitoring' existe
+      command: kubectl get namespace monitoring
+      register: monitoring_namespace
+      failed_when: false
       changed_when: false
 
     - name: 📁 Crear namespace 'monitoring' si no existe
@@ -53,40 +44,32 @@
           kind: Namespace
           metadata:
             name: monitoring
+      when: monitoring_namespace.rc != 0
 
+    # 🔹 Repositorios Helm
     - name: 🔗 Configurar repositorios Helm
       block:
         - name: Añadir repo Prometheus
           command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
           register: prometheus_repo
           failed_when: prometheus_repo.rc != 0 and "exists" not in prometheus_repo.stderr
+          changed_when: false
 
         - name: Añadir repo Grafana
           command: helm repo add grafana https://grafana.github.io/helm-charts
           register: grafana_repo
           failed_when: grafana_repo.rc != 0 and "exists" not in grafana_repo.stderr
+          changed_when: false
 
         - name: 🔄 Actualizar repos Helm
           command: helm repo update
+          changed_when: false
 
-    - name: 📄 Renderizar valores para Prometheus
+    # 🔹 Despliegue Prometheus
+    - name: 📄 Renderizar valores de Prometheus
       template:
         src: helm/prometheus/values-prometheus.yaml.j2
         dest: "{{ prometheus_values_path }}"
-
-    - name: 📄 Renderizar extraScrapeConfigs.yaml para nodos externos
-      template:
-        src: templates/node_exporter/extraScrapeConfigs.yaml.j2
-        dest: "{{ extra_scrape_config_path }}"
-
-    - name: 🔐 Crear Secret con configuración de scraping externo
-      shell: >
-        kubectl create secret generic prometheus-additional-scrape-configs
-        --from-file=extraScrapeConfigs.yaml={{ extra_scrape_config_path }}
-        --namespace=monitoring --dry-run=client -o yaml | kubectl apply -f -
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"
-        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
     - name: 🚀 Desplegar Prometheus con Helm
       kubernetes.core.helm:
@@ -100,7 +83,8 @@
           - "{{ prometheus_values_path }}"
         state: present
 
-    - name: 📄 Renderizar valores para Grafana
+    # 🔹 Despliegue Grafana
+    - name: 📄 Renderizar valores de Grafana
       template:
         src: helm/grafana/values-grafana.yaml.j2
         dest: "{{ grafana_values_path }}"
@@ -117,13 +101,14 @@
           - "{{ grafana_values_path }}"
         state: present
 
-    - name: 📦 Verificar estado de los pods en 'monitoring'
+    # 🔹 Verificación Final
+    - name: 📆 Esperar a que los pods estén listos
       shell: kubectl get pods -n monitoring
       register: pod_status
+      retries: 10
+      delay: 6
+      until: pod_status.rc == 0
       changed_when: false
-      environment:
-        KUBECONFIG: "{{ kubeconfig_path }}"
-        PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
     - name: 🔍 Mostrar estado de los pods
       debug:
