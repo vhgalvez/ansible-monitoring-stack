@@ -20,6 +20,10 @@
     # Configuración de Grafana
     grafana_chart_version: "8.12.1"
     grafana_values_path: "/tmp/values-grafana.yaml"
+    grafana_admin_user: "admin"
+    grafana_admin_password: "123456"
+    grafana_storage_class: "longhorn"
+    grafana_pvc_size: "5Gi"
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
@@ -65,7 +69,7 @@
           command: helm repo update
           changed_when: false
 
-    # 🔹 Despliegue Prometheus
+    # 🔹 Despliegue de Prometheus
     - name: 📄 Renderizar valores de Prometheus
       template:
         src: helm/prometheus/values-prometheus.yaml.j2
@@ -83,7 +87,7 @@
           - "{{ prometheus_values_path }}"
         state: present
 
-    # 🔹 Despliegue Grafana
+    # 🔹 Despliegue de Grafana
     - name: 📄 Renderizar valores de Grafana
       template:
         src: helm/grafana/values-grafana.yaml.j2
