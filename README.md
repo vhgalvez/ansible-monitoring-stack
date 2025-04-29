@@ -202,3 +202,15 @@ Este proyecto fue creado como parte del stack FlatcarMicroCloud y tiene como obj
 
 **Autor:** [@vhgalvez](https://github.com/vhgalvez)
 
+
+# muestra el estado de los port-forwards
+ ps aux | grep port-forward
+
+# ✅ Matar antiguos
+sudo pkill -f "kubectl port-forward"
+
+
+
+nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 32001:80 > /tmp/prometheus-port-forward.log 2>&1 &
+
+nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:3000 > /tmp/grafana-port-forward.log 2>&1 &
