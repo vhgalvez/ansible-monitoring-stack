@@ -52,6 +52,9 @@ Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgal
 ├── LICENSE
 └── README.md
 ```
+
+---
+
 ## ⚙️ Requisitos
 
 Antes de comenzar, asegúrate de tener lo siguiente instalado y configurado:
@@ -174,20 +177,17 @@ kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
 
 ---
 
----
-![alt text](image/monitoreo_01.png)
+## 🖼 Imágenes de referencia
 
-![alt text](image/monitoreo_02.png)
-
-![alt text](image/monitoreo_03.png)
-
-![alt text](image/monitoreo_grafana_01.png)
-
-![alt text](image/monitoreo_grafana_02.png)
-
-![alt text](image/monitoreo_prometheus.png)
+![Monitoreo 1](image/monitoreo_01.png)
+![Monitoreo 2](image/monitoreo_02.png)
+![Monitoreo 3](image/monitoreo_03.png)
+![Grafana 1](image/monitoreo_grafana_01.png)
+![Grafana 2](image/monitoreo_grafana_02.png)
+![Prometheus](image/monitoreo_prometheus.png)
 
 ---
+
 ## 📦 Notas adicionales
 
 - Grafana quedará accesible internamente en el namespace `monitoring` con el password definido en `group_vars/all.yml`.
@@ -196,21 +196,31 @@ kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
 
 ---
 
+## 🛠 Gestión de port-forwards
+
+### Mostrar el estado de los port-forwards:
+
+```bash
+ps aux | grep port-forward
+```
+
+### Matar procesos antiguos:
+
+```bash
+sudo pkill -f "kubectl port-forward"
+```
+
+### Configurar nuevos port-forwards:
+
+```bash
+nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 32001:80 > /tmp/prometheus-port-forward.log 2>&1 &
+nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:3000 > /tmp/grafana-port-forward.log 2>&1 &
+```
+
+---
+
 ## ✨ Créditos
 
 Este proyecto fue creado como parte del stack FlatcarMicroCloud y tiene como objetivo simplificar la gestión de monitoreo en Kubernetes usando herramientas de código abierto y automatización con Ansible.
 
 **Autor:** [@vhgalvez](https://github.com/vhgalvez)
-
-
-# muestra el estado de los port-forwards
- ps aux | grep port-forward
-
-# ✅ Matar antiguos
-sudo pkill -f "kubectl port-forward"
-
-
-
-nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 32001:80 > /tmp/prometheus-port-forward.log 2>&1 &
-
-nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:3000 > /tmp/grafana-port-forward.log 2>&1 &
