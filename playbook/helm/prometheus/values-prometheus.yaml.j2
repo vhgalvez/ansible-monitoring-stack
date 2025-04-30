@@ -45,7 +45,6 @@ server:
             - action: labelmap
               regex: __meta_kubernetes_node_label_(.+)
 
-# 👇 Esto debe estar fuera de 'server', al nivel raíz del YAML
 additionalScrapeConfigs:
   name: extra-scrape-configs
   key: extraScrapeConfigs.yaml
