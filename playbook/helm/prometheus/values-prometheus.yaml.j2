@@ -48,3 +48,5 @@ server:
 extraScrapeConfigs:
   enabled: true
   existingSecret: "extra-scrape-configs"
+  value: |
+    {{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | to_nice_yaml | indent(4) }}
