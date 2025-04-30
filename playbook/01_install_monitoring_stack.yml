@@ -65,7 +65,6 @@
             extraScrapeConfigs.yaml: |
               {{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
 
-
     # 🔹 Repositorios Helm
     - name: 🔗 Configurar repositorios Helm
       block:
