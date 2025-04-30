@@ -45,6 +45,8 @@ server:
             - action: labelmap
               regex: __meta_kubernetes_node_label_(.+)
 
-additionalScrapeConfigs:
-  name: extra-scrape-configs
-  key: extraScrapeConfigs.yaml
+extraScrapeConfigs:
+  enabled: true
+  existingSecret:
+    name: extra-scrape-configs
+    key: extraScrapeConfigs.yaml
