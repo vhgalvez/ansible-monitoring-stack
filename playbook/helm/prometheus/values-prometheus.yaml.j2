@@ -45,8 +45,6 @@ server:
             - action: labelmap
               regex: __meta_kubernetes_node_label_(.+)
 
-extraScrapeConfigs:
-  enabled: true
-  existingSecret: "extra-scrape-configs"
-  value: |
-    {{ lookup('template', 'templates/node_exporter/extraScrapeConfigs.yaml.j2') | to_nice_yaml | indent(4) }}
+additionalScrapeConfigs:
+  name: extra-scrape-configs
+  key: extraScrapeConfigs.yaml
