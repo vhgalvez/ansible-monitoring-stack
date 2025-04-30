@@ -63,7 +63,7 @@
           type: Opaque
           stringData:
             extraScrapeConfigs.yaml: |
-              {{ lookup('template', 'templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
+              {{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
 
     # 🔹 Repositorios Helm
     - name: 🔗 Configurar repositorios Helm
