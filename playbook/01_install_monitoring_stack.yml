@@ -1,6 +1,4 @@
 # playbook/01_install_monitoring_stack.yml
-# 🧱 Instalación robusta de Prometheus + Grafana con Helm y configuración persistente
-
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   become: true
@@ -11,12 +9,8 @@
 
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
-
-    # Configuración de Prometheus
     prometheus_chart_version: "27.11.0"
     prometheus_values_path: "/tmp/values-prometheus.yaml"
-
-    # Configuración de Grafana
     grafana_chart_version: "8.12.1"
     grafana_values_path: "/tmp/values-grafana.yaml"
     grafana_admin_user: "admin"
@@ -31,7 +25,6 @@
       failed_when: kubectl_check.rc != 0
       changed_when: false
 
-    # 🔹 Namespace 'monitoring'
     - name: 📁 Verificar si namespace 'monitoring' existe
       command: kubectl get namespace monitoring
       register: monitoring_namespace
@@ -49,7 +42,6 @@
             name: monitoring
       when: monitoring_namespace.rc != 0
 
-    # 🔐 Crear Secret con extraScrapeConfigs (para Node Exporters externos)
     - name: 🔒 Crear Secret 'extra-scrape-configs' para Prometheus
       kubernetes.core.k8s:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -63,9 +55,8 @@
           type: Opaque
           stringData:
             extraScrapeConfigs.yaml: |
-              {{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
+              {{ lookup('file', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
 
-    # 🔹 Repositorios Helm
     - name: 🔗 Configurar repositorios Helm
       block:
         - name: Añadir repo Prometheus
@@ -84,7 +75,6 @@
           command: helm repo update
           changed_when: false
 
-    # 🔹 Despliegue de Prometheus
     - name: 📄 Renderizar valores de Prometheus
       template:
         src: helm/prometheus/values-prometheus.yaml.j2
@@ -102,7 +92,6 @@
           - "{{ prometheus_values_path }}"
         state: present
 
-    # 🔹 Despliegue de Grafana
     - name: 📄 Renderizar valores de Grafana
       template:
         src: helm/grafana/values-grafana.yaml.j2
@@ -120,7 +109,6 @@
           - "{{ grafana_values_path }}"
         state: present
 
-    # 🔹 Verificación Final
     - name: 📆 Esperar a que los pods estén listos
       shell: kubectl get pods -n monitoring
       register: pod_status
