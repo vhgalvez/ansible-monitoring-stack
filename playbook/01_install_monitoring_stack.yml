@@ -55,7 +55,7 @@
           type: Opaque
           stringData:
             extraScrapeConfigs.yaml: |
-              {{ lookup('file', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
+              {{ lookup('file', 'templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
 
     - name: 🔗 Configurar repositorios Helm
       block:
