@@ -20,6 +20,22 @@ server:
       cpu: 1
       memory: 2Gi
 
+  extraScrapeConfigs:
+    - job_name: 'node-exporter-externos'
+      scrape_interval: 15s
+      scrape_timeout: 10s
+      static_configs:
+        - targets:
+            - "10.17.3.11:9100"
+            - "10.17.3.12:9100"
+            - "10.17.3.13:9100"
+            - "10.17.3.14:9100"
+            - "10.17.5.20:9100"
+            - "192.168.0.15:9100"
+          labels:
+            environment: "external"
+            monitored_by: "prometheus"
+
   serverFiles:
     prometheus.yml:
       global:
@@ -46,19 +62,3 @@ server:
           relabel_configs:
             - action: labelmap
               regex: __meta_kubernetes_node_label_(.+)
-
-        # Node Exporter en nodos externos
-        - job_name: 'node-exporter-externos'
-          scrape_interval: 15s
-          scrape_timeout: 10s
-          static_configs:
-            - targets:
-                - "10.17.3.11:9100"
-                - "10.17.3.12:9100"
-                - "10.17.3.13:9100"
-                - "10.17.3.14:9100"
-                - "10.17.5.20:9100"
-                - "192.168.0.15:9100"
-              labels:
-                environment: "external"
-                monitored_by: "prometheus"
