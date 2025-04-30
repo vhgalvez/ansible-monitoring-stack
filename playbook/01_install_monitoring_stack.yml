@@ -1,4 +1,3 @@
----
 # playbook/01_install_monitoring_stack.yml
 # 🧱 Instalación robusta de Prometheus + Grafana con Helm y configuración persistente
 
@@ -49,6 +48,22 @@
           metadata:
             name: monitoring
       when: monitoring_namespace.rc != 0
+
+    # 🔐 Crear Secret con extraScrapeConfigs (para Node Exporters externos)
+    - name: 🔒 Crear Secret 'extra-scrape-configs' para Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: extra-scrape-configs
+            namespace: monitoring
+          type: Opaque
+          stringData:
+            extraScrapeConfigs.yaml: |
+              {{ lookup('template', 'playbook/templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
 
     # 🔹 Repositorios Helm
     - name: 🔗 Configurar repositorios Helm
