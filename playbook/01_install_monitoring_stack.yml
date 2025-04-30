@@ -42,21 +42,6 @@
             name: monitoring
       when: monitoring_namespace.rc != 0
 
-    - name: 🔒 Crear Secret 'extra-scrape-configs' para Prometheus
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        state: present
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: extra-scrape-configs
-            namespace: monitoring
-          type: Opaque
-          stringData:
-            extraScrapeConfigs.yaml: |
-              {{ lookup('file', 'templates/node_exporter/extraScrapeConfigs.yaml.j2') | indent(14) }}
-
     - name: 🔗 Configurar repositorios Helm
       block:
         - name: Añadir repo Prometheus
