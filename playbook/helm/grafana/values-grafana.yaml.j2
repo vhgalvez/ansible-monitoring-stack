@@ -15,3 +15,13 @@ service:
   port: 3000
   targetPort: 3000
   nodePort: 32002
+
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  annotations:
+    kubernetes.io/ingress.class: traefik
+  hosts:
+    - grafana.local
+  paths:
+    - /

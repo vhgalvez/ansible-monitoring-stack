@@ -7,6 +7,9 @@ server:
 
   ingress:
     enabled: true
+    ingressClassName: traefik  # 👈 Usado por Traefik v2+
+    annotations:
+      kubernetes.io/ingress.class: traefik  # 👈 Compatibilidad con algunos charts
     hosts:
       - prometheus.local
     paths:
