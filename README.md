@@ -220,6 +220,11 @@ nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:300
 
 ---
 
+## instalar el stack completo
+```bash
+sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
+```
+
 ## ✨ Créditos
 
 Este proyecto fue creado como parte del stack FlatcarMicroCloud y tiene como objetivo simplificar la gestión de monitoreo en Kubernetes usando herramientas de código abierto y automatización con Ansible.
