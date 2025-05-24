@@ -13,6 +13,9 @@ server:
       traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
       traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
+      traefik.ingress.kubernetes.io/auth-type: basic
+      traefik.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
+      traefik.ingress.kubernetes.io/auth-header-field: Authorization
     hosts:
       - host: prometheus.cefaslocalserver.com
         paths:

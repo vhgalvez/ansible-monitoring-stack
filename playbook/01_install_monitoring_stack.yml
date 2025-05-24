@@ -17,6 +17,8 @@
     grafana_admin_password: "123456"
     grafana_storage_class: "longhorn"
     grafana_pvc_size: "5Gi"
+    prometheus_auth_user: "admin"
+    prometheus_auth_pass: "admin123"
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
@@ -41,6 +43,26 @@
           metadata:
             name: monitoring
       when: monitoring_namespace.rc != 0
+
+    - name: 🔐 Generar hash htpasswd para Prometheus
+      delegate_to: localhost
+      run_once: true
+      command: >
+        python3 -c "import crypt; print('{{ prometheus_auth_user }}:' + crypt.crypt('{{ prometheus_auth_pass }}', crypt.mksalt(crypt.METHOD_MD5)))"
+      register: htpasswd_output
+
+    - name: 🔐 Crear Secret de autenticación para Prometheus
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        namespace: monitoring
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: prometheus-basic-auth
+          type: Opaque
+          data:
+            auth: "{{ htpasswd_output.stdout | b64encode }}"
 
     - name: 🔗 Configurar repositorios Helm
       block:
@@ -108,4 +130,4 @@
 
     - name: ✅ Confirmación final
       debug:
-        msg: "✅ Stack Prometheus + Grafana desplegado con éxito."
+        msg: "✅ Stack Prometheus + Grafana desplegado con éxito con protección básica activada en Prometheus."
