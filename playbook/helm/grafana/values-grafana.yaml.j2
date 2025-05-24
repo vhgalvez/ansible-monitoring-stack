@@ -11,17 +11,20 @@ persistence:
   size: "{{ grafana_pvc_size }}"
 
 service:
-  type: NodePort
+  type: ClusterIP
   port: 3000
   targetPort: 3000
-  nodePort: 32002
 
 ingress:
   enabled: true
   ingressClassName: traefik
   annotations:
     kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
   hosts:
-    - grafana.local
-  paths:
-    - /
+    - host: grafana.cefaslocalserver.com
+      paths:
+        - path: /
+          pathType: Prefix

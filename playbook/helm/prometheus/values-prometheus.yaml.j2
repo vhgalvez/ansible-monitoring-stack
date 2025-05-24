@@ -1,19 +1,23 @@
+# playbook\helm\prometheus\values-prometheus.yaml.j2
 server:
   service:
-    type: NodePort
+    type: ClusterIP
     port: 80
     targetPort: 9090
-    nodePort: 32001
 
   ingress:
     enabled: true
-    ingressClassName: traefik  # 👈 Usado por Traefik v2+
+    ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: traefik  # 👈 Compatibilidad con algunos charts
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
     hosts:
-      - prometheus.local
-    paths:
-      - /
+      - host: prometheus.cefaslocalserver.com
+        paths:
+          - path: /
+            pathType: Prefix
 
   resources:
     requests:
