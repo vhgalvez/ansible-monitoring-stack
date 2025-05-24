@@ -4,9 +4,10 @@ After=network.target
 
 [Service]
 User={{ node_exporter_user }}
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ExecStart={{ node_exporter_bin_dir }}/node_exporter
 Restart=always
 ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
