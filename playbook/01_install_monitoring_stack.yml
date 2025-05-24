@@ -13,12 +13,10 @@
     prometheus_values_path: "/tmp/values-prometheus.yaml"
     grafana_chart_version: "8.12.1"
     grafana_values_path: "/tmp/values-grafana.yaml"
-    grafana_admin_user: "admin"
-    grafana_admin_password: "123456"
-    grafana_storage_class: "longhorn"
-    grafana_pvc_size: "5Gi"
     prometheus_auth_user: "admin"
     prometheus_auth_pass: "admin123"
+    grafana_auth_user: "admin"
+    grafana_auth_pass: "admin123"
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
@@ -44,12 +42,13 @@
             name: monitoring
       when: monitoring_namespace.rc != 0
 
+    # Generación de hash para Prometheus y Grafana
     - name: 🔐 Generar hash htpasswd para Prometheus
       delegate_to: localhost
       run_once: true
       command: >
         python3 -c "import crypt; print('{{ prometheus_auth_user }}:' + crypt.crypt('{{ prometheus_auth_pass }}', crypt.mksalt(crypt.METHOD_MD5)))"
-      register: htpasswd_output
+      register: prometheus_htpasswd_output
 
     - name: 🔐 Crear Secret de autenticación para Prometheus
       kubernetes.core.k8s:
@@ -62,8 +61,29 @@
             name: prometheus-basic-auth
           type: Opaque
           data:
-            auth: "{{ htpasswd_output.stdout | b64encode }}"
+            auth: "{{ prometheus_htpasswd_output.stdout | b64encode }}"
 
+    - name: 🔐 Generar hash htpasswd para Grafana
+      delegate_to: localhost
+      run_once: true
+      command: >
+        python3 -c "import crypt; print('{{ grafana_auth_user }}:' + crypt.crypt('{{ grafana_auth_pass }}', crypt.mksalt(crypt.METHOD_MD5)))"
+      register: grafana_htpasswd_output
+
+    - name: 🔐 Crear Secret de autenticación para Grafana
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        namespace: monitoring
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: grafana-basic-auth
+          type: Opaque
+          data:
+            auth: "{{ grafana_htpasswd_output.stdout | b64encode }}"
+
+    # Configuración y despliegue de Prometheus y Grafana con Helm
     - name: 🔗 Configurar repositorios Helm
       block:
         - name: Añadir repo Prometheus
@@ -130,4 +150,4 @@
 
     - name: ✅ Confirmación final
       debug:
-        msg: "✅ Stack Prometheus + Grafana desplegado con éxito con protección básica activada en Prometheus."
+        msg: "✅ Stack Prometheus + Grafana desplegado con éxito con protección básica activada en ambos servicios."

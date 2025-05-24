@@ -23,8 +23,54 @@ ingress:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
+    traefik.ingress.kubernetes.io/auth-type: basic
+    traefik.ingress.kubernetes.io/auth-secret: grafana-basic-auth  # Secret creado para la autenticación básica
+    traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
     - host: grafana.cefaslocalserver.com
       paths:
         - path: /
           pathType: Prefix
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 200m
+    memory: 1Gi
+
+# Configuración personalizada para Grafana
+extraArgs:
+  - --basehref=/
+
+# Habilitar TLS
+tls:
+  enabled: true
+  certResolver: selfsigned
+
+# Variables de personalización
+env:
+  GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"  # Añadido para la configuración de seguridad
+  GF_SECURITY_ADMIN_USER: "{{ grafana_admin_user }}"  # Añadido para la configuración de usuario admin
+
+# Configuración adicional de almacenamiento y control de recursos
+resources:
+  requests:
+    cpu: 500m
+    memory: 1Gi
+  limits:
+    cpu: 1
+    memory: 2Gi
+
+# Habilitar persistencia para los datos de Grafana
+persistence:
+  enabled: true
+  storageClassName: "{{ grafana_storage_class }}"
+  accessModes:
+    - ReadWriteOnce
+  size: "{{ grafana_pvc_size }}"
+
+# Configuración de Logs
+logs:
+  level: "info"
