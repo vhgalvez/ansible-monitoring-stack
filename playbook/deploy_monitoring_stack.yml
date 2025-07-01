@@ -14,7 +14,7 @@
 
 # 2 Crear y cifrar los secrets de autenticación para Prometheus y Grafana
 - name: 2 Crear y cifrar los secrets de autenticación para Prometheus y Grafana
-  import_playbook: 4-seal-monitoring-auth-secret.yml
+  import_playbook: seal-monitoring-auth-secret.yml
 
 # 3 Instalar Node Exporter en máquinas externas (si aplica)
 - name: 3 Instalar Node Exporter en máquinas externas (si aplica)
