@@ -8,16 +8,16 @@
     - vars/main.yml
   hosts: localhost
 
-# 1 Desplegar stack de monitoreo completo (Prometheus + Grafana)
+# 1. Desplegar stack de monitoreo completo (Prometheus + Grafana)
 - name: 1 Desplegar stack de monitoreo completo (Prometheus + Grafana)
   import_playbook: 01_install_monitoring_stack.yml
 
-# 3 Instalar Node Exporter en máquinas externas (si aplica)
-- name: 3 Instalar Node Exporter en máquinas externas (si aplica)
+# 2. Instalar Node Exporter en máquinas externas (si aplica)
+- name: 2 Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
 
-# 4 Verificación del despliegue y estado de los pods
-- name: 4 Verificación final del despliegue
+# 3. Verificación del despliegue y estado de los pods
+- name: 3 Verificación final del despliegue
   hosts: localhost
   gather_facts: false
   tasks:
