@@ -23,6 +23,7 @@
         name: curl
         state: present
 
+    # Crear usuario 'node_exporter' si no existe
     - name: 👤 Crear usuario 'node_exporter' si no existe
       user:
         name: "{{ node_exporter_user }}"
@@ -30,23 +31,27 @@
         system: true
         create_home: false
 
+    # Limpiar carpeta temporal anterior si existe
     - name: 🧹 Limpiar carpeta temporal anterior si existe
       file:
         path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
         state: absent
 
+    # Descargar Node Exporter
     - name: 📥 Descargar Node Exporter
       get_url:
         url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
         dest: "/tmp/node_exporter.tar.gz"
         mode: "0644"
 
+    # Extraer Node Exporter en /tmp
     - name: 📂 Extraer Node Exporter en /tmp
       unarchive:
         src: "/tmp/node_exporter.tar.gz"
         dest: "/tmp/"
         remote_src: true
 
+    # Copiar binario a {{ node_exporter_bin_dir }}
     - name: 🚀 Copiar binario a {{ node_exporter_bin_dir }}
       copy:
         src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
@@ -54,12 +59,18 @@
         mode: "0755"
         remote_src: true
 
+    # Crear archivo systemd para Node Exporter
     - name: 🧩 Crear archivo systemd para Node Exporter
       template:
         src: "templates/node_exporter/node_exporter.service.j2"
         dest: "{{ node_exporter_service_path }}"
         mode: "0644"
 
+    # Recargar systemd para aplicar cambios
+    - name: Recargar systemd para aplicar cambios
+      command: systemctl daemon-reload
+
+    # Habilitar e iniciar Node Exporter
     - name: ✅ Habilitar e iniciar Node Exporter
       systemd:
         name: node_exporter
@@ -67,6 +78,7 @@
         state: started
         daemon_reload: true
 
+    # Verificar puerto {{ node_exporter_port }} está disponible
     - name: 📊 Verificar puerto {{ node_exporter_port }} está disponible
       wait_for:
         host: "{{ inventory_hostname }}"
