@@ -48,6 +48,7 @@ extraArgs:
 tls:
   enabled: true
   certResolver: selfsigned
+  secretName: "{{ tls_secret_name }}"  # Se ha corregido la indentación
 
 # Variables de personalización
 env:
@@ -57,6 +58,3 @@ env:
 # Configuración adicional de Logs
 logs:
   level: "info"
-
-    tls:
-    secretName: {{ tls_secret_name }}  # Se ha incluido la variable para el nombre del Secret TLS
