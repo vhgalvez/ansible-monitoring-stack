@@ -1,5 +1,4 @@
 # vars/main.yml
-
 # 🛠️ Credenciales de autenticación para la interfaz de usuario (UI)
 prometheus_auth_user_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
 prometheus_auth_pass_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno

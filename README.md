@@ -191,3 +191,16 @@ export PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
 export PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
 export GRAFANA_AUTH_USER_UI="grafana_ui_user"
 export GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
+
+
+
+echo $PROMETHEUS_AUTH_USER_UI
+echo $PROMETHEUS_AUTH_PASS_UI
+echo $GRAFANA_AUTH_USER_UI
+echo $GRAFANA_AUTH_PASS_UI
+
+
+export PROMETHEUS_AUTH_USER_UI="tu_usuario"
+export PROMETHEUS_AUTH_PASS_UI="tu_contraseña"
+export GRAFANA_AUTH_USER_UI="tu_usuario"
+export GRAFANA_AUTH_PASS_UI="tu_contraseña"
