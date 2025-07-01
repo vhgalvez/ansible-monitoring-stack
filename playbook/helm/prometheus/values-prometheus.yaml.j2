@@ -9,32 +9,32 @@ server:
     enabled: true
     ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: traefik
-      traefik.ingress.kubernetes.io/router.entrypoints: websecure
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
-      traefik.ingress.kubernetes.io/auth-type: basic
-      traefik.ingress.kubernetes.io/auth-secret: prometheus-basic-auth
-      traefik.ingress.kubernetes.io/auth-header-field: Authorization
+      kubernetes.io/ingress.class: "traefik"  # Asegúrate de que todos los valores estén entre comillas
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Cadena de texto
+      traefik.ingress.kubernetes.io/router.tls: "true"  # Cadena de texto
+      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Cadena de texto
+      traefik.ingress.kubernetes.io/auth-type: "basic"  # Cadena de texto
+      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Cadena de texto
+      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # Cadena de texto
     hosts:
-      - host: prometheus.cefaslocalserver.com
+      - host: "prometheus.cefaslocalserver.com"  # Asegúrate de que el host esté entre comillas
         paths:
-          - path: /
-            pathType: Prefix
+          - path: "/"
+            pathType: Prefix  # Asegúrate de que sea un valor válido como "Prefix" o "Exact"
 
   resources:
     requests:
-      cpu: 500m
-      memory: 1Gi
+      cpu: "500m"  # Asigna los recursos como cadenas de texto si es necesario
+      memory: "1Gi"  # Asigna los recursos como cadenas de texto si es necesario
     limits:
-      cpu: 1
-      memory: 2Gi
+      cpu: "1"  # Asigna los recursos como cadenas de texto si es necesario
+      memory: "2Gi"  # Asigna los recursos como cadenas de texto si es necesario
 
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: 15s
-        evaluation_interval: 15s
+        scrape_interval: "15s"  # Asegúrate de que los tiempos estén como cadenas de texto
+        evaluation_interval: "15s"  # Asegúrate de que los tiempos estén como cadenas de texto
 
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
@@ -46,14 +46,14 @@ server:
                 - __meta_kubernetes_service_name
                 - __meta_kubernetes_endpoint_port_name
               action: keep
-              regex: default;kubernetes;https
+              regex: "default;kubernetes;https"  # Asegúrate de que la regex esté como una cadena
 
         - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
             - role: node
           relabel_configs:
             - action: labelmap
-              regex: __meta_kubernetes_node_label_(.+)
+              regex: "__meta_kubernetes_node_label_(.+)"  # Asegúrate de que la regex esté como una cadena
 
 extraScrapeConfigs: |
   - job_name: 'node-exporter-externos'
