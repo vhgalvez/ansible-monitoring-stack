@@ -1,14 +1,14 @@
 # vars/main.yml
 # 🛠️ Credenciales de autenticación para la interfaz de usuario (UI)
-prometheus_auth_user_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
-prometheus_auth_pass_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno
+prometheus_auth_user_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_USER_UI') }}"
+prometheus_auth_pass_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS_UI') }}"
 
-grafana_auth_user_ui: "{{ lookup('env', 'GRAFANA_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
-grafana_auth_pass_ui: "{{ lookup('env', 'GRAFANA_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno
+grafana_auth_user_ui: "{{ lookup('env', 'GRAFANA_AUTH_USER_UI') }}"
+grafana_auth_pass_ui: "{{ lookup('env', 'GRAFANA_AUTH_PASS_UI') }}"
 
 # Dominio y namespace donde se desplegarán los Dashboards
 domain: "monitoring.socialdevs.site"
-monitoring_namespace: "monitoring"  # Namespace donde se desplegará Prometheus y Grafana
+monitoring_namespace: "monitoring"
 
 # Nombres del Middleware y Secret sellado
 prometheus_dashboard_middleware_name: "prometheus-dashboard-auth"
@@ -18,20 +18,20 @@ grafana_secret_name: "grafana-dashboard-auth"
 
 # Ruta del kubeconfig y token de acceso al clúster (usado por kubectl/kubeseal)
 kubeconfig_path: "/home/victory/.kube/config"
-kubeconfig_token_path: "/home/victory/.kube/token.jwt"  # Asegúrate de que este archivo esté bien protegido
+kubeconfig_token_path: "/home/victory/.kube/token.jwt"
 
 # Dirección VIP del clúster Kubernetes (útil para balanceo o HA)
-vip_kubernetes: "192.168.0.32"  # Asegúrate de que esta dirección esté correctamente configurada y accesible
+vip_kubernetes: "192.168.0.32"
 
 # Ruta del binario kubectl y kubeseal
 kubectl_path: "/usr/local/bin/kubectl"
-kubeseal_path: "/usr/local/bin/kubeseal"  # Asegúrate de que kubeseal esté correctamente instalado y accesible
+kubeseal_path: "/usr/local/bin/kubeseal"
 
 # TLS Secret creado en Kubernetes
-tls_secret_name: "wildcard-socialdevs-tls"  # El Secret TLS que contiene el certificado y la clave privada
+tls_secret_name: "wildcard-socialdevs-tls"  # El nombre del secret TLS debe ser definido aquí
 
 # Configuración opcional de redirección automática HTTP -> HTTPS
-http_to_https_redirect: true  # Si deseas redirigir automáticamente todo el tráfico HTTP a HTTPS
+http_to_https_redirect: true
 
 # Configuración del repositorio de Helm para Prometheus y Grafana
 prometheus_chart_version: "27.11.0"
