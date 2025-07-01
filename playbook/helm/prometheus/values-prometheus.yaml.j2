@@ -6,35 +6,35 @@ server:
     targetPort: 9090
 
   ingress:
-    enabled: true
-    ingressClassName: traefik
+    enabled: true  # Activamos el ingreso para Prometheus
+    ingressClassName: traefik  # Usamos Traefik como Ingress Controller
     annotations:
-      kubernetes.io/ingress.class: "traefik"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/router.tls: "true"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/auth-type: "basic"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # Comillas para asegurar que es una cadena
+      kubernetes.io/ingress.class: "traefik"  # Traefik como Ingress Controller
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Usa 'websecure' como entrypoint para HTTPS
+      traefik.ingress.kubernetes.io/router.tls: "true"  # Habilita TLS
+      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Usamos un certificado autofirmado
+      traefik.ingress.kubernetes.io/auth-type: "basic"  # Autenticación básica
+      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Referencia al secret de autenticación básica
+      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo que se usará para la autenticación
     hosts:
-      - host: "prometheus.cefaslocalserver.com"  # Comillas para asegurar que es una cadena
+      - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
           - path: "/"  # Ruta de acceso a Prometheus
-            pathType: Prefix  # <-- REMOVER LAS COMILLAS AQUÍ
+            pathType: Prefix  # <-- Eliminar las comillas aquí, 'Prefix' es un valor válido sin comillas
 
   resources:
     requests:
-      cpu: "500m"  # Asigna los recursos como cadenas de texto si es necesario
-      memory: "1Gi"  # Asigna los recursos como cadenas de texto si es necesario
+      cpu: "500m"  # Recursos solicitados (se asigna como cadena)
+      memory: "1Gi"  # Recursos solicitados (se asigna como cadena)
     limits:
-      cpu: "1"  # Asigna los recursos como cadenas de texto si es necesario
-      memory: "2Gi"  # Asigna los recursos como cadenas de texto si es necesario
+      cpu: "1"  # Límite de CPU
+      memory: "2Gi"  # Límite de memoria
 
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: "15s"  # Asegúrate de que los tiempos estén como cadenas de texto
-        evaluation_interval: "15s"  # Asegúrate de que los tiempos estén como cadenas de texto
+        scrape_interval: "15s"  # Intervalo de scraping, configurado como cadena
+        evaluation_interval: "15s"  # Intervalo de evaluación, configurado como cadena
 
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
@@ -55,6 +55,7 @@ server:
             - action: labelmap
               regex: "__meta_kubernetes_node_label_(.+)"  # Mapear etiquetas de nodos
 
+# Configuración extra de scrape para nodos externos
 extraScrapeConfigs: |
   - job_name: 'node-exporter-externos'
     scrape_interval: "15s"  # Intervalo de scraping para nodos externos
