@@ -3,7 +3,7 @@
 # Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
 # Compatible con ejecución local, CI/CD y automatización general.
 
-- name: Cargar variables de group_vars y ejecutar playbooks en 'controller'
+- name: Cargar variables de vars/main.yml y ejecutar playbooks en 'controller'
   vars_files:
     vars/main.yml
   hosts: localhost
