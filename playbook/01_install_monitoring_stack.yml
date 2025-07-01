@@ -1,4 +1,4 @@
-# playbook\01_install_monitoring_stack.yml
+# playbook/01_install_monitoring_stack.yml
 ---
 # 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
 - name: Instalar stack de monitoreo
@@ -10,9 +10,15 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   vars_files:
-    - ../vars/main.yml
+    - vars/main.yml
 
   tasks:
+    - name: Crear directorio para archivos renderizados
+    file:
+      path: "./rendered_files"
+      state: directory
+      mode: "0755"
+
     # Verificar que kubectl está disponible
     - name: Verificar que kubectl está disponible
       command: "/usr/local/bin/kubectl version --client"

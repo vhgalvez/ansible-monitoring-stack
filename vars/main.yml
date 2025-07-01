@@ -35,8 +35,8 @@ tls_secret_name: "wildcard-socialdevs-tls"  # El nombre del secret TLS debe ser 
 http_to_https_redirect: true  # Si deseas redirigir automáticamente todo el tráfico HTTP a HTTPS
 
 # Configuración del repositorio de Helm para Prometheus y Grafana
-prometheus_chart_version: "27.11.0"
-grafana_chart_version: "8.12.1"
+prometheus_chart_version: "27.23.0"
+grafana_chart_version: "9.2.9"
 
 # Configuración de Prometheus y Grafana
 prometheus_values_path: "playbook/helm/prometheus/values-prometheus.yaml.j2"
