@@ -8,24 +8,22 @@ prometheus_auth_pass: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"  # Obtenció
 grafana_auth_user: "{{ lookup('env', 'GRAFANA_AUTH_USER') }}"  # Obtención desde la variable de entorno
 grafana_auth_pass: "{{ lookup('env', 'GRAFANA_AUTH_PASS') }}"  # Obtención desde la variable de entorno
 
-
-# 🛠️ Credenciales de autenticación para la interfaz de usuario 
+# 🛠️ Credenciales de autenticación para la interfaz de usuario (UI)
 prometheus_auth_user_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
-prometheus_auth_pass_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"  # Obtención desde la variable de entorno
+prometheus_auth_pass_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno
 
 grafana_auth_user_ui: "{{ lookup('env', 'GRAFANA_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
 grafana_auth_pass_ui: "{{ lookup('env', 'GRAFANA_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno
 
-
 # Dominio y namespace donde se desplegarán los Dashboards
-domain: monitoring.socialdevs.site
-monitoring_namespace: monitoring  # Namespace donde se desplegará Prometheus y Grafana
+domain: "monitoring.socialdevs.site"
+monitoring_namespace: "monitoring"  # Namespace donde se desplegará Prometheus y Grafana
 
 # Nombres del Middleware y Secret sellado
-prometheus_dashboard_middleware_name: prometheus-dashboard-auth
-grafana_dashboard_middleware_name: grafana-dashboard-auth
-prometheus_secret_name: prometheus-dashboard-auth
-grafana_secret_name: grafana-dashboard-auth
+prometheus_dashboard_middleware_name: "prometheus-dashboard-auth"
+grafana_dashboard_middleware_name: "grafana-dashboard-auth"
+prometheus_secret_name: "prometheus-dashboard-auth"
+grafana_secret_name: "grafana-dashboard-auth"
 
 # Ruta del kubeconfig y token de acceso al clúster (usado por kubectl/kubeseal)
 kubeconfig_path: "/home/victory/.kube/config"
@@ -39,7 +37,7 @@ kubectl_path: "/usr/local/bin/kubectl"
 kubeseal_path: "/usr/local/bin/kubeseal"  # Asegúrate de que kubeseal esté correctamente instalado y accesible
 
 # TLS Secret creado en Kubernetes
-tls_secret_name: wildcard-socialdevs-tls  # El Secret TLS que contiene el certificado y la clave privada
+tls_secret_name: "wildcard-socialdevs-tls"  # El Secret TLS que contiene el certificado y la clave privada
 
 # Configuración opcional de redirección automática HTTP -> HTTPS
 http_to_https_redirect: true  # Si deseas redirigir automáticamente todo el tráfico HTTP a HTTPS
