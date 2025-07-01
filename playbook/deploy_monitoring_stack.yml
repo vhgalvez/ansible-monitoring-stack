@@ -20,7 +20,15 @@
 - name: Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
 
-# 3. Verificación del despliegue y estado de los pods
+# 3. Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
+- name: Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
+  import_playbook: 03_generate_monitoring_auth_secrets.yml
+
+# 4. Configurar Prometheus y Grafana con autenticación básica
+- name: Configurar Prometheus y Grafana con autenticación básica
+  import_playbook: 04_configure_monitoring_auth.yml
+
+# 5. Verificación del despliegue y estado de los pods
 - name: Verificación final del despliegue de Prometheus y Grafana
   hosts: localhost
   gather_facts: false
