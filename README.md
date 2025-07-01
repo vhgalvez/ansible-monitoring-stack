@@ -28,7 +28,8 @@ ansible-galaxy collection install community.kubernetes kubernetes.core
 Este playbook instalará Prometheus y Grafana en Kubernetes, configurará PVCs para persistencia de datos y utilizará Helm para gestionar los charts de ambas herramientas:
 
 ```bash
-sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
+source .env
+sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
 ```
 
 ### 2. Actualizar los targets de scrape de Prometheus
@@ -50,14 +51,6 @@ sudo ansible-playbook -i inventory/hosts.ini playbook/uninstall_stack.yml
 ### 4. Forwarding de puertos para interfaces de usuario (opcional)
 
 Si deseas acceder a las interfaces de Grafana o Prometheus localmente, puedes usar `kubectl port-forward`:
-
-```bash
-# Para Grafana
-sudo bash sh-forward/start-monitoring.sh
-
-# Para Prometheus
-sudo bash sh-forward/stop-monitoring.sh
-```
 
 ---
 
@@ -87,23 +80,7 @@ ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
 - **Eliminar todo el stack:**
 
 ```bash
-ansible-playbook -i inventory/hosts.ini playbook/uninstall_stack.yml
-```
-
----
-
-## 📊 Acceso a las interfaces de usuario
-
-- **Grafana:** Accede a la UI de Grafana en el puerto 3000 (por defecto):
-
-```bash
-kubectl port-forward -n monitoring svc/grafana 3000:3000
-```
-
-- **Prometheus:** Accede a la UI de Prometheus en el puerto 9091 (por defecto):
-
-```bash
-kubectl port-forward -n monitoring svc/prometheus-server 9091:9091
+sudo -E ansible-playbook -i inventory/hosts.ini playbook/uninstall_stack.yml
 ```
 
 ---
@@ -180,3 +157,37 @@ sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.ym
 Este proyecto fue creado como parte del stack FlatcarMicroCloud y tiene como objetivo simplificar la gestión de monitoreo en Kubernetes usando herramientas de código abierto y automatización con Ansible.
 
 **Autor:** [@vhgalvez](https://github.com/vhgalvez)
+
+source .env
+
+sudo nano .env
+
+# 🌍 Variables de entorno para Prometheus y Grafana
+PROMETHEUS_AUTH_USER="prometheus_admin"
+PROMETHEUS_AUTH_PASS="S3cr3tP@ssw0rd!123"
+
+GRAFANA_AUTH_USER="grafana_admin"
+GRAFANA_AUTH_PASS="GrafanaS3cr3t!456"
+
+# 🛠️ Variables de entorno para la interfaz de usuario de Prometheus y Grafana
+PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
+PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
+
+GRAFANA_AUTH_USER_UI="grafana_ui_user"
+GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
+
+
+
+```bash
+source .env
+sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
+```
+
+export PROMETHEUS_AUTH_USER="prometheus_admin"
+export PROMETHEUS_AUTH_PASS="S3cr3tP@ssw0rd!123"
+export GRAFANA_AUTH_USER="grafana_admin"
+export GRAFANA_AUTH_PASS="GrafanaS3cr3t!456"
+export PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
+export PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
+export GRAFANA_AUTH_USER_UI="grafana_ui_user"
+export GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
