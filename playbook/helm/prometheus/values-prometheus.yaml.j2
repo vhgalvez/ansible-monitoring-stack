@@ -9,15 +9,15 @@ server:
     enabled: true
     ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: "traefik"  # Asegúrate de que todos los valores estén entre comillas
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Cadena de texto
-      traefik.ingress.kubernetes.io/router.tls: "true"  # Cadena de texto
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Cadena de texto
-      traefik.ingress.kubernetes.io/auth-type: "basic"  # Cadena de texto
-      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Cadena de texto
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # Cadena de texto
+      kubernetes.io/ingress.class: "traefik"  # Comillas para asegurar que es una cadena
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Comillas para asegurar que es una cadena
+      traefik.ingress.kubernetes.io/router.tls: "true"  # Comillas para asegurar que es una cadena
+      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Comillas para asegurar que es una cadena
+      traefik.ingress.kubernetes.io/auth-type: "basic"  # Comillas para asegurar que es una cadena
+      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Comillas para asegurar que es una cadena
+      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # Comillas para asegurar que es una cadena
     hosts:
-      - host: "prometheus.cefaslocalserver.com"  # Asegúrate de que el host esté entre comillas
+      - host: "prometheus.cefaslocalserver.com"  # Comillas para asegurar que es una cadena
         paths:
           - path: "/"  # Ruta de acceso a Prometheus
             pathType: "Prefix"  # Asegúrate de que sea un valor válido como "Prefix" o "Exact"
@@ -39,7 +39,7 @@ server:
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
           kubernetes_sd_configs:
-            - role: endpoints  # Configuración para los endpoints de Kubernetes
+            - role: endpoints  # Configuración para scrape de endpoints de Kubernetes
           relabel_configs:
             - source_labels:
                 - __meta_kubernetes_namespace
