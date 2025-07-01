@@ -1,4 +1,6 @@
 # playbook\helm\prometheus\values-prometheus.yaml.j2
+# playbook/helm/prometheus/values-prometheus.yaml.j2
+
 server:
   service:
     type: ClusterIP
@@ -20,7 +22,7 @@ server:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
           - path: "/"  # Ruta de acceso a Prometheus
-            pathType: Prefix  # <-- Eliminar las comillas aquí, 'Prefix' es un valor válido sin comillas
+            pathType: Prefix  # <-- No hay comillas aquí, 'Prefix' es un valor válido sin comillas
 
   resources:
     requests:
@@ -70,3 +72,6 @@ extraScrapeConfigs: |
         labels:
           environment: "external"  # Etiqueta para nodos externos
           monitored_by: "prometheus"  # Etiqueta para identificar que estos nodos están siendo monitoreados por Prometheus
+
+  tls:
+    secretName: {{ tls_secret_name }}  # Se ha incluido la variable para el nombre del Secret TLS
