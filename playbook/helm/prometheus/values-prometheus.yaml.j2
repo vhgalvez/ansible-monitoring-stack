@@ -6,59 +6,55 @@ server:
     targetPort: 9090
 
   ingress:
-    enabled: true
-    ingressClassName: traefik
+    enabled: true  # Activamos el ingreso para Prometheus
+    ingressClassName: traefik  # Usamos traefik como Ingress Controller
     annotations:
-      kubernetes.io/ingress.class: "traefik"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/router.tls: "true"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/auth-type: "basic"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Comillas para asegurar que es una cadena
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # Comillas para asegurar que es una cadena
+      kubernetes.io/ingress.class: "traefik"  # Especifica que usaremos Traefik
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Configura Traefik para usar HTTPS
+      traefik.ingress.kubernetes.io/router.tls: "true"  # Habilitamos TLS
+      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Usamos un certificado autofirmado
+      traefik.ingress.kubernetes.io/auth-type: "basic"  # Autenticación básica para acceder
+      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Usamos el Secret para la autenticación
+      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo para la autenticación
     hosts:
-      - host: "prometheus.cefaslocalserver.com"  # Comillas para asegurar que es una cadena
+      - host: "prometheus.cefaslocalserver.com"  # El dominio para acceder a Prometheus
         paths:
-          - path: "/"  # Ruta de acceso a Prometheus
-            pathType: "Prefix"  # Asegúrate de que sea un valor válido como "Prefix" o "Exact"
-
+          - path: "/"  # Ruta raíz de acceso a Prometheus
+            pathType: Prefix  # Este es el tipo de ruta, "Prefix" es común para Kubernetes Ingress
   resources:
     requests:
-      cpu: "500m"  # Asigna los recursos como cadenas de texto si es necesario
-      memory: "1Gi"  # Asigna los recursos como cadenas de texto si es necesario
+      cpu: "500m"
+      memory: "1Gi"
     limits:
-      cpu: "1"  # Asigna los recursos como cadenas de texto si es necesario
-      memory: "2Gi"  # Asigna los recursos como cadenas de texto si es necesario
-
+      cpu: "1"
+      memory: "2Gi"
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: "15s"  # Asegúrate de que los tiempos estén como cadenas de texto
-        evaluation_interval: "15s"  # Asegúrate de que los tiempos estén como cadenas de texto
-
+        scrape_interval: "15s"
+        evaluation_interval: "15s"
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
           kubernetes_sd_configs:
-            - role: endpoints  # Configuración para scrape de endpoints de Kubernetes
+            - role: endpoints
           relabel_configs:
             - source_labels:
                 - __meta_kubernetes_namespace
                 - __meta_kubernetes_service_name
                 - __meta_kubernetes_endpoint_port_name
               action: keep
-              regex: "default;kubernetes;https"  # Filtra por puerto HTTPS de Kubernetes
-
+              regex: "default;kubernetes;https"
         - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
-            - role: node  # Configuración para scrape de nodos
+            - role: node
           relabel_configs:
             - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"  # Mapear etiquetas de nodos
+              regex: "__meta_kubernetes_node_label_(.+)"
 
 extraScrapeConfigs: |
   - job_name: 'node-exporter-externos'
-    scrape_interval: "15s"  # Intervalo de scraping para nodos externos
-    scrape_timeout: "10s"  # Timeout de scraping
+    scrape_interval: "15s"
+    scrape_timeout: "10s"
     static_configs:
       - targets:
           - "10.17.3.11:9100"
@@ -67,5 +63,5 @@ extraScrapeConfigs: |
           - "10.17.3.14:9100"
           - "192.168.0.40:9100"
         labels:
-          environment: "external"  # Etiqueta para nodos externos
-          monitored_by: "prometheus"  # Etiqueta para identificar que estos nodos están siendo monitoreados por Prometheus
+          environment: "external"
+          monitored_by: "prometheus"
