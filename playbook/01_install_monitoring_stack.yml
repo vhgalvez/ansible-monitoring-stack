@@ -1,112 +1,113 @@
 # playbook\01_install_monitoring_stack.yml
 ---
 # 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
-hosts: controller
-become: true
-gather_facts: false
-environment:
-  PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-  KUBECONFIG: "/home/victory/.kube/config"
+- name: Instalar stack de monitoreo
+  hosts: controller
+  become: true
+  gather_facts: false
+  environment:
+    PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+    KUBECONFIG: "/home/victory/.kube/config"
 
-vars_files:
-  - vars/main.yml
+  vars_files:
+    - vars/main.yml
 
-tasks:
-  # Verificar que kubectl está disponible
-  - name: Verificar que kubectl está disponible
-    command: "/usr/local/bin/kubectl version --client"
-    register: kubectl_check
-    failed_when: kubectl_check.rc != 0
-    changed_when: false
+  tasks:
+    # Verificar que kubectl está disponible
+    - name: Verificar que kubectl está disponible
+      command: "/usr/local/bin/kubectl version --client"
+      register: kubectl_check
+      failed_when: kubectl_check.rc != 0
+      changed_when: false
 
-  # Verificar si namespace 'monitoring' existe
-  - name: Verificar si namespace 'monitoring' existe
-    command: kubectl get namespace monitoring
-    register: monitoring_namespace
-    failed_when: false
-    changed_when: false
+    # Verificar si namespace 'monitoring' existe
+    - name: Verificar si namespace 'monitoring' existe
+      command: kubectl get namespace monitoring
+      register: monitoring_namespace
+      failed_when: false
+      changed_when: false
 
-  # Crear namespace 'monitoring' si no existe
-  - name: Crear namespace 'monitoring' si no existe
-    kubernetes.core.k8s:
-      kubeconfig: "{{ kubeconfig_path }}"
-      state: present
-      definition:
-        apiVersion: v1
-        kind: Namespace
-        metadata:
-          name: monitoring
-    when: monitoring_namespace.rc != 0
+    # Crear namespace 'monitoring' si no existe
+    - name: Crear namespace 'monitoring' si no existe
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kubeconfig_path }}"
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: monitoring
+      when: monitoring_namespace.rc != 0
 
-  # Configuración y despliegue de Prometheus y Grafana con Helm
-  - name: Configurar repositorios Helm
-    block:
-      - name: Añadir repo Prometheus
-        command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-        register: prometheus_repo
-        failed_when: prometheus_repo.rc != 0 and "exists" not in prometheus_repo.stderr
-        changed_when: false
+    # Configuración y despliegue de Prometheus y Grafana con Helm
+    - name: Configurar repositorios Helm
+      block:
+        - name: Añadir repo Prometheus
+          command: helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          register: prometheus_repo
+          failed_when: prometheus_repo.rc != 0 and "exists" not in prometheus_repo.stderr
+          changed_when: false
 
-      - name: Añadir repo Grafana
-        command: helm repo add grafana https://grafana.github.io/helm-charts
-        register: grafana_repo
-        failed_when: grafana_repo.rc != 0 and "exists" not in grafana_repo.stderr
-        changed_when: false
+        - name: Añadir repo Grafana
+          command: helm repo add grafana https://grafana.github.io/helm-charts
+          register: grafana_repo
+          failed_when: grafana_repo.rc != 0 and "exists" not in grafana_repo.stderr
+          changed_when: false
 
-      - name: Actualizar repos Helm
-        command: helm repo update
-        changed_when: false
+        - name: Actualizar repos Helm
+          command: helm repo update
+          changed_when: false
 
-  # Renderizar valores de Prometheus y Grafana
-  - name: Renderizar valores de Prometheus
-    template:
-      src: helm/prometheus/values-prometheus.yaml.j2
-      dest: "{{ prometheus_values_path }}"
+    # Renderizar valores de Prometheus y Grafana
+    - name: Renderizar valores de Prometheus
+      template:
+        src: helm/prometheus/values-prometheus.yaml.j2
+        dest: "{{ prometheus_values_path }}"
 
-  - name: Desplegar Prometheus con Helm
-    kubernetes.core.helm:
-      kubeconfig: "{{ kubeconfig_path }}"
-      name: prometheus
-      chart_ref: prometheus-community/prometheus
-      release_namespace: monitoring
-      chart_version: "{{ prometheus_chart_version }}"
-      create_namespace: false
-      values_files:
-        - "{{ prometheus_values_path }}"
-      state: present
+    - name: Desplegar Prometheus con Helm
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        name: prometheus
+        chart_ref: prometheus-community/prometheus
+        release_namespace: monitoring
+        chart_version: "{{ prometheus_chart_version }}"
+        create_namespace: false
+        values_files:
+          - "{{ prometheus_values_path }}"
+        state: present
 
-  - name: Renderizar valores de Grafana
-    template:
-      src: helm/grafana/values-grafana.yaml.j2
-      dest: "{{ grafana_values_path }}"
+    - name: Renderizar valores de Grafana
+      template:
+        src: helm/grafana/values-grafana.yaml.j2
+        dest: "{{ grafana_values_path }}"
 
-  - name: Desplegar Grafana con Helm
-    kubernetes.core.helm:
-      kubeconfig: "{{ kubeconfig_path }}"
-      name: grafana
-      chart_ref: grafana/grafana
-      release_namespace: monitoring
-      chart_version: "{{ grafana_chart_version }}"
-      create_namespace: false
-      values_files:
-        - "{{ grafana_values_path }}"
-      state: present
+    - name: Desplegar Grafana con Helm
+      kubernetes.core.helm:
+        kubeconfig: "{{ kubeconfig_path }}"
+        name: grafana
+        chart_ref: grafana/grafana
+        release_namespace: monitoring
+        chart_version: "{{ grafana_chart_version }}"
+        create_namespace: false
+        values_files:
+          - "{{ grafana_values_path }}"
+        state: present
 
-  # Esperar a que los pods estén listos
-  - name: Esperar a que los pods estén listos
-    shell: kubectl get pods -n monitoring
-    register: pod_status
-    retries: 10
-    delay: 6
-    until: pod_status.rc == 0
-    changed_when: false
+    # Esperar a que los pods estén listos
+    - name: Esperar a que los pods estén listos
+      shell: kubectl get pods -n monitoring
+      register: pod_status
+      retries: 10
+      delay: 6
+      until: pod_status.rc == 0
+      changed_when: false
 
-  # Mostrar estado de los pods
-  - name: Mostrar estado de los pods
-    debug:
-      var: pod_status.stdout_lines
+    # Mostrar estado de los pods
+    - name: Mostrar estado de los pods
+      debug:
+        var: pod_status.stdout_lines
 
-  # Confirmación final
-  - name: Confirmación final
-    debug:
-      msg: "✅ Stack Prometheus + Grafana desplegado con éxito con protección básica activada en ambos servicios."
+    # Confirmación final
+    - name: Confirmación final
+      debug:
+        msg: "✅ Stack Prometheus + Grafana desplegado con éxito con protección básica activada en ambos servicios."
