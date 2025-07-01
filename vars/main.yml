@@ -38,5 +38,5 @@ prometheus_chart_version: "27.11.0"
 grafana_chart_version: "8.12.1"
 
 # Configuración de Prometheus y Grafana
-prometheus_values_path: "/tmp/values-prometheus.yaml"
-grafana_values_path: "/tmp/values-grafana.yaml"
+prometheus_values_path: "playbook/helm/prometheus/values-prometheus.yaml.j2"
+grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"

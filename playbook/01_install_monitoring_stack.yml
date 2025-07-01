@@ -10,7 +10,7 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   vars_files:
-    - vars/main.yml  # Asegúrate de que las variables estén siendo cargadas desde este archivo
+    - vars/main.yml  # Asegúrate de que esta línea esté bien posicionada
 
   tasks:
     # Verificar que kubectl está disponible
@@ -39,6 +39,13 @@
             name: monitoring
       when: monitoring_namespace.rc != 0
 
+    # Crear directorio para archivos renderizados
+    - name: Crear directorio para archivos renderizados
+      file:
+        path: "./rendered_files"
+        state: directory
+        mode: "0755"
+
     # Configuración y despliegue de Prometheus y Grafana con Helm
     - name: Configurar repositorios Helm
       block:
@@ -58,12 +65,13 @@
           command: helm repo update
           changed_when: false
 
-    # Renderizar valores de Prometheus y Grafana
+    # Renderizar valores de Prometheus
     - name: Renderizar valores de Prometheus
       template:
         src: helm/prometheus/values-prometheus.yaml.j2
-        dest: "{{ prometheus_values_path }}"
+        dest: "./rendered_files/values-prometheus.yaml"  # Ruta dentro del proyecto
 
+    # Desplegar Prometheus con Helm
     - name: Desplegar Prometheus con Helm
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -73,14 +81,16 @@
         chart_version: "{{ prometheus_chart_version }}"
         create_namespace: false
         values_files:
-          - "{{ prometheus_values_path }}"
+          - "./rendered_files/values-prometheus.yaml"  # Ruta dentro del proyecto
         state: present
 
+    # Renderizar valores de Grafana
     - name: Renderizar valores de Grafana
       template:
         src: helm/grafana/values-grafana.yaml.j2
-        dest: "{{ grafana_values_path }}"
+        dest: "./rendered_files/values-grafana.yaml"  # Ruta dentro del proyecto
 
+    # Desplegar Grafana con Helm
     - name: Desplegar Grafana con Helm
       kubernetes.core.helm:
         kubeconfig: "{{ kubeconfig_path }}"
@@ -90,7 +100,7 @@
         chart_version: "{{ grafana_chart_version }}"
         create_namespace: false
         values_files:
-          - "{{ grafana_values_path }}"
+          - "./rendered_files/values-grafana.yaml"  # Ruta dentro del proyecto
         state: present
 
     # Esperar a que los pods estén listos
