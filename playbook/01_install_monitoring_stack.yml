@@ -1,12 +1,12 @@
 # playbook/01_install_monitoring_stack.yml
-
-- name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
-  hosts: controller
-  become: true
-  gather_facts: false
-  environment:
-    PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    KUBECONFIG: "/home/victory/.kube/config"
+---
+# 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
+hosts: controller
+become: true
+gather_facts: false
+environment:
+  PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  KUBECONFIG: "/home/victory/.kube/config"
 
 - name: Cargar variables de vars/main.yml y ejecutar playbooks en 'controller'
   vars_files:
@@ -19,10 +19,6 @@
     prometheus_values_path: "/tmp/values-prometheus.yaml"
     grafana_chart_version: "8.12.1"
     grafana_values_path: "/tmp/values-grafana.yaml"
-    prometheus_auth_user: "{{ lookup('env', 'PROMETHEUS_AUTH_USER') }}"
-    prometheus_auth_pass: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"
-    grafana_auth_user: "{{ lookup('env', 'GRAFANA_AUTH_USER') }}"
-    grafana_auth_pass: "{{ lookup('env', 'GRAFANA_AUTH_PASS') }}"
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
@@ -47,47 +43,6 @@
           metadata:
             name: monitoring
       when: monitoring_namespace.rc != 0
-
-    # Generación de hash para Prometheus y Grafana desde el archivo .env
-    - name: 🔐 Generar hash htpasswd para Prometheus
-      delegate_to: localhost
-      run_once: true
-      command: >
-        python3 -c "import crypt; print('{{ prometheus_auth_user }}:' + crypt.crypt('{{ prometheus_auth_pass }}', crypt.mksalt(crypt.METHOD_MD5)))"
-      register: prometheus_htpasswd_output
-
-    - name: 🔐 Crear Secret de autenticación para Prometheus
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        namespace: monitoring
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: prometheus-basic-auth
-          type: Opaque
-          data:
-            auth: "{{ prometheus_htpasswd_output.stdout | b64encode }}"
-
-    - name: 🔐 Generar hash htpasswd para Grafana
-      delegate_to: localhost
-      run_once: true
-      command: >
-        python3 -c "import crypt; print('{{ grafana_auth_user }}:' + crypt.crypt('{{ grafana_auth_pass }}', crypt.mksalt(crypt.METHOD_MD5)))"
-      register: grafana_htpasswd_output
-
-    - name: 🔐 Crear Secret de autenticación para Grafana
-      kubernetes.core.k8s:
-        kubeconfig: "{{ kubeconfig_path }}"
-        namespace: monitoring
-        definition:
-          apiVersion: v1
-          kind: Secret
-          metadata:
-            name: grafana-basic-auth
-          type: Opaque
-          data:
-            auth: "{{ grafana_htpasswd_output.stdout | b64encode }}"
 
     # Configuración y despliegue de Prometheus y Grafana con Helm
     - name: 🔗 Configurar repositorios Helm
