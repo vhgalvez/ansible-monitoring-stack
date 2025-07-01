@@ -4,7 +4,6 @@
 
 Este proyecto forma parte del stack [FlatcarMicroCloud](https://github.com/vhgalvez/FlatcarMicroCloud), ofreciendo una solución automatizada para monitorear nodos y servicios con Prometheus y Grafana. Además, permite la instalación de **Node Exporter** para la recolección de métricas de los nodos, todo gestionado con **Ansible**.
 
-
 ## ⚙️ Requisitos
 
 Antes de comenzar, asegúrate de tener lo siguiente instalado y configurado:
@@ -148,6 +147,7 @@ nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:300
 ---
 
 ## instalar el stack completo
+
 ```bash
 sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
 ```
@@ -163,6 +163,7 @@ source .env
 sudo nano .env
 
 # 🌍 Variables de entorno para Prometheus y Grafana
+
 PROMETHEUS_AUTH_USER="prometheus_admin"
 PROMETHEUS_AUTH_PASS="S3cr3tP@ssw0rd!123"
 
@@ -171,7 +172,6 @@ GRAFANA_AUTH_PASS="GrafanaS3cr3t!456"
 
 sudo chmod 600 .env
 
-
 # 🛠️ Variables de entorno para la interfaz de usuario de Prometheus y Grafana
 
 PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
@@ -179,8 +179,6 @@ PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
 
 GRAFANA_AUTH_USER_UI="grafana_ui_user"
 GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
-
-
 
 ```bash
 source .env
@@ -196,13 +194,10 @@ export PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
 export GRAFANA_AUTH_USER_UI="grafana_ui_user"
 export GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
 
-
-
 echo $PROMETHEUS_AUTH_USER_UI
 echo $PROMETHEUS_AUTH_PASS_UI
 echo $GRAFANA_AUTH_USER_UI
 echo $GRAFANA_AUTH_PASS_UI
-
 
 export PROMETHEUS_AUTH_USER_UI="tu_usuario"
 export PROMETHEUS_AUTH_PASS_UI="tu_contraseña"
