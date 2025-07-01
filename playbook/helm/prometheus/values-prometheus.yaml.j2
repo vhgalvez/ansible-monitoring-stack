@@ -1,6 +1,4 @@
 # playbook\helm\prometheus\values-prometheus.yaml.j2
-# playbook/helm/prometheus/values-prometheus.yaml.j2
-
 server:
   service:
     type: ClusterIP
@@ -22,7 +20,7 @@ server:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
           - path: "/"  # Ruta de acceso a Prometheus
-            pathType: Prefix  # <-- No hay comillas aquí, 'Prefix' es un valor válido sin comillas
+            pathType: Prefix  # <-- Remover las comillas aquí, 'Prefix' es un valor válido sin comillas
 
   resources:
     requests:
