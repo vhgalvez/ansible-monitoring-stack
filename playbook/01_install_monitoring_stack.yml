@@ -1,4 +1,5 @@
 # playbook/01_install_monitoring_stack.yml
+
 - name: 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
   hosts: controller
   become: true
@@ -7,16 +8,21 @@
     PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     KUBECONFIG: "/home/victory/.kube/config"
 
+- name: Cargar variables de vars/main.yml y ejecutar playbooks en 'controller'
+  vars_files:
+    - vars/main.yml
+  hosts: localhost
+
   vars:
     kubeconfig_path: "/home/victory/.kube/config"
     prometheus_chart_version: "27.11.0"
     prometheus_values_path: "/tmp/values-prometheus.yaml"
     grafana_chart_version: "8.12.1"
     grafana_values_path: "/tmp/values-grafana.yaml"
-    prometheus_auth_user: "admin"
-    prometheus_auth_pass: "admin123"
-    grafana_auth_user: "admin"
-    grafana_auth_pass: "admin123"
+    prometheus_auth_user: "{{ lookup('env', 'PROMETHEUS_AUTH_USER') }}"
+    prometheus_auth_pass: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"
+    grafana_auth_user: "{{ lookup('env', 'GRAFANA_AUTH_USER') }}"
+    grafana_auth_pass: "{{ lookup('env', 'GRAFANA_AUTH_PASS') }}"
 
   tasks:
     - name: ✅ Verificar que kubectl está disponible
@@ -42,7 +48,7 @@
             name: monitoring
       when: monitoring_namespace.rc != 0
 
-    # Generación de hash para Prometheus y Grafana
+    # Generación de hash para Prometheus y Grafana desde el archivo .env
     - name: 🔐 Generar hash htpasswd para Prometheus
       delegate_to: localhost
       run_once: true
