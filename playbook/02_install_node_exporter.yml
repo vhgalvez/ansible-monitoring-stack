@@ -7,12 +7,15 @@
   become: true
   gather_facts: true
 
+  vars_files:
+    - ../vars/main.yml
+
   vars:
-    node_exporter_version: "1.8.1"  # Versión de Node Exporter que vamos a instalar
-    node_exporter_port: 9100  # Puerto en el que escuchará Node Exporter
-    node_exporter_bin_dir: "/usr/local/bin"  # Directorio donde se copiará el binario de Node Exporter
-    node_exporter_user: "node_exporter"  # Usuario para ejecutar el servicio
-    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"  # Ruta para el archivo de servicio systemd
+    node_exporter_version: "1.8.1" # Versión de Node Exporter que vamos a instalar
+    node_exporter_port: 9100 # Puerto en el que escuchará Node Exporter
+    node_exporter_bin_dir: "/usr/local/bin" # Directorio donde se copiará el binario de Node Exporter
+    node_exporter_user: "node_exporter" # Usuario para ejecutar el servicio
+    node_exporter_service_path: "/etc/systemd/system/node_exporter.service" # Ruta para el archivo de servicio systemd
 
   tasks:
     - name: 📦 Asegurar que 'curl' esté instalado

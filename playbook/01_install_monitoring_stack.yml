@@ -10,7 +10,7 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   vars_files:
-    - vars/main.yml  # Asegúrate de que esta línea esté bien posicionada
+    - ../vars/main.yml
 
   tasks:
     # Verificar que kubectl está disponible
