@@ -10,7 +10,7 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   vars_files:
-    - vars/main.yml
+    - ..vars/main.yml
 
   tasks:
     - name: Crear directorio para archivos renderizados
