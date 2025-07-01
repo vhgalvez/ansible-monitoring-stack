@@ -19,13 +19,13 @@ server:
     hosts:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
-          - path: "/"  # Ruta de acceso a Prometheus
-            pathType: Prefix  # <-- Remover las comillas aquí, 'Prefix' es un valor válido sin comillas
+          - path: /  # Ruta de acceso a Prometheus
+            pathType: Prefix  # Remover las comillas aquí, 'Prefix' es un valor válido sin comillas
 
   resources:
     requests:
-      cpu: "500m"  # Recursos solicitados (se asigna como cadena)
-      memory: "1Gi"  # Recursos solicitados (se asigna como cadena)
+      cpu: "500m"  # Recursos solicitados
+      memory: "1Gi"  # Recursos solicitados
     limits:
       cpu: "1"  # Límite de CPU
       memory: "2Gi"  # Límite de memoria
@@ -33,8 +33,8 @@ server:
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: "15s"  # Intervalo de scraping, configurado como cadena
-        evaluation_interval: "15s"  # Intervalo de evaluación, configurado como cadena
+        scrape_interval: "15s"  # Intervalo de scraping
+        evaluation_interval: "15s"  # Intervalo de evaluación
 
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
@@ -58,8 +58,8 @@ server:
 # Configuración extra de scrape para nodos externos
 extraScrapeConfigs: |
   - job_name: 'node-exporter-externos'
-    scrape_interval: "15s"  # Intervalo de scraping para nodos externos
-    scrape_timeout: "10s"  # Timeout de scraping
+    scrape_interval: "15s"
+    scrape_timeout: "10s"
     static_configs:
       - targets:
           - "10.17.3.11:9100"
@@ -68,8 +68,8 @@ extraScrapeConfigs: |
           - "10.17.3.14:9100"
           - "192.168.0.40:9100"
         labels:
-          environment: "external"  # Etiqueta para nodos externos
-          monitored_by: "prometheus"  # Etiqueta para identificar que estos nodos están siendo monitoreados por Prometheus
+          environment: "external"
+          monitored_by: "prometheus"
 
   tls:
     secretName: {{ tls_secret_name }}  # Se ha incluido la variable para el nombre del Secret TLS

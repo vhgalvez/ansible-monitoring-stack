@@ -24,7 +24,7 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
     traefik.ingress.kubernetes.io/auth-type: basic
-    traefik.ingress.kubernetes.io/auth-secret: grafana-basic-auth
+    traefik.ingress.kubernetes.io/auth-secret: grafana-basic-auth  # Secret creado para la autenticación básica
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
     - host: grafana.cefaslocalserver.com
@@ -42,7 +42,7 @@ resources:
 
 # Configuración personalizada para Grafana
 extraArgs:
-  - --basehref=/
+  - --basehref=/  # Base href para las rutas
 
 # Habilitar TLS
 tls:
@@ -54,91 +54,6 @@ env:
   GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
   GF_SECURITY_ADMIN_USER: "{{ grafana_admin_user }}"
 
-# Configuración de Logs
+# Configuración adicional de Logs
 logs:
   level: "info"
-
-# Persistencia
-persistence:
-  enabled: true
-  storageClassName: "{{ grafana_storage_class }}"
-  accessModes:
-    - ReadWriteOnce
-  size: "{{ grafana_pvc_size }}"
-
-# helm/prometheus/values-prometheus.yaml.j2
-
-server:
-  service:
-    type: ClusterIP
-    port: 80
-    targetPort: 9090
-
-  ingress:
-    enabled: true  # Activamos el ingreso para Prometheus
-    ingressClassName: traefik  # Usamos Traefik como Ingress Controller
-    annotations:
-      kubernetes.io/ingress.class: "traefik"  # Traefik como Ingress Controller
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Usa 'websecure' como entrypoint para HTTPS
-      traefik.ingress.kubernetes.io/router.tls: "true"  # Habilita TLS
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Usamos un certificado autofirmado
-      traefik.ingress.kubernetes.io/auth-type: "basic"  # Autenticación básica
-      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Referencia al secret de autenticación básica
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo que se usará para la autenticación
-    hosts:
-      - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
-        paths:
-          - path: /  # Ruta de acceso a Prometheus
-            pathType: Prefix
-
-  resources:
-    requests:
-      cpu: "500m"  # Recursos solicitados
-      memory: "1Gi"  # Recursos solicitados
-    limits:
-      cpu: "1"  # Límite de CPU
-      memory: "2Gi"  # Límite de memoria
-
-  serverFiles:
-    prometheus.yml:
-      global:
-        scrape_interval: "15s"  # Intervalo de scraping
-        evaluation_interval: "15s"  # Intervalo de evaluación
-
-      scrape_configs:
-        - job_name: 'kubernetes-apiservers'
-          kubernetes_sd_configs:
-            - role: endpoints  # Configuración para scrape de endpoints de Kubernetes
-          relabel_configs:
-            - source_labels:
-                - __meta_kubernetes_namespace
-                - __meta_kubernetes_service_name
-                - __meta_kubernetes_endpoint_port_name
-              action: keep
-              regex: "default;kubernetes;https"  # Filtra por puerto HTTPS de Kubernetes
-
-        - job_name: 'kubernetes-nodes'
-          kubernetes_sd_configs:
-            - role: node  # Configuración para scrape de nodos
-          relabel_configs:
-            - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"  # Mapear etiquetas de nodos
-
-# Configuración extra de scrape para nodos externos
-extraScrapeConfigs: |
-  - job_name: 'node-exporter-externos'
-    scrape_interval: "15s"
-    scrape_timeout: "10s"
-    static_configs:
-      - targets:
-          - "10.17.3.11:9100"
-          - "192.168.0.30:9100"
-          - "192.168.0.31:9100"
-          - "10.17.3.14:9100"
-          - "192.168.0.40:9100"
-        labels:
-          environment: "external"
-          monitored_by: "prometheus"
-
-  tls:
-    secretName: {{ tls_secret_name }}  # Se ha incluido la variable para el nombre del Secret TLS
