@@ -5,8 +5,8 @@
 
 - name: Cargar variables de group_vars y ejecutar playbooks en 'controller'
   vars_files:
-    - group_vars/all.yml
-  hosts: controller
+    vars/main.yml
+  hosts: localhost
 
 # 1 Desplegar stack de monitoreo completo (Prometheus + Grafana)
 - name: 1 Desplegar stack de monitoreo completo (Prometheus + Grafana)
@@ -22,7 +22,7 @@
 
 # 4 Verificación del despliegue y estado de los pods
 - name: 4 Verificación final del despliegue
-  hosts: controller
+  hosts: localhost
   gather_facts: false
   tasks:
     - name: ✅ Verificar que los pods estén listos
