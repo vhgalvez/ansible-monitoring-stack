@@ -19,8 +19,8 @@ server:
     hosts:
       - host: "prometheus.cefaslocalserver.com"  # Asegúrate de que el host esté entre comillas
         paths:
-          - path: "/"
-            pathType: Prefix  # Asegúrate de que sea un valor válido como "Prefix" o "Exact"
+          - path: "/"  # Ruta de acceso
+            pathType: "Prefix"  # Asegúrate de que sea un valor válido como "Prefix" o "Exact"
 
   resources:
     requests:
@@ -39,26 +39,26 @@ server:
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
           kubernetes_sd_configs:
-            - role: endpoints
+            - role: endpoints  # Configuración para los endpoints de Kubernetes
           relabel_configs:
             - source_labels:
                 - __meta_kubernetes_namespace
                 - __meta_kubernetes_service_name
                 - __meta_kubernetes_endpoint_port_name
               action: keep
-              regex: "default;kubernetes;https"  # Asegúrate de que la regex esté como una cadena
+              regex: "default;kubernetes;https"  # Filtra por puerto HTTPS de Kubernetes
 
         - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
-            - role: node
+            - role: node  # Configuración para scrape de nodos
           relabel_configs:
             - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"  # Asegúrate de que la regex esté como una cadena
+              regex: "__meta_kubernetes_node_label_(.+)"  # Mapear etiquetas de nodos
 
 extraScrapeConfigs: |
   - job_name: 'node-exporter-externos'
-    scrape_interval: 15s
-    scrape_timeout: 10s
+    scrape_interval: "15s"  # Intervalo de scraping para nodos externos
+    scrape_timeout: "10s"  # Timeout de scraping
     static_configs:
       - targets:
           - "10.17.3.11:9100"
@@ -67,5 +67,5 @@ extraScrapeConfigs: |
           - "10.17.3.14:9100"
           - "192.168.0.40:9100"
         labels:
-          environment: "external"
-          monitored_by: "prometheus"
+          environment: "external"  # Etiqueta para nodos externos
+          monitored_by: "prometheus"  # Etiqueta para identificar que estos nodos están siendo monitoreados por Prometheus
