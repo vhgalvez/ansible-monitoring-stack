@@ -34,16 +34,18 @@
   gather_facts: false
   tasks:
     - name: ✅ Verificar que los pods de Prometheus y Grafana estén listos
-      shell: kubectl get pods -n monitoring --no-headers
+      k8s_facts:
+        kubeconfig: "{{ kubeconfig_path }}"
+        namespace: monitoring
       register: pod_status
       retries: 10
       delay: 6
-      until: pod_status.rc == 0
+      until: pod_status.resources | length > 0
       changed_when: false
 
     - name: 🔍 Mostrar estado de los pods
       debug:
-        var: pod_status.stdout_lines
+        var: pod_status.resources
 
     - name: ✅ Confirmación final del despliegue
       debug:
