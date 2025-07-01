@@ -7,22 +7,26 @@
   vars_files:
     - ../vars/main.yml
   hosts: localhost
+  tasks:
+    - name: Cargar variables de configuración
+      debug:
+        msg: "Variables cargadas correctamente desde vars/main.yml"
 
 # 1. Desplegar stack de monitoreo completo (Prometheus + Grafana)
-- name: 1 Desplegar stack de monitoreo completo (Prometheus + Grafana)
+- name: Desplegar stack de monitoreo completo (Prometheus + Grafana)
   import_playbook: 01_install_monitoring_stack.yml
 
 # 2. Instalar Node Exporter en máquinas externas (si aplica)
-- name: 2 Instalar Node Exporter en máquinas externas (si aplica)
+- name: Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
 
 # 3. Verificación del despliegue y estado de los pods
-- name: 3 Verificación final del despliegue
+- name: Verificación final del despliegue de Prometheus y Grafana
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: ✅ Verificar que los pods estén listos
-      shell: kubectl get pods -n monitoring
+    - name: ✅ Verificar que los pods de Prometheus y Grafana estén listos
+      shell: kubectl get pods -n monitoring --no-headers
       register: pod_status
       retries: 10
       delay: 6
@@ -33,6 +37,6 @@
       debug:
         var: pod_status.stdout_lines
 
-    - name: ✅ Confirmación final
+    - name: ✅ Confirmación final del despliegue
       debug:
         msg: "✅ Stack Prometheus + Grafana desplegado con éxito con protección básica activada en ambos servicios."
