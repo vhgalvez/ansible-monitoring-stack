@@ -37,7 +37,7 @@
       # CAMBIO AQUÍ: Usar k8s_info en lugar de k8s_facts
       kubernetes.core.k8s_info:
         api_version: v1 # Specify api_version
-        kind: Pod       # Specify kind as Pod
+        kind: Pod # Specify kind as Pod
         kubeconfig: "{{ kubeconfig_path }}"
         namespace: monitoring
         field_selectors:
@@ -45,9 +45,6 @@
       register: pod_status
       retries: 10
       delay: 6
-      # Adjust 'until' condition slightly as k8s_info returns items in 'resources'
-      # and we're checking for pods specifically.
-      # You might also want to check for specific pod names or counts if needed.
       until: "pod_status.resources | selectattr('status.phase', 'equalto', 'Running') | list | length >= 2" # At least 2 running pods (Prometheus/Grafana)
       changed_when: false
 
