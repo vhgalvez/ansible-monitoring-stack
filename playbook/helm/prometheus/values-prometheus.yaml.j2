@@ -7,7 +7,6 @@ server:
 
   ingress:
     enabled: true  # Activamos el ingreso para Prometheus
-    ingressClassName: traefik  # Usamos Traefik como Ingress Controller
     annotations:
       kubernetes.io/ingress.class: "traefik"  # Traefik como Ingress Controller
       traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Usa 'websecure' como entrypoint para HTTPS
@@ -16,11 +15,16 @@ server:
       traefik.ingress.kubernetes.io/auth-type: "basic"  # Autenticación básica
       traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Referencia al secret de autenticación básica
       traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo que se usará para la autenticación
+    # FIXED: Simplified hosts structure - this is what the chart expects
     hosts:
-      - host: "prometheus.socialdevs.site"  # Dominio para acceder a Prometheus
-        paths:
-          - path: "/"  # Asegúrate de que esta ruta sea una cadena
-            pathType: Prefix  # Asegúrate de que `pathType` esté correctamente definido al mismo nivel que 'path'
+      - "prometheus.socialdevs.site"  # Simple hostname string
+    path: "/"  # Path at the top level
+    pathType: Prefix  # PathType at the top level
+    # TLS configuration
+    tls:
+      - secretName: {{ tls_secret_name }}
+        hosts:
+          - "prometheus.socialdevs.site"
 
   resources:
     requests:
@@ -70,6 +74,3 @@ extraScrapeConfigs: |
         labels:
           environment: "external"  # Etiqueta para diferenciar nodos externos
           monitored_by: "prometheus"  # Etiqueta para identificar que está siendo monitoreado por Prometheus
-
-tls:
-  secretName: {{ tls_secret_name }}  # Asegúrate de que {{ tls_secret_name }} esté correctamente resuelto en el entorno
