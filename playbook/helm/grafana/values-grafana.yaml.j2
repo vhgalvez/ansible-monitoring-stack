@@ -1,4 +1,5 @@
 # helm/grafana/values-grafana.yaml.j2
+# helm/grafana/values-grafana.yaml.j2
 
 adminUser: "{{ grafana_admin_user }}"
 adminPassword: "{{ grafana_admin_password }}"
@@ -27,10 +28,7 @@ ingress:
     traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"  # Secret creado para la autenticación básica
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - host: "grafana.{{ domain }}"  # Asegúrate de que esto sea una cadena, no un mapa
-      paths:
-        - path: "/"  # Asegúrate de que esta ruta sea una cadena, no un mapa
-          pathType: Prefix  # Asegúrate de que `pathType` esté correctamente definido al mismo nivel que 'path'
+    - "grafana.{{ domain }}"  # Asegúrate de que esto sea una cadena, no un mapa
   tls:
     - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Grafana
       hosts:
@@ -52,3 +50,21 @@ env:
 # Configuración adicional de Logs
 logs:
   level: "info"
+
+prometheus:
+  server:
+    ingress:
+      enabled: true
+      ingressClassName: traefik
+      annotations:
+        kubernetes.io/ingress.class: "traefik"
+        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+        traefik.ingress.kubernetes.io/router.tls: "true"
+        traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"
+        traefik.ingress.kubernetes.io/auth-type: "basic"
+        traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"
+        traefik.ingress.kubernetes.io/auth-header-field: "Authorization"
+      hosts:
+        - "prometheus.cefaslocalserver.com"  # Asegúrate de que esta sea una cadena, no un mapa
+      tls:
+        - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Prometheus
