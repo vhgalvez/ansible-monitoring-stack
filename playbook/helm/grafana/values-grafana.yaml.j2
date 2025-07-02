@@ -15,16 +15,6 @@ service:
   port: 3000
   targetPort: 3000
 
-  storageClassName: "{{ grafana_storage_class }}"
-  accessModes:
-    - ReadWriteOnce
-  size: "{{ grafana_pvc_size }}"
-
-service:
-  type: ClusterIP
-  port: 3000
-  targetPort: 3000
-
 ingress:
   enabled: true
   ingressClassName: traefik
@@ -34,17 +24,17 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
     traefik.ingress.kubernetes.io/auth-type: basic
-    traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"
+    traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"  # Secret creado para la autenticación básica
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - host: "grafana.{{ domain }}"
+    - host: "grafana.{{ domain }}"  # Asegúrate de que esto sea una cadena, no un mapa
       paths:
-        - path: /
-          pathType: Prefix
+        - path: "/"  # Asegúrate de que esta ruta sea una cadena, no un mapa
+          pathType: Prefix  # Asegúrate de que `pathType` esté correctamente definido al mismo nivel que 'path'
   tls:
-    - secretName: "{{ tls_secret_name }}"
+    - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Grafana
       hosts:
-        - "grafana.{{ domain }}"
+        - "grafana.{{ domain }}"  # Asegúrate de que el host sea una cadena
 
 resources:
   requests:
