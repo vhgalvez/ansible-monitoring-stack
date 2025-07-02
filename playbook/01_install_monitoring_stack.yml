@@ -2,7 +2,7 @@
 ---
 # 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
 - name: Instalar stack de monitoreo
-  hosts: controller
+  hosts: localhost
   become: true
   gather_facts: false
   environment:
@@ -68,7 +68,7 @@
     # Renderizar valores de Prometheus
     - name: Renderizar valores de Prometheus
       template:
-        src: playbook/helm/prometheus/values-prometheus.yaml.j2 # Ruta corregida para el archivo
+        src: helm/prometheus/values-prometheus.yaml.j2 # Ruta corregida para el archivo
         dest: "./rendered_files/values-prometheus.yaml"
 
     # Desplegar Prometheus con Helm
@@ -87,7 +87,7 @@
     # Renderizar valores de Grafana
     - name: Renderizar valores de Grafana
       template:
-        src: playbook/helm/grafana/values-grafana.yaml.j2 # Ruta corregida para el archivo
+        src: helm/grafana/values-grafana.yaml.j2 # Ruta corregida para el archivo
         dest: "./rendered_files/values-grafana.yaml"
 
     # Desplegar Grafana con Helm
