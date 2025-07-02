@@ -1,3 +1,4 @@
+# playbook\01_install_monitoring_stack.yml
 ---
 # 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
 - name: Instalar stack de monitoreo
@@ -9,7 +10,7 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   vars_files:
-    - ../vars/main.yml
+    - vars/main.yml  # Asegúrate de que la ruta esté correcta para el archivo main.yml
 
   tasks:
     # Verificar que kubectl está disponible
@@ -67,8 +68,8 @@
     # Renderizar valores de Prometheus
     - name: Renderizar valores de Prometheus
       template:
-        src: helm/prometheus/values-prometheus.yaml.j2
-        dest: "./rendered_files/values-prometheus.yaml"  # Ruta dentro del proyecto
+        src: playbook/helm/prometheus/values-prometheus.yaml.j2  # Ruta corregida para el archivo
+        dest: "./rendered_files/values-prometheus.yaml"
 
     # Desplegar Prometheus con Helm
     - name: Desplegar Prometheus con Helm
@@ -80,14 +81,14 @@
         chart_version: "{{ prometheus_chart_version }}"
         create_namespace: false
         values_files:
-          - "./rendered_files/values-prometheus.yaml"  # Ruta dentro del proyecto
+          - "./rendered_files/values-prometheus.yaml"
         state: present
 
     # Renderizar valores de Grafana
     - name: Renderizar valores de Grafana
       template:
-        src: helm/grafana/values-grafana.yaml.j2
-        dest: "./rendered_files/values-grafana.yaml"  # Ruta dentro del proyecto
+        src: playbook/helm/grafana/values-grafana.yaml.j2  # Ruta corregida para el archivo
+        dest: "./rendered_files/values-grafana.yaml"
 
     # Desplegar Grafana con Helm
     - name: Desplegar Grafana con Helm
@@ -99,7 +100,7 @@
         chart_version: "{{ grafana_chart_version }}"
         create_namespace: false
         values_files:
-          - "./rendered_files/values-grafana.yaml"  # Ruta dentro del proyecto
+          - "./rendered_files/values-grafana.yaml"
         state: present
 
     # Esperar a que los pods estén listos
