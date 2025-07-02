@@ -10,7 +10,7 @@
     KUBECONFIG: "/home/victory/.kube/config"
 
   vars_files:
-    - vars/main.yml  # Asegúrate de que la ruta esté correcta para el archivo main.yml
+    - vars/main.yml # Asegúrate de que la ruta esté correcta para el archivo main.yml
 
   tasks:
     # Verificar que kubectl está disponible
@@ -68,7 +68,7 @@
     # Renderizar valores de Prometheus
     - name: Renderizar valores de Prometheus
       template:
-        src: playbook/helm/prometheus/values-prometheus.yaml.j2  # Ruta corregida para el archivo
+        src: playbook/helm/prometheus/values-prometheus.yaml.j2 # Ruta corregida para el archivo
         dest: "./rendered_files/values-prometheus.yaml"
 
     # Desplegar Prometheus con Helm
@@ -87,7 +87,7 @@
     # Renderizar valores de Grafana
     - name: Renderizar valores de Grafana
       template:
-        src: playbook/helm/grafana/values-grafana.yaml.j2  # Ruta corregida para el archivo
+        src: playbook/helm/grafana/values-grafana.yaml.j2 # Ruta corregida para el archivo
         dest: "./rendered_files/values-grafana.yaml"
 
     # Desplegar Grafana con Helm
