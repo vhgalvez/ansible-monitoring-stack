@@ -162,24 +162,17 @@ source .env
 sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
 ```
 
-export PROMETHEUS_AUTH_USER="prometheus_admin"
-export PROMETHEUS_AUTH_PASS="S3cr3tP@ssw0rd!123"
-export GRAFANA_AUTH_USER="grafana_admin"
-export GRAFANA_AUTH_PASS="GrafanaS3cr3t!456"
-export PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
-export PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
-export GRAFANA_AUTH_USER_UI="grafana_ui_user"
-export GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
+
 
 echo $PROMETHEUS_AUTH_USER_UI
 echo $PROMETHEUS_AUTH_PASS_UI
 echo $GRAFANA_AUTH_USER_UI
 echo $GRAFANA_AUTH_PASS_UI
+echo $PROMETHEUS_AUTH_USER
+echo $PROMETHEUS_AUTH_PASS
+echo $GRAFANA_AUTH_USER
+echo $GRAFANA_AUTH_PASS
 
-export PROMETHEUS_AUTH_USER_UI="tu_usuario"
-export PROMETHEUS_AUTH_PASS_UI="tu_contraseña"
-export GRAFANA_AUTH_USER_UI="tu_usuario"
-export GRAFANA_AUTH_PASS_UI="tu_contraseña"
 
 
 export PROMETHEUS_AUTH_USER="prometheus_admin"
@@ -192,8 +185,16 @@ export GRAFANA_AUTH_USER_UI="grafana_ui_user"
 export GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
 
 
+PROMETHEUS_AUTH_USER=prometheus_admin
+PROMETHEUS_AUTH_PASS=S3cr3tP@ssw0rd!123
+GRAFANA_AUTH_USER=grafana_admin
+GRAFANA_AUTH_PASS=GrafanaS3cr3t!456
+PROMETHEUS_AUTH_USER_UI=prometheus_ui_user
+PROMETHEUS_AUTH_PASS_UI=UI@Prometheus!789
+GRAFANA_AUTH_USER_UI=grafana_ui_user
+GRAFANA_AUTH_PASS_UI=UI@Grafana!789
 
 
 
 source .env
-sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
+sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
