@@ -5,7 +5,7 @@
 
 - name: Cargar variables de vars/main.yml y ejecutar playbooks en 'controller'
   vars_files:
-    - vars/main.yml
+    - ../vars/main.yml
   hosts: localhost
   tasks:
     - name: Cargar variables de configuración
