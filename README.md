@@ -44,12 +44,10 @@ sudo ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.y
 Para eliminar todo el stack, incluyendo Prometheus y Grafana:
 
 ```bash
-sudo ansible-playbook -i inventory/hosts.ini playbook/uninstall_stack.yml
+sudo ansible-playbook -i inventory/hosts.ini uninstall_stack.yml
 ```
 
-### 4. Forwarding de puertos para interfaces de usuario (opcional)
 
-Si deseas acceder a las interfaces de Grafana o Prometheus localmente, puedes usar `kubectl port-forward`:
 
 ---
 
@@ -57,8 +55,12 @@ Si deseas acceder a las interfaces de Grafana o Prometheus localmente, puedes us
 
 ### Playbook principal
 
+
+Para desplegar el stack de monitoreo, utiliza el siguiente comando:
+
 ```bash
-playbook/deploy_monitoring_stack.yml
+source .env
+sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
 ```
 
 Este playbook realiza las siguientes tareas:
@@ -79,8 +81,7 @@ ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
 - **Eliminar todo el stack:**
 
 ```bash
-sudo -E ansible-playbook -i inventory/hosts.ini playbook/uninstall_stack.yml
-```
+sudo -E ansible-playbook -i inventory/hosts.ini uninstall_stack.yml```
 
 ---
 
@@ -122,31 +123,6 @@ sudo -E ansible-playbook -i inventory/hosts.ini playbook/uninstall_stack.yml
 
 ---
 
-## 🛠 Gestión de port-forwards
-
-### Mostrar el estado de los port-forwards:
-
-```bash
-ps aux | grep port-forward
-```
-
-### Matar procesos antiguos:
-
-```bash
-sudo pkill -f "kubectl port-forward"
-```
-
-### Configurar nuevos port-forwards:
-
-```bash
-nohup kubectl port-forward -n monitoring svc/prometheus-server --address 0.0.0.0 32001:80 > /tmp/prometheus-port-forward.log 2>&1 &
-
-nohup kubectl port-forward -n monitoring svc/grafana --address 0.0.0.0 32002:3000 > /tmp/grafana-port-forward.log 2>&1 &
-```
-
----
-
-## instalar el stack completo
 
 ```bash
 sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
