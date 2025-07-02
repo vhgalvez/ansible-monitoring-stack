@@ -5,7 +5,7 @@ server:
     port: 80
     targetPort: 9090
 
-    ingress:
+  ingress:
     enabled: true  # Activamos el ingreso para Prometheus
     ingressClassName: traefik  # Usamos Traefik como Ingress Controller
     annotations:
@@ -19,9 +19,8 @@ server:
     hosts:
       - host: "prometheus.socialdevs.site"  # Dominio para acceder a Prometheus
         paths:
-          - path: "/"  # Esta es una lista de cadenas, no un mapa
-            pathType: Prefix  # Asegúrate de que `pathType` esté definido correctamente
-
+          - path: "/"  # Ruta principal de Prometheus
+            pathType: Prefix  # Especificamos que el tipo de ruta es Prefix
 
   resources:
     requests:
