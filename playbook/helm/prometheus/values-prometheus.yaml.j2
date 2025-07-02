@@ -19,8 +19,9 @@ server:
     hosts:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
-          - path: "/"  # Ahora esto es una lista de cadenas, eliminando la parte con 'pathType'
-            pathType: Prefix  # Aseguramos que se usa 'Prefix' para rutas de Ingress
+          - "/"  # Esta es una lista de cadenas, no un mapa, y está bien configurada
+    pathType: Prefix  # Asegúrate de que el `pathType` esté definido correctamente
+
 
   resources:
     requests:
