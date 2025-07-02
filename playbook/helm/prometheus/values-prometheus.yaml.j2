@@ -19,8 +19,8 @@ server:
     hosts:
       - host: "prometheus.socialdevs.site"  # Dominio para acceder a Prometheus
         paths:
-          - path: "/"  # Ruta principal de Prometheus
-            pathType: Prefix  # Especificamos que el tipo de ruta es Prefix
+          - path: "/"  # Asegúrate de que esta ruta sea una cadena
+            pathType: Prefix  # Asegúrate de que `pathType` esté definido correctamente
 
   resources:
     requests:
