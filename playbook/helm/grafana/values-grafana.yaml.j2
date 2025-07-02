@@ -27,11 +27,11 @@ ingress:
     traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"  # Secret creado para la autenticación básica
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - "grafana.{{ domain }}"  # Usa el dominio para Grafana
+    - "grafana.{{ grafana_domain }}"  # Usa el dominio para Grafana
   tls:
     - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Grafana
       hosts:
-        - "grafana.{{ domain }}"  # Usa el dominio para Grafana
+        - "grafana.{{ grafana_domain }}"  # Usa el dominio para Grafana
 
 resources:
   requests:
@@ -64,6 +64,6 @@ prometheus:
         traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"
         traefik.ingress.kubernetes.io/auth-header-field: "Authorization"
       hosts:
-        - "prometheus.{{ domain }}"  # Usa el dominio para Prometheus
+        - "prometheus.{{ prometheus_domain }}"  # Usa el dominio para Prometheus
       tls:
         - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Prometheus
