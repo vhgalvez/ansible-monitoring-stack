@@ -36,7 +36,8 @@ sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack
 Si necesitas añadir o actualizar los nodos a los que Prometheus realizará scrape de métricas, ejecuta:
 
 ```bash
-sudo ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
+
+sudo ansible-playbook -i inventory/hosts.ini playbook/update_scrape_targets.yml
 ```
 
 ### 3. Eliminar el stack de monitoreo
