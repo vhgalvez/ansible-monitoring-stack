@@ -50,3 +50,5 @@ grafana_chart_version: "9.2.9"
 # 🛠️ Configuración de Prometheus y Grafana
 prometheus_values_path: "playbook/helm/prometheus/values-prometheus.yaml.j2"
 grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"
+
+grafana_storage_class: "default"
