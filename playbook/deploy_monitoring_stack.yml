@@ -12,7 +12,7 @@
         msg: "Variables cargadas correctamente desde vars/main.yml"
 
 - name: Instalar stack de monitoreo (Prometheus + Grafana)
-  import_playbook: 01_install_monitoring_stack.yml # Ruta corregida
+  import_playbook: 01_install_monitoring_stack.yml  # Ruta corregida
 
 - name: Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
@@ -28,7 +28,7 @@
   gather_facts: false
   tasks:
     - name: ✅ Verificar que los pods de Prometheus y Grafana estén listos
-      k8s_facts:
+      kubernetes.core.k8s_info:
         kubeconfig: "{{ kubeconfig_path }}"
         namespace: monitoring
       register: pod_status
