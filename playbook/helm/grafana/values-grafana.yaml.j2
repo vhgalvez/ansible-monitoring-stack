@@ -15,6 +15,16 @@ service:
   port: 3000
   targetPort: 3000
 
+  storageClassName: "{{ grafana_storage_class }}"
+  accessModes:
+    - ReadWriteOnce
+  size: "{{ grafana_pvc_size }}"
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
 ingress:
   enabled: true
   ingressClassName: traefik
