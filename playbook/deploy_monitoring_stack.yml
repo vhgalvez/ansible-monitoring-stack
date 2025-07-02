@@ -1,5 +1,7 @@
+# playbook\deploy_monitoring_stack.yml
 ---
-# deploy_monitoring_stack.yml
+# 🧩 Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
+# Compatible con ejecución local, CI/CD y automatización general.
 
 - name: 🧩 Cargar variables de configuración desde main.yml
   hosts: localhost
@@ -10,7 +12,7 @@
         msg: "Variables cargadas correctamente desde vars/main.yml"
 
 - name: Instalar stack de monitoreo (Prometheus + Grafana)
-  import_playbook: playbook/01_install_monitoring_stack.yml  # Ruta correcta
+  import_playbook: playbook/01_install_monitoring_stack.yml  # Ruta correcta para instalar Prometheus y Grafana
 
 - name: Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: playbook/02_install_node_exporter.yml
