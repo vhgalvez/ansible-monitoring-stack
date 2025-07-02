@@ -24,13 +24,17 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
     traefik.ingress.kubernetes.io/auth-type: basic
-    traefik.ingress.kubernetes.io/auth-secret: grafana-basic-auth  # Secret creado para la autenticación básica
+    traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - host: grafana.cefaslocalserver.com
+    - host: "grafana.{{ domain }}"
       paths:
-        - path: "/"  # Asegúrate de que esta ruta sea una cadena
-          pathType: Prefix  # Asegúrate de que `pathType` esté correctamente definido al mismo nivel que 'path'
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: "{{ tls_secret_name }}"
+      hosts:
+        - "grafana.{{ domain }}"
 
 resources:
   requests:
@@ -39,16 +43,6 @@ resources:
   limits:
     cpu: 200m
     memory: 1Gi
-
-# Configuración personalizada para Grafana
-extraArgs:
-  - --basehref=/  # Base href para las rutas
-
-# Habilitar TLS
-tls:
-  enabled: true
-  certResolver: selfsigned
-  secretName: "{{ tls_secret_name }}"  # Se ha corregido la indentación
 
 # Variables de personalización
 env:
