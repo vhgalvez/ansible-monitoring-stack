@@ -1,4 +1,4 @@
-# playbook\01_install_monitoring_stack.yml
+# playbook/01_install_monitoring_stack.yml
 ---
 # 🧱 Instalar stack de monitoreo (Prometheus + Grafana)
 - name: Instalar stack de monitoreo
