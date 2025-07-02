@@ -19,8 +19,8 @@ server:
     hosts:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
-          - path: "/"  # Ruta principal para Prometheus
-            pathType: Prefix  # Especificamos que el tipo de ruta es Prefix
+          - path: "/"  # Esta es una lista de cadenas, no un mapa
+            pathType: Prefix  # Asegúrate de que `pathType` esté definido correctamente
 
   resources:
     requests:
