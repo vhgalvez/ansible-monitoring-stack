@@ -19,48 +19,47 @@ server:
     hosts:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
-          - "/"  # Esta es una lista de cadenas, no un mapa, y está bien configurada
-    pathType: Prefix  # Asegúrate de que el `pathType` esté definido correctamente
-
+          - path: "/"  # Ruta principal para Prometheus
+            pathType: Prefix  # Especificamos que el tipo de ruta es Prefix
 
   resources:
     requests:
-      cpu: "500m"  # Recursos solicitados
-      memory: "1Gi"  # Recursos solicitados
+      cpu: "500m"  # Recursos solicitados (CPU)
+      memory: "1Gi"  # Recursos solicitados (Memoria)
     limits:
-      cpu: "1"  # Límite de CPU
-      memory: "2Gi"  # Límite de memoria
+      cpu: "1"  # Límite máximo de CPU
+      memory: "2Gi"  # Límite máximo de memoria
 
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: "15s"  # Intervalo de scraping
-        evaluation_interval: "15s"  # Intervalo de evaluación
+        scrape_interval: "15s"  # Intervalo de scraping para Prometheus
+        evaluation_interval: "15s"  # Intervalo de evaluación de reglas
 
       scrape_configs:
-        - job_name: 'kubernetes-apiservers'
+        - job_name: 'kubernetes-apiservers'  # Job para scrape de API servers de Kubernetes
           kubernetes_sd_configs:
-            - role: endpoints  # Configuración para scrape de endpoints de Kubernetes
+            - role: endpoints  # Configuración para endpoints de Kubernetes
           relabel_configs:
             - source_labels:
                 - __meta_kubernetes_namespace
                 - __meta_kubernetes_service_name
                 - __meta_kubernetes_endpoint_port_name
               action: keep
-              regex: "default;kubernetes;https"  # Filtra por puerto HTTPS de Kubernetes
+              regex: "default;kubernetes;https"  # Filtra por el puerto HTTPS de Kubernetes
 
-        - job_name: 'kubernetes-nodes'
+        - job_name: 'kubernetes-nodes'  # Job para scrape de nodos de Kubernetes
           kubernetes_sd_configs:
             - role: node  # Configuración para scrape de nodos
           relabel_configs:
             - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"  # Mapear etiquetas de nodos
+              regex: "__meta_kubernetes_node_label_(.+)"  # Mapea las etiquetas de los nodos
 
 # Configuración extra de scrape para nodos externos
 extraScrapeConfigs: |
-  - job_name: 'node-exporter-externos'
-    scrape_interval: "15s"
-    scrape_timeout: "10s"
+  - job_name: 'node-exporter-externos'  # Job para scrape de nodos externos
+    scrape_interval: "15s"  # Intervalo de scrape
+    scrape_timeout: "10s"  # Timeout para el scrape
     static_configs:
       - targets:
           - "10.17.3.11:9100"
@@ -69,8 +68,8 @@ extraScrapeConfigs: |
           - "10.17.3.14:9100"
           - "192.168.0.40:9100"
         labels:
-          environment: "external"
-          monitored_by: "prometheus"
+          environment: "external"  # Etiqueta para diferenciar nodos externos
+          monitored_by: "prometheus"  # Etiqueta para identificar que está siendo monitoreado por Prometheus
 
 tls:
-  secretName: {{ tls_secret_name }}  # Correctamente formateado fuera de 'extraScrapeConfigs'
+  secretName: {{ tls_secret_name }}  # Asegúrate de que {{ tls_secret_name }} esté correctamente resuelto en el entorno
