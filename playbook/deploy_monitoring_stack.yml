@@ -14,19 +14,19 @@
 
 # 1. Desplegar stack de monitoreo completo (Prometheus + Grafana)
 - name: Desplegar stack de monitoreo completo (Prometheus + Grafana)
-  import_playbook: 01_install_monitoring_stack.yml # Corrige la ruta aquí
+  import_playbook: 01_install_monitoring_stack.yml
 
 # 2. Instalar Node Exporter en máquinas externas (si aplica)
 - name: Instalar Node Exporter en máquinas externas (si aplica)
-  import_playbook: 02_install_node_exporter.yml # Corrige la ruta aquí
+  import_playbook: 02_install_node_exporter.yml
 
 # 3. Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
 - name: Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
-  import_playbook: 03_generate-monitoring-auth-secrets.yml # Corrige la ruta aquí
+  import_playbook: 03_generate-monitoring-auth-secrets.yml
 
 # 4. Configurar Prometheus y Grafana con autenticación básica
 - name: Configurar Prometheus y Grafana con autenticación básica
-  import_playbook: 04_seal-monitoring-auth-secret.yml # Corrige la ruta aquí
+  import_playbook: 04_seal-monitoring-auth-secret.yml
 
 # 5. Verificación del despliegue y estado de los pods
 - name: Verificación final del despliegue de Prometheus y Grafana
@@ -34,13 +34,21 @@
   gather_facts: false
   tasks:
     - name: ✅ Verificar que los pods de Prometheus y Grafana estén listos
-      k8s_facts:
+      # CAMBIO AQUÍ: Usar k8s_info en lugar de k8s_facts
+      kubernetes.core.k8s_info:
+        api_version: v1 # Specify api_version
+        kind: Pod       # Specify kind as Pod
         kubeconfig: "{{ kubeconfig_path }}"
         namespace: monitoring
+        field_selectors:
+          - status.phase=Running # Optional: Filter for running pods directly
       register: pod_status
       retries: 10
       delay: 6
-      until: pod_status.resources | length > 0
+      # Adjust 'until' condition slightly as k8s_info returns items in 'resources'
+      # and we're checking for pods specifically.
+      # You might also want to check for specific pod names or counts if needed.
+      until: "pod_status.resources | selectattr('status.phase', 'equalto', 'Running') | list | length >= 2" # At least 2 running pods (Prometheus/Grafana)
       changed_when: false
 
     - name: 🔍 Mostrar estado de los pods
