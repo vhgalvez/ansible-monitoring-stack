@@ -17,7 +17,7 @@ server:
       traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Referencia al secret de autenticación básica
       traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo que se usará para la autenticación
     hosts:
-      - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
+      - host: "prometheus.socialdevs.site"  # Dominio para acceder a Prometheus
         paths:
           - path: "/"  # Esta es una lista de cadenas, no un mapa
             pathType: Prefix  # Asegúrate de que `pathType` esté definido correctamente
