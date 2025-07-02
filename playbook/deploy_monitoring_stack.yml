@@ -26,7 +26,7 @@
 
 # 4. Configurar Prometheus y Grafana con autenticación básica
 - name: Configurar Prometheus y Grafana con autenticación básica
-  import_playbook: playbook/04_configure_monitoring_auth.yml
+  import_playbook: playbook/04_seal-monitoring-auth-secret.yml
 
 # 5. Verificación del despliegue y estado de los pods
 - name: Verificación final del despliegue de Prometheus y Grafana
