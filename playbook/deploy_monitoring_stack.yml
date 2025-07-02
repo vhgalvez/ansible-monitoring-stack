@@ -37,7 +37,7 @@
       # CAMBIO AQUÍ: Usar k8s_info en lugar de k8s_facts
       kubernetes.core.k8s_info:
         api_version: v1 # Specify api_version
-        kind: Pod       # Specify kind as Pod
+        kind: Pod # Specify kind as Pod
         kubeconfig: "{{ kubeconfig_path }}"
         namespace: monitoring
         field_selectors:
