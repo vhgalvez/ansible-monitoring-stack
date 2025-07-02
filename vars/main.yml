@@ -9,7 +9,6 @@ prometheus_auth_pass: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"  # Obtenció
 grafana_admin_user: "{{ lookup('env', 'GRAFANA_AUTH_USER') }}"
 grafana_admin_password: "{{ lookup('env', 'GRAFANA_AUTH_PASS') }}"
 
-
 # 🛠️ Credenciales de autenticación para la interfaz de usuario (UI) de Prometheus y Grafana
 prometheus_auth_user_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
 prometheus_auth_pass_ui: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno
