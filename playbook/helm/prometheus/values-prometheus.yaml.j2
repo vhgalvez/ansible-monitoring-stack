@@ -6,64 +6,64 @@ server:
     targetPort: 9090
 
   ingress:
-    enabled: true  # Activamos el ingreso para Prometheus
+    enabled: true
+    ingressClassName: traefik
     annotations:
-      kubernetes.io/ingress.class: "traefik"  # Traefik como Ingress Controller
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Usa 'websecure' como entrypoint para HTTPS
-      traefik.ingress.kubernetes.io/router.tls: "true"  # Habilita TLS
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Usamos un certificado autofirmado
-      traefik.ingress.kubernetes.io/auth-type: "basic"  # Autenticación básica
-      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Referencia al secret de autenticación básica
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo que se usará para la autenticación
-    # FIXED: Simplified hosts structure - this is what the chart expects
+      kubernetes.io/ingress.class: "traefik"
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+      traefik.ingress.kubernetes.io/router.tls: "true"
+      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"
+      traefik.ingress.kubernetes.io/auth-type: "basic"
+      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"
+      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"
     hosts:
-      - "prometheus.socialdevs.site"  # Simple hostname string
-    path: "/"  # Path at the top level
-    pathType: Prefix  # PathType at the top level
-    # TLS configuration
+      - host: "{{ prometheus_domain }}"
+        paths:
+          - path: /
+            pathType: Prefix
     tls:
-      - secretName: {{ tls_secret_name }}
+      - secretName: "{{ tls_secret_name }}"
         hosts:
-          - "prometheus.socialdevs.site"
+          - "{{ prometheus_domain }}"
 
   resources:
     requests:
-      cpu: "500m"  # Recursos solicitados (CPU)
-      memory: "1Gi"  # Recursos solicitados (Memoria)
+      cpu: "500m"
+      memory: "1Gi"
     limits:
-      cpu: "1"  # Límite máximo de CPU
-      memory: "2Gi"  # Límite máximo de memoria
+      cpu: "1"
+      memory: "2Gi"
 
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: "15s"  # Intervalo de scraping para Prometheus
-        evaluation_interval: "15s"  # Intervalo de evaluación de reglas
+        scrape_interval: "15s"
+        evaluation_interval: "15s"
 
       scrape_configs:
-        - job_name: 'kubernetes-apiservers'  # Job para scrape de API servers de Kubernetes
+        - job_name: 'kubernetes-apiservers'
           kubernetes_sd_configs:
-            - role: endpoints  # Configuración para endpoints de Kubernetes
+            - role: endpoints
           relabel_configs:
             - source_labels:
                 - __meta_kubernetes_namespace
                 - __meta_kubernetes_service_name
                 - __meta_kubernetes_endpoint_port_name
               action: keep
-              regex: "default;kubernetes;https"  # Filtra por el puerto HTTPS de Kubernetes
+              regex: "default;kubernetes;https"
 
-        - job_name: 'kubernetes-nodes'  # Job para scrape de nodos de Kubernetes
+        - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
-            - role: node  # Configuración para scrape de nodos
+            - role: node
           relabel_configs:
             - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"  # Mapea las etiquetas de los nodos
+              regex: "__meta_kubernetes_node_label_(.+)"
 
 # Configuración extra de scrape para nodos externos
 extraScrapeConfigs: |
-  - job_name: 'node-exporter-externos'  # Job para scrape de nodos externos
-    scrape_interval: "15s"  # Intervalo de scrape
-    scrape_timeout: "10s"  # Timeout para el scrape
+  - job_name: 'node-exporter-externos'
+    scrape_interval: "15s"
+    scrape_timeout: "10s"
     static_configs:
       - targets:
           - "10.17.3.11:9100"
@@ -72,5 +72,5 @@ extraScrapeConfigs: |
           - "192.168.0.31:9100"
           - "192.168.0.40:9100"
         labels:
-          environment: "external"  # Etiqueta para diferenciar nodos externos
-          monitored_by: "prometheus"  # Etiqueta para identificar que está siendo monitoreado por Prometheus
+          environment: "external"
+          monitored_by: "prometheus"

@@ -24,14 +24,17 @@ ingress:
     traefik.ingress.kubernetes.io/router.tls: "true"
     traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
     traefik.ingress.kubernetes.io/auth-type: basic
-    traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"  # Secret creado para la autenticación básica
+    traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - "grafana.{{ grafana_domain }}"  # Usa el dominio para Grafana
+    - host: "grafana.{{ grafana_domain }}"
+      paths:
+        - path: /
+          pathType: Prefix
   tls:
-    - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Grafana
+    - secretName: "{{ tls_secret_name }}"
       hosts:
-        - "grafana.{{ grafana_domain }}"  # Usa el dominio para Grafana
+        - "grafana.{{ grafana_domain }}"
 
 resources:
   requests:
@@ -41,29 +44,9 @@ resources:
     cpu: 200m
     memory: 1Gi
 
-# Variables de personalización
 env:
   GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
   GF_SECURITY_ADMIN_USER: "{{ grafana_admin_user }}"
 
-# Configuración adicional de Logs
 logs:
   level: "info"
-
-prometheus:
-  server:
-    ingress:
-      enabled: true
-      ingressClassName: traefik
-      annotations:
-        kubernetes.io/ingress.class: "traefik"
-        traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-        traefik.ingress.kubernetes.io/router.tls: "true"
-        traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"
-        traefik.ingress.kubernetes.io/auth-type: "basic"
-        traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"
-        traefik.ingress.kubernetes.io/auth-header-field: "Authorization"
-      hosts:
-        - "prometheus.{{ prometheus_domain }}"  # Usa el dominio para Prometheus
-      tls:
-        - secretName: "{{ tls_secret_name }}"  # Certificado TLS para Prometheus
