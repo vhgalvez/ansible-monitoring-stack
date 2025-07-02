@@ -14,19 +14,19 @@
 
 # 1. Desplegar stack de monitoreo completo (Prometheus + Grafana)
 - name: Desplegar stack de monitoreo completo (Prometheus + Grafana)
-  import_playbook: playbook/01_install_monitoring_stack.yml
+  import_playbook: 01_install_monitoring_stack.yml
 
 # 2. Instalar Node Exporter en máquinas externas (si aplica)
 - name: Instalar Node Exporter en máquinas externas (si aplica)
-  import_playbook: playbook/02_install_node_exporter.yml
+  import_playbook: 02_install_node_exporter.yml
 
 # 3. Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
 - name: Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
-  import_playbook: playbook/03_generate-monitoring-auth-secrets.yml
+  import_playbook: 03_generate-monitoring-auth-secrets.yml
 
 # 4. Configurar Prometheus y Grafana con autenticación básica
 - name: Configurar Prometheus y Grafana con autenticación básica
-  import_playbook: playbook/04_seal-monitoring-auth-secret.yml
+  import_playbook: 04_seal-monitoring-auth-secret.yml
 
 # 5. Verificación del despliegue y estado de los pods
 - name: Verificación final del despliegue de Prometheus y Grafana
@@ -37,7 +37,7 @@
       # CAMBIO AQUÍ: Usar k8s_info en lugar de k8s_facts
       kubernetes.core.k8s_info:
         api_version: v1 # Specify api_version
-        kind: Pod # Specify kind as Pod
+        kind: Pod       # Specify kind as Pod
         kubeconfig: "{{ kubeconfig_path }}"
         namespace: monitoring
         field_selectors:
