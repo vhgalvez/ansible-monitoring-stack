@@ -1,5 +1,5 @@
----
 #  uninstall_stack.yml
+---
 # 🧼 Playbook para eliminar por completo Prometheus + Grafana + namespace + RBAC
 
 - name: 🧼 Eliminar stack de monitoreo (Prometheus + Grafana)
@@ -10,6 +10,7 @@
     ns: monitoring
     kubeconfig_path: "/home/victory/.kube/config"
     kubectl_path: "/usr/local/bin/kubectl"
+    helm_path: "/usr/local/bin/helm" # Ruta de Helm, si no está en el PATH
 
   environment:
     KUBECONFIG: "{{ kubeconfig_path }}"
@@ -23,12 +24,12 @@
       changed_when: false
 
     - name: ❌ Desinstalar Prometheus con Helm
-      command: "{{ kubectl_path }} helm uninstall prometheus -n {{ ns }}"
+      command: "{{ helm_path }} uninstall prometheus -n {{ ns }}"
       when: ns_check.rc == 0
       ignore_errors: true
 
     - name: ❌ Desinstalar Grafana con Helm
-      command: "{{ kubectl_path }} helm uninstall grafana -n {{ ns }}"
+      command: "{{ helm_path }} uninstall grafana -n {{ ns }}"
       when: ns_check.rc == 0
       ignore_errors: true
 
@@ -79,6 +80,7 @@
         msg: "⚠️ Namespace '{{ ns }}' aún está activo. Revisa si hay CRDs o operadores recreándolo automáticamente."
       when: ns_check_final.rc == 0
 
+    # **Eliminar RBAC relacionados con monitoreo**
     - name: ❌ Eliminar ClusterRole 'system:monitoring'
       command: "{{ kubectl_path }} delete clusterrole system:monitoring --ignore-not-found=true"
       ignore_errors: true
@@ -87,6 +89,15 @@
       command: "{{ kubectl_path }} delete clusterrolebinding system:monitoring --ignore-not-found=true"
       ignore_errors: true
 
+    - name: ❌ Eliminar los RoleBindings en el namespace de monitoreo
+      shell: "{{ kubectl_path }} get rolebinding -n {{ ns }} -o name | grep monitoring | xargs -I {} {{ kubectl_path }} delete {} -n {{ ns }}"
+      ignore_errors: true
+
+    - name: ❌ Eliminar los ClusterRoleBindings en el clúster
+      shell: "{{ kubectl_path }} get clusterrolebinding -o name | grep monitoring | xargs -I {} {{ kubectl_path }} delete {}"
+      ignore_errors: true
+
     - name: ❌ Eliminar CRDs relacionadas con monitoreo (si existen)
-      command: "{{ kubectl_path }} get crd | grep monitoring | awk '{print $1}' | xargs -I '{}' {{ kubectl_path }} delete crd '{}'"
+      shell: |
+        {{ kubectl_path }} get crd | grep monitoring | awk '{print $1}' | xargs -n 1 {{ kubectl_path }} delete crd
       ignore_errors: true
