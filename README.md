@@ -180,3 +180,8 @@ export PROMETHEUS_AUTH_USER_UI="tu_usuario"
 export PROMETHEUS_AUTH_PASS_UI="tu_contraseña"
 export GRAFANA_AUTH_USER_UI="tu_usuario"
 export GRAFANA_AUTH_PASS_UI="tu_contraseña"
+
+
+
+source .env
+sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
