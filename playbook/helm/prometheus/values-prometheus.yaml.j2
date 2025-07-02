@@ -1,30 +1,13 @@
 # playbook\helm\prometheus\values-prometheus.yaml.j2
 server:
   service:
-    type: ClusterIP
+    type: NodePort  # Changed to NodePort for direct access
     port: 80
     targetPort: 9090
-
+    nodePort: 30090  # You can access via http://<node-ip>:30090
+  # Disable ingress temporarily
   ingress:
-    enabled: true
-    ingressClassName: traefik
-    annotations:
-      kubernetes.io/ingress.class: "traefik"
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
-      traefik.ingress.kubernetes.io/router.tls: "true"
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"
-      traefik.ingress.kubernetes.io/auth-type: "basic"
-      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"
-    hosts:
-      - host: "prometheus.socialdevs.site"
-        paths:
-          - "/"  # Simple string path instead of object
-    # Alternative format that might work better:
-    # hosts:
-    #   - "prometheus.socialdevs.site"
-    # path: "/"
-
+    enabled: false
   resources:
     requests:
       cpu: "500m"
@@ -32,13 +15,11 @@ server:
     limits:
       cpu: "1"
       memory: "2Gi"
-
   serverFiles:
     prometheus.yml:
       global:
         scrape_interval: "15s"
         evaluation_interval: "15s"
-
       scrape_configs:
         - job_name: 'kubernetes-apiservers'
           kubernetes_sd_configs:
@@ -49,14 +30,13 @@ server:
                 - __meta_kubernetes_service_name
                 - __meta_kubernetes_endpoint_port_name
               action: keep
-              regex: "default;kubernetes;https"
-
+              regex: "default;kubernetes;https"  # Filtra por el puerto HTTPS de Kubernetes
         - job_name: 'kubernetes-nodes'
           kubernetes_sd_configs:
             - role: node
           relabel_configs:
             - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"
+              regex: "__meta_kubernetes_node_label_(.+)"  # Corrected regex for node labels
 
 # Configuración extra de scrape para nodos externos
 extraScrapeConfigs: |
