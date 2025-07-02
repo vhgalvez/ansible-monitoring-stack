@@ -29,8 +29,8 @@ ingress:
   hosts:
     - host: grafana.cefaslocalserver.com
       paths:
-        - path: /
-          pathType: Prefix
+        - path: "/"  # Asegúrate de que esta ruta sea una cadena
+          pathType: Prefix  # Asegúrate de que `pathType` esté correctamente definido al mismo nivel que 'path'
 
 resources:
   requests:
