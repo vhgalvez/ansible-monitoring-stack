@@ -12,16 +12,13 @@
         msg: "Variables cargadas correctamente desde vars/main.yml"
 
 - name: Instalar stack de monitoreo (Prometheus + Grafana)
-  import_playbook: 01_install_monitoring_stack.yml  # Ruta corregida
+  import_playbook: 01_install_monitoring_stack.yml # Ruta corregida
 
 - name: Instalar Node Exporter en máquinas externas (si aplica)
   import_playbook: 02_install_node_exporter.yml
 
 - name: Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
   import_playbook: 03_generate-monitoring-auth-secrets.yml
-
-- name: Configurar Prometheus y Grafana con autenticación básica
-  import_playbook: 04_seal-monitoring-auth-secret.yml
 
 - name: Verificación final del despliegue de Prometheus y Grafana
   hosts: localhost
