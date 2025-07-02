@@ -182,6 +182,18 @@ export GRAFANA_AUTH_USER_UI="tu_usuario"
 export GRAFANA_AUTH_PASS_UI="tu_contraseña"
 
 
+export PROMETHEUS_AUTH_USER="prometheus_admin"
+export PROMETHEUS_AUTH_PASS="S3cr3tP@ssw0rd!123"
+export GRAFANA_AUTH_USER="grafana_admin"
+export GRAFANA_AUTH_PASS="GrafanaS3cr3t!456"
+export PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
+export PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
+export GRAFANA_AUTH_USER_UI="grafana_ui_user"
+export GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
+
+
+
+
 
 source .env
 sudo ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack.yml
