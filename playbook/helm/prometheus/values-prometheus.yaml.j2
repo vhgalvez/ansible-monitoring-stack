@@ -19,9 +19,8 @@ server:
     hosts:
       - host: "prometheus.cefaslocalserver.com"  # Dominio para acceder a Prometheus
         paths:
-          - path: /  # Ruta de acceso a Prometheus
-            pathType: Prefix  # Remover las comillas aquí, 'Prefix' es un valor válido sin comillas
-
+          - "/"  # Ahora esto es una lista de cadenas, eliminando la parte con 'pathType'
+          
   resources:
     requests:
       cpu: "500m"  # Recursos solicitados
@@ -72,4 +71,4 @@ extraScrapeConfigs: |
           monitored_by: "prometheus"
 
 tls:
-  secretName: {{ tls_secret_name }}  # Se ha corregido la indentación, ahora está fuera de extraScrapeConfigs
+  secretName: {{ tls_secret_name }}  # Correctamente formateado fuera de 'extraScrapeConfigs'
