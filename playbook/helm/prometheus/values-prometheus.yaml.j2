@@ -1,29 +1,45 @@
 # playbook\helm\prometheus\values-prometheus.yaml.j2
 server:
   service:
-    type: NodePort  # Changed to NodePort for direct access
+    type: ClusterIP
     port: 80
     targetPort: 9090
-    nodePort: 30090  # You can access via http://<node-ip>:30090
-  # Disable ingress temporarily
+
   ingress:
-    enabled: false
+    enabled: true  # Activamos el ingreso para Prometheus
+    ingressClassName: traefik  # Usamos Traefik como Ingress Controller
+    annotations:
+      kubernetes.io/ingress.class: "traefik"  # Traefik como Ingress Controller
+      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"  # Usa 'websecure' como entrypoint para HTTPS
+      traefik.ingress.kubernetes.io/router.tls: "true"  # Habilita TLS
+      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"  # Usamos un certificado autofirmado
+      traefik.ingress.kubernetes.io/auth-type: "basic"  # Autenticación básica
+      traefik.ingress.kubernetes.io/auth-secret: "prometheus-basic-auth"  # Referencia al secret de autenticación básica
+      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"  # El campo que se usará para la autenticación
+    hosts:
+      - host: "prometheus.socialdevs.site"  # Dominio para acceder a Prometheus
+        paths:
+          - path: "/"  # Asegúrate de que esta ruta sea una cadena
+            pathType: Prefix  # Asegúrate de que `pathType` esté correctamente definido al mismo nivel que 'path'
+
   resources:
     requests:
-      cpu: "500m"
-      memory: "1Gi"
+      cpu: "500m"  # Recursos solicitados (CPU)
+      memory: "1Gi"  # Recursos solicitados (Memoria)
     limits:
-      cpu: "1"
-      memory: "2Gi"
+      cpu: "1"  # Límite máximo de CPU
+      memory: "2Gi"  # Límite máximo de memoria
+
   serverFiles:
     prometheus.yml:
       global:
-        scrape_interval: "15s"
-        evaluation_interval: "15s"
+        scrape_interval: "15s"  # Intervalo de scraping para Prometheus
+        evaluation_interval: "15s"  # Intervalo de evaluación de reglas
+
       scrape_configs:
-        - job_name: 'kubernetes-apiservers'
+        - job_name: 'kubernetes-apiservers'  # Job para scrape de API servers de Kubernetes
           kubernetes_sd_configs:
-            - role: endpoints
+            - role: endpoints  # Configuración para endpoints de Kubernetes
           relabel_configs:
             - source_labels:
                 - __meta_kubernetes_namespace
@@ -31,18 +47,19 @@ server:
                 - __meta_kubernetes_endpoint_port_name
               action: keep
               regex: "default;kubernetes;https"  # Filtra por el puerto HTTPS de Kubernetes
-        - job_name: 'kubernetes-nodes'
+
+        - job_name: 'kubernetes-nodes'  # Job para scrape de nodos de Kubernetes
           kubernetes_sd_configs:
-            - role: node
+            - role: node  # Configuración para scrape de nodos
           relabel_configs:
             - action: labelmap
-              regex: "__meta_kubernetes_node_label_(.+)"  # Corrected regex for node labels
+              regex: "__meta_kubernetes_node_label_(.+)"  # Mapea las etiquetas de los nodos
 
 # Configuración extra de scrape para nodos externos
 extraScrapeConfigs: |
-  - job_name: 'node-exporter-externos'
-    scrape_interval: "15s"
-    scrape_timeout: "10s"
+  - job_name: 'node-exporter-externos'  # Job para scrape de nodos externos
+    scrape_interval: "15s"  # Intervalo de scrape
+    scrape_timeout: "10s"  # Timeout para el scrape
     static_configs:
       - targets:
           - "10.17.3.11:9100"
@@ -51,11 +68,8 @@ extraScrapeConfigs: |
           - "10.17.3.14:9100"
           - "192.168.0.40:9100"
         labels:
-          environment: "external"
-          monitored_by: "prometheus"
+          environment: "external"  # Etiqueta para diferenciar nodos externos
+          monitored_by: "prometheus"  # Etiqueta para identificar que está siendo monitoreado por Prometheus
 
-# TLS configuration - only include if you have the variable defined
-{% if tls_secret_name is defined %}
 tls:
-  secretName: {{ tls_secret_name }}
-{% endif %}
+  secretName: {{ tls_secret_name }}  # Asegúrate de que {{ tls_secret_name }} esté correctamente resuelto en el entorno
