@@ -48,5 +48,5 @@ prometheus_chart_version: "27.23.0"
 grafana_chart_version: "9.2.9"
 
 # 🛠️ Configuración de Prometheus y Grafana
-prometheus_values_path: "playbook/helm/prometheus/values-prometheus.yaml.j2"
-grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"
+prometheus_values_path: "/home/victory/code-FlatcarMicroCloud/ansible-monitoring-stack/playbook/helm/prometheus/values-prometheus.yaml.j2"  # Ruta absoluta
+grafana_values_path: "/home/victory/code-FlatcarMicroCloud/ansible-monitoring-stack/playbook/helm/grafana/values-grafana.yaml.j2"  # Ruta absoluta
