@@ -1,9 +1,9 @@
-# playbook\02_install_node_exporter.yml
+# playbook/02_install_node_exporter.yml
 ---
 # 📦 Instalación y configuración de Node Exporter en máquinas externas para Prometheus
 
 - name: 🐧 Instalar y configurar Node Exporter
-  hosts: external_node_exporter
+  hosts: node_exporter_nodes # Este es el grupo de nodos donde se instalará Node Exporter
   become: true
   gather_facts: true
 
@@ -11,11 +11,11 @@
     - ../vars/main.yml
 
   vars:
-    node_exporter_version: "1.9.1"  # Versión de Node Exporter que vamos a instalar
-    node_exporter_port: 9100        # Puerto en el que escuchará Node Exporter
-    node_exporter_bin_dir: "/usr/local/bin"  # Directorio donde se copiará el binario de Node Exporter
-    node_exporter_user: "node_exporter"     # Usuario para ejecutar el servicio
-    node_exporter_service_path: "/etc/systemd/system/node_exporter.service"  # Ruta para el archivo de servicio systemd
+    node_exporter_version: "1.9.1" # Versión de Node Exporter que vamos a instalar
+    node_exporter_port: 9100 # Puerto en el que escuchará Node Exporter
+    node_exporter_bin_dir: "/usr/local/bin" # Directorio donde se copiará el binario de Node Exporter
+    node_exporter_user: "node_exporter" # Usuario para ejecutar el servicio
+    node_exporter_service_path: "/etc/systemd/system/node_exporter.service" # Ruta para el archivo de servicio systemd
 
   tasks:
     - name: 📦 Asegurar que 'curl' esté instalado
@@ -37,24 +37,37 @@
         path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
         state: absent
 
-    # Descargar y extraer Node Exporter directamente en el directorio bin
-    - name: 📦 Descargar y extraer Node Exporter
-      unarchive:
+    # Descargar Node Exporter
+    - name: 📦 Descargar Node Exporter
+      get_url:
         url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
-        dest: "{{ node_exporter_bin_dir }}"
-        remote_src: yes
-        creates: "{{ node_exporter_bin_dir }}/node_exporter"
+        dest: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+      register: download_node_exporter
 
-    # Limpiar archivo comprimido de Node Exporter después de la instalación
-    - name: 🧹 Limpiar archivo comprimido de Node Exporter
+    # Extraer Node Exporter
+    - name: 📦 Extraer Node Exporter
+      unarchive:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        dest: "/tmp/"
+        remote_src: yes
+      when: download_node_exporter.changed
+
+    # Mover el binario de Node Exporter a la ubicación final
+    - name: 🔧 Mover el binario de Node Exporter
+      command: mv /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter {{ node_exporter_bin_dir }}/node_exporter
+      when: download_node_exporter.changed
+
+    # Limpiar archivos temporales
+    - name: 🧹 Limpiar archivos temporales de Node Exporter
       file:
-        path: "/tmp/node_exporter.tar.gz"
+        path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
         state: absent
+      when: download_node_exporter.changed
 
     # Crear archivo systemd para Node Exporter
     - name: 🧩 Crear archivo systemd para Node Exporter
       template:
-        src: "templates/node_exporter/node_exporter.service.j2"
+        src: "templates/node_exporter.service.j2"
         dest: "{{ node_exporter_service_path }}"
         mode: "0644"
 
