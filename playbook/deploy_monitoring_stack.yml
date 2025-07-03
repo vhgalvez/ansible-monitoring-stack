@@ -29,13 +29,6 @@
 
   tasks:
     - name: ⏳ Esperar a que Prometheus y Grafana estén Ready
-      kubernetes.core.k8s_info:
-        kubeconfig: "{{ kubeconfig_path }}"
-        namespace: "{{ monitoring_namespace }}"
-        kind: Pod
-        label_selectors:
-          - "app.kubernetes.io/instance in (grafana,prometheus)"
-      register: pod_status
       retries: 20
       delay: 15
       until: >
@@ -45,3 +38,10 @@
           | length
         ) >= 2
       changed_when: false
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kubeconfig_path }}"
+        namespace: "{{ monitoring_namespace }}"
+        kind: Pod
+        label_selectors:
+          - "app.kubernetes.io/instance in (grafana,prometheus)"
+      register: pod_status
