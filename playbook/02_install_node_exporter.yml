@@ -67,9 +67,10 @@
     # Crear archivo systemd para Node Exporter
     - name: 🧩 Crear archivo systemd para Node Exporter
       template:
-        src: "templates/node_exporter.service.j2"
+        src: "node_exporter/node_exporter.service.j2"
         dest: "{{ node_exporter_service_path }}"
         mode: "0644"
+
 
     # Recargar systemd para aplicar cambios
     - name: Recargar systemd para aplicar cambios
