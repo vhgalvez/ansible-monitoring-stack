@@ -22,20 +22,27 @@
   gather_facts: false
 
   vars_files:
-    - ../vars/main.yml # 👈 AÑADE ESTA LÍNEA para tener acceso a kubeconfig_path
+    - ../vars/main.yml
 
   tasks:
-    - name: ✅ Verificar que los pods de Prometheus y Grafana estén listos
+    - name: ⏳ Esperar a que los pods de Prometheus y Grafana estén listos
       kubernetes.core.k8s_info:
         kubeconfig: "{{ kubeconfig_path }}"
-        namespace: monitoring
+        namespace: "{{ monitoring_namespace }}"
+        kind: Pod
+        label_selectors:
+          - "app.kubernetes.io/instance in (prometheus,grafana)"
       register: pod_status
-      retries: 10
-      delay: 6
-      until: pod_status.resources | length > 0
+      retries: 20
+      delay: 15
+      until: >
+        (
+          pod_status.resources | selectattr('status.phase','equalto','Running')
+        | list | length
+        ) == 2
       changed_when: false
 
-    - name: 🔍 Mostrar estado de los pods
+    - name: 🔍 Mostrar pods listos
       debug:
         var: pod_status.resources
 
