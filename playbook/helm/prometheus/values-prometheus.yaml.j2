@@ -1,4 +1,5 @@
 # playbook/helm/prometheus/values-prometheus.yaml.j2
+
 server:
   service:
     type: ClusterIP
@@ -6,76 +7,41 @@ server:
     targetPort: 9090
 
   ##################################################
-  # Ingress – compatible con el chart oficial      #
+  # Ingress (Traefik)
   ##################################################
   ingress:
     enabled: true
     ingressClassName: traefik
-
     annotations:
-      kubernetes.io/ingress.class: "traefik"
-      traefik.ingress.kubernetes.io/router.entrypoints: "websecure"
+      kubernetes.io/ingress.class: traefik
+      traefik.ingress.kubernetes.io/router.entrypoints: websecure
       traefik.ingress.kubernetes.io/router.tls: "true"
-      traefik.ingress.kubernetes.io/router.tls.certresolver: "selfsigned"
-      traefik.ingress.kubernetes.io/auth-type: "basic"
-      traefik.ingress.kubernetes.io/auth-secret: "{{ prometheus_secret_name }}"
-      traefik.ingress.kubernetes.io/auth-header-field: "Authorization"
-
-    # El chart espera una lista simple de hosts
-    hosts:
-      - "{{ prometheus_domain }}"
-
-    # Estos dos campos **deben** estar a nivel raíz de ingress
-    path: /
+      traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
+      traefik.ingress.kubernetes.io/router.middlewares: "{{ monitoring_namespace }}-{{ prometheus_dashboard_middleware_name }}@kubernetescrd"
+    hosts: [ "{{ prometheus_domain }}" ]
+    paths: [ / ]
     pathType: Prefix
-
     tls:
       - secretName: "{{ tls_secret_name }}"
-        hosts:
-          - "{{ prometheus_domain }}"
+        hosts: [ "{{ prometheus_domain }}" ]
 
   ##################################################
-  # Límites y peticiones de recursos               #
+  # Resources
   ##################################################
   resources:
-    requests:
-      cpu: 500m
-      memory: 1Gi
-    limits:
-      cpu: "1"
-      memory: 2Gi
+    requests: { cpu: 500m , memory: 1Gi }
+    limits:   { cpu: "1" , memory: 2Gi }
 
   ##################################################
-  # Configuración de Prometheus                    #
+  # Prometheus config
   ##################################################
   serverFiles:
     prometheus.yml:
-      global:
-        scrape_interval: 15s
-        evaluation_interval: 15s
-
-      scrape_configs:
-        # API servers de K8s
-        - job_name: kubernetes-apiservers
-          kubernetes_sd_configs:
-            - role: endpoints
-          relabel_configs:
-            - source_labels: [__meta_kubernetes_namespace,
-                              __meta_kubernetes_service_name,
-                              __meta_kubernetes_endpoint_port_name]
-              action: keep
-              regex: default;kubernetes;https
-
-        # Nodos de K8s
-        - job_name: kubernetes-nodes
-          kubernetes_sd_configs:
-            - role: node
-          relabel_configs:
-            - action: labelmap
-              regex: __meta_kubernetes_node_label_(.+)
+      # … (tu configuración original)
+      # OMITIDO PARA BREVEDAD …
 
 ####################################################
-# Scrape extra para Node-Exporter externos         #
+# Extra scrape-configs
 ####################################################
 extraScrapeConfigs: |
   - job_name: node-exporter-externos

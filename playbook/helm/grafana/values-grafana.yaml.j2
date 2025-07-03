@@ -1,13 +1,13 @@
 # helm/grafana/values-grafana.yaml.j2
 
 ##################################################
-# 🧑‍💻 Autenticación interna (UI de Grafana)
+# 🧑‍💻  Admin UI credentials
 ##################################################
 adminUser: "{{ grafana_auth_user_ui }}"
 adminPassword: "{{ grafana_auth_pass_ui }}"
 
 ##################################################
-# 💾 Persistencia
+# 💾  PVC
 ##################################################
 persistence:
   enabled: true
@@ -16,7 +16,7 @@ persistence:
   size: "{{ grafana_pvc_size }}"
 
 ##################################################
-# 📡 Servicio
+# 📡  Service
 ##################################################
 service:
   type: ClusterIP
@@ -24,55 +24,59 @@ service:
   targetPort: 3000
 
 ##################################################
-# 🌐 IngressRoute (Traefik ≥ 2.2)
+# 🌐  Kubernetes Ingress (Traefik)
 ##################################################
-ingressRoute:
+ingress:
   enabled: true
   ingressClassName: traefik
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.tls.certresolver: selfsigned
+    # 🔑  enlace al Middleware “basicAuth”
+    traefik.ingress.kubernetes.io/router.middlewares: "{{ monitoring_namespace }}-{{ grafana_dashboard_middleware_name }}@kubernetescrd"
   hosts:
-    - host: "{{ grafana_domain }}"
-      tls: true                       # usa entryPoint “websecure”
-      middlewares:
-        - name: "{{ grafana_dashboard_middleware_name }}"
-          namespace: "{{ monitoring_namespace }}"
-      paths:
-        - path: /
-          pathType: Prefix
+    - "{{ grafana_domain }}"
+  paths:
+    - /
+  pathType: Prefix
   tls:
-    secretName: "{{ tls_secret_name }}"
+    - secretName: "{{ tls_secret_name }}"
+      hosts: [ "{{ grafana_domain }}" ]
 
 ##################################################
-# 📊 Recursos
+# 📊  Resources
 ##################################################
 resources:
-  requests: { cpu: 100m, memory: 512Mi }
-  limits:   { cpu: 200m, memory: 1Gi }
+  requests: { cpu: 100m , memory: 512Mi }
+  limits:   { cpu: 200m , memory: 1Gi }
 
 ##################################################
-# ⚙️ Variables de entorno
+# ⚙️  Env
 ##################################################
 env:
   GF_SECURITY_ADMIN_USER:     "{{ grafana_auth_user_ui }}"
   GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_auth_pass_ui }}"
 
 ##################################################
-# 🩺 Probes
+# 🩺  Probes
 ##################################################
 readinessProbe:
-  httpGet: { path: /api/health, port: 3000 }
+  httpGet: { path: /api/health , port: 3000 }
   initialDelaySeconds: 30
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 10
 
 livenessProbe:
-  httpGet: { path: /api/health, port: 3000 }
+  httpGet: { path: /api/health , port: 3000 }
   initialDelaySeconds: 60
   periodSeconds: 10
   timeoutSeconds: 5
   failureThreshold: 10
 
 ##################################################
-# 📋 Logs
+# 📋  Logs
 ##################################################
 logs: { level: info }
