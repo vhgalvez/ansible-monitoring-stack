@@ -2,7 +2,7 @@
 ---
 # 📦 Instalación y configuración de Node Exporter en máquinas externas para Prometheus
 
-- name: 🐧 Instalar y configurar Node Exporter
+- name: "🐧 Instalar y configurar Node Exporter"
   hosts: node_exporter_nodes
   become: true
   gather_facts: true
@@ -18,81 +18,82 @@
     node_exporter_service_path: "/etc/systemd/system/node_exporter.service"
 
   tasks:
-    - name: 📦 Asegurar que 'curl' esté instalado
-      package:
+    - name: "📦 Asegurar que 'curl' esté instalado"
+      ansible.builtin.package:
         name: curl
         state: present
 
-    - name: 👤 Crear usuario 'node_exporter' si no existe
-      user:
+    - name: "👤 Crear usuario 'node_exporter' si no existe"
+      ansible.builtin.user:
         name: "{{ node_exporter_user }}"
         shell: /usr/sbin/nologin
         system: true
         create_home: false
 
-    - name: 🧹 Limpiar carpeta temporal anterior si existe
-      file:
+    - name: "🧹 Limpiar carpeta temporal anterior si existe"
+      ansible.builtin.file:
         path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64"
         state: absent
 
-    - name: 📦 Descargar Node Exporter
-      get_url:
+    - name: "📦 Descargar Node Exporter"
+      ansible.builtin.get_url:
         url: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
         dest: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
+        mode: "0644"
       register: download_node_exporter
 
-    - name: 📦 Extraer Node Exporter
-      unarchive:
+    - name: "📦 Extraer Node Exporter"
+      ansible.builtin.unarchive:
         src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
         dest: "/tmp/"
         remote_src: yes
       when: download_node_exporter.changed
 
-    - name: 🔧 Mover el binario de Node Exporter
-      command: mv /tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter {{ node_exporter_bin_dir }}/node_exporter
+    - name: "🔧 Mover el binario de Node Exporter con permisos correctos"
+      ansible.builtin.copy:
+        src: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64/node_exporter"
+        dest: "{{ node_exporter_bin_dir }}/node_exporter"
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: yes
       when: download_node_exporter.changed
 
-    - name: 🧹 Limpiar archivos temporales de Node Exporter
-      file:
+    - name: "🧹 Limpiar archivos temporales de Node Exporter"
+      ansible.builtin.file:
         path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
         state: absent
       when: download_node_exporter.changed
 
-    - name: 🧩 Crear archivo systemd para Node Exporter
-      template:
+    - name: "🧩 Crear archivo systemd para Node Exporter"
+      ansible.builtin.template:
         src: "node_exporter/node_exporter.service.j2"
         dest: "{{ node_exporter_service_path }}"
-        mode: "0644"
-
-    - name: ⛓️ Ajustar permisos y propietario del binario
-      file:
-        path: "{{ node_exporter_bin_dir }}/node_exporter"
         owner: root
         group: root
-        mode: "0755"
-        state: file
+        mode: "0644"
 
-    - name: 🛡️ Restaurar contexto SELinux (si aplica)
-      command: restorecon -v "{{ node_exporter_bin_dir }}/node_exporter"
+    - name: "🛡️ Restaurar contexto SELinux (si aplica)"
+      ansible.builtin.command: restorecon -v "{{ node_exporter_bin_dir }}/node_exporter"
       when: ansible_selinux.status == "enabled"
 
-    - name: Recargar systemd para aplicar cambios
-      command: systemctl daemon-reload
-
-    - name: ✅ Habilitar e iniciar Node Exporter
-      systemd:
-        name: node_exporter
-        enabled: true
-        state: started
+    - name: "🔄 Recargar systemd para aplicar cambios"
+      ansible.builtin.systemd:
         daemon_reload: true
 
-    - name: 📊 Verificar puerto {{ node_exporter_port }} está disponible
-      wait_for:
+    - name: "✅ Habilitar e iniciar Node Exporter"
+      ansible.builtin.systemd:
+        name: node_exporter
+        enabled: true
+        state: restarted
+
+    - name: "📊 Verificar puerto {{ node_exporter_port }} está disponible"
+      ansible.builtin.wait_for:
         host: "{{ inventory_hostname }}"
         port: "{{ node_exporter_port }}"
         state: started
         timeout: 30
 
-    - name: 🔍 Resultado del escaneo del puerto
-      debug:
+    - name: "🔍 Resultado del escaneo del puerto"
+      ansible.builtin.debug:
         msg: "✅ Node Exporter está escuchando en el puerto {{ node_exporter_port }}"
