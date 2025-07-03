@@ -185,6 +185,7 @@ export GRAFANA_AUTH_USER="grafana_admin"
 export GRAFANA_AUTH_PASS="GrafanaS3cr3t"
 
 
+.env
 PROMETHEUS_AUTH_USER=prometheus_admin
 PROMETHEUS_AUTH_PASS=S3cr3tP@ssw0rd!123
 GRAFANA_AUTH_USER=grafana_admin
