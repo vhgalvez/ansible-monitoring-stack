@@ -2,53 +2,54 @@
 
 # 📝 Variables de configuración para el stack de monitoreo (Prometheus + Grafana)
 
-# Credenciales generales de autenticación para Prometheus y Grafana
-prometheus_auth_user: "{{ lookup('env', 'PROMETHEUS_AUTH_USER') }}"  # Obtención desde la variable de entorno
-prometheus_auth_pass: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"  # Obtención desde la variable de entorno
+# 🔐 Credenciales para autenticación básica vía Ingress + Traefik Middleware
+prometheus_auth_user: "{{ lookup('env', 'PROMETHEUS_AUTH_USER') }}"
+prometheus_auth_pass: "{{ lookup('env', 'PROMETHEUS_AUTH_PASS') }}"
 
 grafana_auth_user: "{{ lookup('env', 'GRAFANA_AUTH_USER') }}"
 grafana_auth_pass: "{{ lookup('env', 'GRAFANA_AUTH_PASS') }}"
 
-grafana_auth_user_ui: "{{ lookup('env', 'GRAFANA_AUTH_USER_UI') }}"  # Obtención desde la variable de entorno
-grafana_auth_pass_ui: "{{ lookup('env', 'GRAFANA_AUTH_PASS_UI') }}"  # Obtención desde la variable de entorno
+# ⚙️ Credenciales internas para la UI de Grafana (admin UI login)
+grafana_auth_user_ui: "{{ lookup('env', 'GRAFANA_AUTH_USER_UI') }}"
+grafana_auth_pass_ui: "{{ lookup('env', 'GRAFANA_AUTH_PASS_UI') }}"
 
 # 🏷️ Dominio y namespace donde se desplegarán los Dashboards
 grafana_domain: "grafana.socialdevs.site"
 prometheus_domain: "prometheus.socialdevs.site"
 
-monitoring_namespace: "monitoring"  # Namespace donde se desplegará Prometheus y Grafana
+monitoring_namespace: "monitoring"
 
-# Nombres del Middleware y Secret sellado para la autenticación básica
+# 🧱 Middleware y Secrets sellados usados por Traefik para BasicAuth
 prometheus_dashboard_middleware_name: "prometheus-dashboard-auth"
 grafana_dashboard_middleware_name: "grafana-dashboard-auth"
 prometheus_secret_name: "prometheus-dashboard-auth"
 grafana_secret_name: "grafana-dashboard-auth"
 
-# 🌐 Ruta del kubeconfig y token de acceso al clúster (usado por kubectl/kubeseal)
+# 🌐 Ruta del kubeconfig y token de acceso al clúster
 kubeconfig_path: "/home/victory/.kube/config"
-kubeconfig_token_path: "/home/victory/.kube/token.jwt"  # Asegúrate de que este archivo esté bien protegido
+kubeconfig_token_path: "/home/victory/.kube/token.jwt"
 
-# 🔌 Dirección VIP del clúster Kubernetes (útil para balanceo o HA)
-vip_kubernetes: "192.168.0.32"  # Asegúrate de que esta dirección esté correctamente configurada y accesible
+# 🔌 Dirección VIP del clúster Kubernetes
+vip_kubernetes: "192.168.0.32"
 
-# 🔧 Ruta del binario kubectl y kubeseal
+# 🛠️ Ruta de binarios
 kubectl_path: "/usr/local/bin/kubectl"
-kubeseal_path: "/usr/local/bin/kubeseal"  # Asegúrate de que kubeseal esté correctamente instalado y accesible
+kubeseal_path: "/usr/local/bin/kubeseal"
 
-# 🔒 TLS Secret creado en Kubernetes
-tls_secret_name: "wildcard-socialdevs-tls"  # El nombre del secret TLS debe ser definido aquí
+# 🔒 Secret TLS para HTTPS con Traefik
+tls_secret_name: "wildcard-socialdevs-tls"
 
-# 🌐 Configuración opcional de redirección automática HTTP -> HTTPS
-http_to_https_redirect: true  # Si deseas redirigir automáticamente todo el tráfico HTTP a HTTPS
+# 🔁 Redirección HTTP → HTTPS
+http_to_https_redirect: true
 
-# 📦 Configuración del repositorio de Helm para Prometheus y Grafana
+# 📦 Versiones de los charts
 prometheus_chart_version: "27.23.0"
 grafana_chart_version: "9.2.9"
 
-# 🛠️ Configuración de Prometheus y Grafana
+# 📂 Paths de los archivos values para Helm
 prometheus_values_path: "playbook/helm/prometheus/values-prometheus.yaml.j2"
 grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"
 
-# Configuración para el almacenamiento de Grafana
+# 💾 Configuración del almacenamiento de Grafana
 grafana_storage_class: "longhorn"
-grafana_pvc_size: "10Gi"  # O el tamaño preferido de PVC para Grafana
+grafana_pvc_size: "10Gi"
