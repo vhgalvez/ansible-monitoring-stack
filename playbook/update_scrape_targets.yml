@@ -18,6 +18,7 @@
     grafana_values_path: "/tmp/values-grafana.yaml"
 
   tasks:
+
     - name: 📂 Verificar si Prometheus está instalado
       shell: helm list -n monitoring --filter '^prometheus$' --short || true
       register: prometheus_installed
@@ -31,10 +32,41 @@
     - name: 🔄 Actualizar repositorios de Helm
       command: helm repo update
 
+    #####################################################################
+    # Prometheus
+    #####################################################################
     - name: 📄 Renderizar nuevos valores para Prometheus
       template:
         src: helm/prometheus/values-prometheus.yaml.j2
         dest: "{{ prometheus_values_path }}"
+
+    - name: 📋 Verificar si plugin helm-diff está instalado (Prometheus)
+      command: helm plugin list
+      register: helm_plugins
+      changed_when: false
+      when: prometheus_installed.stdout != ""
+
+    - name: 📥 Instalar plugin helm-diff si falta (Prometheus)
+      command: helm plugin install https://github.com/databus23/helm-diff
+      when:
+        - prometheus_installed.stdout != ""
+        - "'diff' not in helm_plugins.stdout"
+      changed_when: true
+
+    - name: 📋 Mostrar diferencias antes del upgrade de Prometheus
+      command: >
+        helm diff upgrade prometheus prometheus-community/prometheus
+        --namespace monitoring
+        -f "{{ prometheus_values_path }}"
+      when: prometheus_installed.stdout != ""
+      register: prometheus_diff
+      changed_when: false
+      failed_when: false
+
+    - name: 🪵 Mostrar diff de Prometheus
+      debug:
+        var: prometheus_diff.stdout_lines
+      when: prometheus_installed.stdout != ""
 
     - name: 🚀 Upgrade Prometheus
       when: prometheus_installed.stdout != ""
@@ -49,10 +81,28 @@
           - "{{ prometheus_values_path }}"
         state: present
 
+    #####################################################################
+    # Grafana
+    #####################################################################
     - name: 📄 Renderizar nuevos valores para Grafana
       template:
         src: helm/grafana/values-grafana.yaml.j2
         dest: "{{ grafana_values_path }}"
+
+    - name: 📋 Mostrar diferencias antes del upgrade de Grafana
+      when: grafana_installed.stdout != ""
+      command: >
+        helm diff upgrade grafana grafana/grafana
+        --namespace monitoring
+        -f "{{ grafana_values_path }}"
+      register: grafana_diff
+      changed_when: false
+      failed_when: false
+
+    - name: 🪵 Mostrar diff de Grafana
+      debug:
+        var: grafana_diff.stdout_lines
+      when: grafana_installed.stdout != ""
 
     - name: 🚀 Upgrade Grafana
       when: grafana_installed.stdout != ""
@@ -67,6 +117,9 @@
           - "{{ grafana_values_path }}"
         state: present
 
+    #####################################################################
+    # Validación final
+    #####################################################################
     - name: 📦 Verificar estado de los pods en 'monitoring'
       shell: kubectl get pods -n monitoring
       register: pod_status
