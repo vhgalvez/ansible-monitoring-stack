@@ -76,13 +76,14 @@ Este playbook realiza las siguientes tareas:
 - **Actualizar los targets de scrape de Prometheus:**
 
 ```bash
-ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
+sudo -E ansible-playbook -i inventory/hosts.ini playbook/03_update_scrape_targets.yml
 ```
 
 - **Eliminar todo el stack:**
 
 ```bash
-sudo -E ansible-playbook -i inventory/hosts.ini uninstall_stack.yml```
+sudo -E ansible-playbook -i inventory/hosts.ini uninstall_stack.yml
+```
 
 ---
 
