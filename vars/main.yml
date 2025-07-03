@@ -55,9 +55,3 @@ grafana_storage_class: "longhorn"
 grafana_pvc_size: "10Gi"
 
 files_dir: "{{ playbook_dir }}/../files"
-
-prometheus_unsealed_path: "{{ files_dir }}/prometheus-dashboard-unsealed.yaml"
-prometheus_sealed_path: "{{ files_dir }}/prometheus-dashboard-sealed.yaml"
-
-grafana_unsealed_path: "{{ files_dir }}/grafana-dashboard-unsealed.yaml"
-grafana_sealed_path: "{{ files_dir }}/grafana-dashboard-sealed.yaml"
