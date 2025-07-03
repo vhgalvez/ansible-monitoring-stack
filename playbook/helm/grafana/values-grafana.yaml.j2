@@ -1,18 +1,32 @@
 # helm/grafana/values-grafana.yaml.j2
-adminUser: "{{ grafana_admin_user }}"
-adminPassword: "{{ grafana_admin_password }}"
 
+##################################################
+# 🧑‍💻 Autenticación interna (UI de Grafana)
+##################################################
+adminUser: "{{ grafana_auth_user_ui }}"
+adminPassword: "{{ grafana_auth_pass_ui }}"
+
+##################################################
+# 💾 Persistencia con PVC (Longhorn u otro)
+##################################################
 persistence:
   enabled: true
   storageClassName: "{{ grafana_storage_class }}"
-  accessModes: [ReadWriteOnce]
+  accessModes:
+    - ReadWriteOnce
   size: "{{ grafana_pvc_size }}"
 
+##################################################
+# 📡 Exposición del servicio interno
+##################################################
 service:
   type: ClusterIP
   port: 3000
   targetPort: 3000
 
+##################################################
+# 🌐 Ingress con autenticación básica via Traefik
+##################################################
 ingress:
   enabled: true
   ingressClassName: traefik
@@ -25,19 +39,34 @@ ingress:
     traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - "grafana.{{ grafana_domain }}"
+    - "{{ grafana_domain }}"
   path: /
   pathType: Prefix
   tls:
     - secretName: "{{ tls_secret_name }}"
-      hosts: ["grafana.{{ grafana_domain }}"]
+      hosts:
+        - "{{ grafana_domain }}"
 
+##################################################
+# 📊 Recursos asignados al contenedor
+##################################################
 resources:
-  requests: {cpu: 100m, memory: 512Mi}
-  limits:   {cpu: 200m, memory: 1Gi}
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 200m
+    memory: 1Gi
 
+##################################################
+# ⚙️ Variables de entorno (configuración inicial)
+##################################################
 env:
-  GF_SECURITY_ADMIN_USER:     "{{ grafana_admin_user }}"
-  GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
+  GF_SECURITY_ADMIN_USER: "{{ grafana_auth_user_ui }}"
+  GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_auth_pass_ui }}"
 
-logs: {level: info}
+##################################################
+# 📋 Nivel de logs
+##################################################
+logs:
+  level: info
