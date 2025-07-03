@@ -134,25 +134,12 @@ Este proyecto fue creado como parte del stack FlatcarMicroCloud y tiene como obj
 
 source .env
 
-sudo nano .env
-
-# 🌍 Variables de entorno para Prometheus y Grafana
-
-PROMETHEUS_AUTH_USER="prometheus_admin"
-PROMETHEUS_AUTH_PASS="S3cr3tP@ssw0rd!123"
-
-GRAFANA_AUTH_USER="grafana_admin"
-GRAFANA_AUTH_PASS="GrafanaS3cr3t!456"
 
 sudo chmod 600 .env
 
 # 🛠️ Variables de entorno para la interfaz de usuario de Prometheus y Grafana
 
-PROMETHEUS_AUTH_USER_UI="prometheus_ui_user"
-PROMETHEUS_AUTH_PASS_UI="UI@Prometheus!789"
 
-GRAFANA_AUTH_USER_UI="grafana_ui_user"
-GRAFANA_AUTH_PASS_UI="UI@Grafana!789"
 
 ```bash
 source .env
