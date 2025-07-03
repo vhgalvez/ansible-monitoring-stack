@@ -54,4 +54,5 @@ grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"
 grafana_storage_class: "longhorn"
 grafana_pvc_size: "10Gi"
 
-files_dir: "{{ playbook_dir }}/../files"
+# Global path for files used in playbooks
+files_dir: "{{ playbook_dir }}/files"
