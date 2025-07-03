@@ -26,19 +26,19 @@
 
   tasks:
     - name: ⏳ Esperar a que Prometheus y Grafana estén Ready
-  retries: 20
-  delay: 15
-  register: pod_status
-  until: >
-    (
-      pod_status.resources
-      | json_query("[?status.phase=='Running' && length(status.containerStatuses[?ready==`false`])==`0`]")
-      | length
-    ) >= 2
-  kubernetes.core.k8s_info:
-    kubeconfig: "{{ kubeconfig_path }}"
-    namespace: "{{ monitoring_namespace }}"
-    kind: Pod
-    label_selectors:
-      - "app.kubernetes.io/instance in (grafana,prometheus)"
-  changed_when: false
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kubeconfig_path }}"
+        namespace: "{{ monitoring_namespace }}"
+        kind: Pod
+        label_selectors:
+          - "app.kubernetes.io/instance in (grafana,prometheus)"
+      register: pod_status
+      retries: 20
+      delay: 15
+      until: >
+        (
+          pod_status.resources
+          | json_query("[?status.phase=='Running' && length(status.containerStatuses[?ready==`false`])==`0`]
+          | length
+        ) >= 2
+      changed_when: false
