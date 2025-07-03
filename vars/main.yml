@@ -53,3 +53,19 @@ grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"
 # 💾 Configuración del almacenamiento de Grafana
 grafana_storage_class: "longhorn"
 grafana_pvc_size: "10Gi"
+
+# Lista de servicios a los que se les aplicará BasicAuth + SealedSecret
+servicios_auth:
+  - name: grafana
+    user: "{{ grafana_auth_user }}"
+    pass: "{{ grafana_auth_pass }}"
+    secret_name: "{{ grafana_secret_name }}"
+    unsealed_path: "{{ playbook_dir }}/files/grafana-unsealed.yaml"
+    sealed_path: "{{ playbook_dir }}/files/grafana-sealed.yaml"
+
+  - name: prometheus
+    user: "{{ prometheus_auth_user }}"
+    pass: "{{ prometheus_auth_pass }}"
+    secret_name: "{{ prometheus_secret_name }}"
+    unsealed_path: "{{ playbook_dir }}/files/prometheus-unsealed.yaml"
+    sealed_path: "{{ playbook_dir }}/files/prometheus-sealed.yaml"
