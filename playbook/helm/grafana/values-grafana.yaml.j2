@@ -6,8 +6,7 @@ adminPassword: "{{ grafana_admin_password }}"
 persistence:
   enabled: true
   storageClassName: "{{ grafana_storage_class }}"
-  accessModes:
-    - ReadWriteOnce
+  accessModes: [ReadWriteOnce]
   size: "{{ grafana_pvc_size }}"
 
 service:
@@ -27,10 +26,9 @@ ingress:
     traefik.ingress.kubernetes.io/auth-secret: "{{ grafana_secret_name }}"
     traefik.ingress.kubernetes.io/auth-header-field: Authorization
   hosts:
-    - host: "grafana.{{ grafana_domain }}"
-      paths:
-        - path: /
-          pathType: Prefix
+    - "grafana.{{ grafana_domain }}"     # ← **solo strings**
+  path: /                                 # ← nivel raíz
+  pathType: Prefix                        # ← nivel raíz
   tls:
     - secretName: "{{ tls_secret_name }}"
       hosts:
@@ -45,8 +43,8 @@ resources:
     memory: 1Gi
 
 env:
+  GF_SECURITY_ADMIN_USER:     "{{ grafana_admin_user }}"
   GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password }}"
-  GF_SECURITY_ADMIN_USER: "{{ grafana_admin_user }}"
 
 logs:
-  level: "info"
+  level: info
