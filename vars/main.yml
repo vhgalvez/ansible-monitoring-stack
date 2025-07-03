@@ -54,5 +54,5 @@ prometheus_values_path: "playbook/helm/prometheus/values-prometheus.yaml.j2"
 grafana_values_path: "playbook/helm/grafana/values-grafana.yaml.j2"
 
 # Configuración para el almacenamiento de Grafana
-grafana_storage_class: "default"
+grafana_storage_class: "longhorn"
 grafana_pvc_size: "10Gi"  # O el tamaño preferido de PVC para Grafana
