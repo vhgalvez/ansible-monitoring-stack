@@ -162,6 +162,7 @@ sudo -E ansible-playbook -i inventory/hosts.ini playbook/deploy_monitoring_stack
 
 echo $GRAFANA_AUTH_USER_UI
 echo $GRAFANA_AUTH_PASS_UI
+
 echo $PROMETHEUS_AUTH_USER
 echo $PROMETHEUS_AUTH_PASS
 echo $GRAFANA_AUTH_USER
@@ -180,7 +181,6 @@ export GRAFANA_AUTH_PASS="12345678"
 
 
 .env
-
 GRAFANA_AUTH_USER=grafana_admin
 GRAFANA_AUTH_PASS=12345678
 PROMETHEUS_AUTH_USER=prometheus_admin
