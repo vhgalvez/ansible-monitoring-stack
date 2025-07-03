@@ -63,6 +63,7 @@
         path: "/tmp/node_exporter-{{ node_exporter_version }}.linux-amd64.tar.gz"
         state: absent
       when: download_node_exporter.changed
+    
 
     # Crear archivo systemd para Node Exporter
     - name: 🧩 Crear archivo systemd para Node Exporter
@@ -71,6 +72,11 @@
         dest: "{{ node_exporter_service_path }}"
         mode: "0644"
 
+    - name: Asegurar permisos de ejecución para node_exporter
+      file:
+        path: "{{ node_exporter_bin_dir }}/node_exporter"
+        mode: '0755'
+        state: file
 
     # Recargar systemd para aplicar cambios
     - name: Recargar systemd para aplicar cambios
