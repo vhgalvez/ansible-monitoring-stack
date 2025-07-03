@@ -1,6 +1,7 @@
 ---
+---
 # 🚀 playbook/update_scrape_targets.yml
-# Playbook para actualizar Prometheus y Grafana de manera limpia usando Helm upgrade.
+# Playbook para actualizar Prometheus y Grafana de manera limpia usando Helm upgrade
 
 - name: 🔄 Upgrade de Prometheus + Grafana (Helm upgrade)
   hosts: controller
