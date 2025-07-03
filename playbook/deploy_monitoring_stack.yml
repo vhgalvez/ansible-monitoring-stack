@@ -20,6 +20,9 @@
 - name: Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
   import_playbook: 03_generate-monitoring-auth-secrets.yml
 
+- name: Generar y sellar los Secrets de autenticación básica para Prometheus y Grafana
+  import_playbook: 04_generate_sealed_secret_inline.yml
+
 - name: Verificación final del despliegue de Prometheus y Grafana
   hosts: localhost
   gather_facts: false
