@@ -1,8 +1,5 @@
-# playbook\deploy_monitoring_stack.yml
+# playbook/deploy_monitoring_stack.yml
 ---
-# 🧩 Playbook maestro para desplegar el stack de monitoreo completo en Kubernetes.
-# Compatible con ejecución local, CI/CD y automatización general.
-
 - name: 🧩 Cargar variables de configuración desde main.yml
   hosts: localhost
   gather_facts: false
@@ -23,6 +20,10 @@
 - name: Verificación final del despliegue de Prometheus y Grafana
   hosts: localhost
   gather_facts: false
+
+  vars_files:
+    - ../vars/main.yml # 👈 AÑADE ESTA LÍNEA para tener acceso a kubeconfig_path
+
   tasks:
     - name: ✅ Verificar que los pods de Prometheus y Grafana estén listos
       kubernetes.core.k8s_info:
