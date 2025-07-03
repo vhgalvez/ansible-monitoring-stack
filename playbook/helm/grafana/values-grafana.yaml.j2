@@ -66,6 +66,29 @@ env:
   GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_auth_pass_ui }}"
 
 ##################################################
+# 🩺 Probes: mejorados para evitar fallos prematuros
+##################################################
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 10
+
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 3000
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 5
+  successThreshold: 1
+  failureThreshold: 10
+
+##################################################
 # 📋 Nivel de logs
 ##################################################
 logs:
