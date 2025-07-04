@@ -159,10 +159,8 @@ echo $GRAFANA_AUTH_PASS
 
 export GRAFANA_AUTH_USER_UI="grafana_ui_user"
 export GRAFANA_AUTH_PASS_UI="12345678"
-
 export PROMETHEUS_AUTH_USER="prometheus_admin"
 export PROMETHEUS_AUTH_PASS="12345678"
-
 export GRAFANA_AUTH_USER="grafana_admin"
 export GRAFANA_AUTH_PASS="12345678"
 
