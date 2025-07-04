@@ -46,15 +46,15 @@
           - "app.kubernetes.io/instance in (grafana,prometheus)"
       register: pod_status
 
-      - name: 🌐 Verificar acceso al dashboard de Grafana
-          uri:
-            url: "https://{{ grafana_domain }}"
-            user: "{{ grafana_auth_user }}"
-            password: "{{ grafana_auth_pass }}"
-            validate_certs: false
-            status_code: [200, 401, 302]
-          register: grafana_status
-          retries: 10
-          delay: 5
-          until: grafana_status.status in [200, 401, 302]
+    - name: 🌐 Verificar acceso al dashboard de Grafana
+      uri:
+        url: "https://{{ grafana_domain }}"
+        user: "{{ grafana_auth_user }}"
+        password: "{{ grafana_auth_pass }}"
+        validate_certs: false
+        status_code: [200, 401, 302]
+      register: grafana_status
+      retries: 10
+      delay: 5
+      until: grafana_status.status in [200, 401, 302]
 
