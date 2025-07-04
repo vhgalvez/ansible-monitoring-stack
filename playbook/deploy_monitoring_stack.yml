@@ -28,34 +28,34 @@
     - ../vars/main.yml
 
   tasks:
-    - name: ⏳ Esperar a que Prometheus y Grafana estén Ready
-      retries: 20
-      delay: 15
-      until: >
-        (
-          pod_status.resources
-          | json_query("[?status.phase=='Running' && length(status.containerStatuses[?ready==`false`])==`0`]
-          | length
-        ) >= 2
+    ############################################################################
+    # 🔎  HEALTH-CHECK PROMETHEUS DASHBOARD
+    ############################################################################
+    - name: 🌐 Comprobar acceso al dashboard de Prometheus
+      shell: >
+        curl --http1.1 -k -u {{ prometheus_auth_user }}:{{ prometheus_auth_pass }}
+        https://{{ prometheus_domain }}/
+        --max-time 10 --silent --output /dev/null --write-out '%{{"{"}}http_code{{"}"}}'
+      register: prometheus_status
       changed_when: false
-      kubernetes.core.k8s_info:
-        kubeconfig: "{{ kubeconfig_path }}"
-        namespace: "{{ monitoring_namespace }}"
-        kind: Pod
-        label_selectors:
-          - "app.kubernetes.io/instance in (grafana,prometheus)"
-      register: pod_status
+      failed_when: prometheus_status.stdout not in ['200', '302', '307', '401']
 
-    - name: 🌐 Verificar acceso al dashboard de Grafana
-      uri:
-        url: "https://{{ grafana_domain }}"
-        user: "{{ grafana_auth_user }}"
-        password: "{{ grafana_auth_pass }}"
-        validate_certs: false
-        status_code: [200, 401, 302]
+    - name: 📊 Resultado HTTP de Prometheus
+      debug:
+        msg: "✅ Prometheus está accesible → Código HTTP: {{ prometheus_status.stdout }}"
+
+    ############################################################################
+    # 🔎  HEALTH-CHECK GRAFANA DASHBOARD
+    ############################################################################
+    - name: 🌐 Comprobar acceso al dashboard de Grafana
+      shell: >
+        curl --http1.1 -k -u {{ grafana_auth_user }}:{{ grafana_auth_pass }}
+        https://{{ grafana_domain }}/
+        --max-time 10 --silent --output /dev/null --write-out '%{{"{"}}http_code{{"}"}}'
       register: grafana_status
-      retries: 10
-      delay: 5
-      until: grafana_status.status in [200, 401, 302]
+      changed_when: false
+      failed_when: grafana_status.stdout not in ['200', '302', '307', '401']
 
-
+    - name: 📊 Resultado HTTP de Grafana
+      debug:
+        msg: "✅ Grafana está accesible → Código HTTP: {{ grafana_status.stdout }}"
