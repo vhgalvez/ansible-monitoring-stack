@@ -54,8 +54,6 @@
         --max-time 10 --silent --output /dev/null --write-out '%{{"{"}}http_code{{"}"}}'
       register: grafana_status
       changed_when: false
-      failed_when: grafana_status.stdout not in ['200', '302', '307', '401']
-
-    - name: 📊 Resultado HTTP de Grafana
-      debug:
-        msg: "✅ Grafana está accesible → Código HTTP: {{ grafana_status.stdout }}"
+      retries: 20 # ⇦ Aumenta el número de intentos
+      delay: 15 # ⇦ Espera entre cada intento
+      until: grafana_status.stdout in ['200', '302', '307', '401']
